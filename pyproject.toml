@@ -1,0 +1,28 @@
+[project]
+name = "eu-ai-check"
+version = "0.1.0"
+description = "Grounded, citable EU AI Act compliance determination over a temporally-versioned provision corpus"
+readme = "README.md"
+authors = [
+    { name = "Arnau", email = "arnauroperouab@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic>=2.9",
+    "lxml>=5.3",
+]
+
+[project.scripts]
+eu-ai-check = "eu_ai_check.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+]
+
+[build-system]
+requires = ["uv_build>=0.11.7,<0.12.0"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
