@@ -47,7 +47,9 @@ class Baseline:
     dedup_ratio: float
     operative_provisions: int
     operative_with_rules: int
+    operative_declared_gaps: int
     rule_coverage: float
+    rule_coverage_in_scope: float
     cross_reference_edges: int
     cross_references_resolved: int
     cross_reference_resolution: float
@@ -90,7 +92,10 @@ class Baseline:
             f"  operative provisions         {self.operative_provisions} "
             f"(obligation + prohibition)",
             f"  with >=1 applicability rule  {self.operative_with_rules}",
-            f"  coverage                     {self.rule_coverage:.3f}",
+            f"  declared out-of-scope gaps   {self.operative_declared_gaps}",
+            f"  raw coverage                 {self.rule_coverage:.3f}",
+            f"  coverage of in-scope duties  {self.rule_coverage_in_scope:.3f}  "
+            f"(excludes declared gaps)",
             "",
             "Cross-reference resolution (§8)",
             f"  distinct edges               {self.cross_reference_edges}",
@@ -122,6 +127,12 @@ def measure(corpus: Corpus) -> Baseline:
     content_ids = {p.content_id for p in provisions}
     operative = [p for p in provisions if p.requires_applicability_rule]
     with_rules = {r.legal_provision_id for r in corpus.applicability_rules}
+    covered = sum(1 for p in operative if p.logical_provision_id in with_rules)
+    declared_gaps = sum(
+        1 for p in operative
+        if p.logical_provision_id not in with_rules and p.applicability_gap_reason
+    )
+    in_scope = len(operative) - declared_gaps
 
     edges = {ref for p in provisions for ref in p.cross_references}
     resolvable = {p.logical_provision_id for p in provisions}
@@ -153,13 +164,13 @@ def measure(corpus: Corpus) -> Baseline:
         distinct_content_ids=len(content_ids),
         dedup_ratio=1 - len(content_ids) / len(provisions),
         operative_provisions=len(operative),
-        operative_with_rules=sum(
-            1 for p in operative if p.logical_provision_id in with_rules
-        ),
-        rule_coverage=(
-            sum(1 for p in operative if p.logical_provision_id in with_rules)
-            / len(operative)
-            if operative else 0.0
+        operative_with_rules=covered,
+        operative_declared_gaps=declared_gaps,
+        rule_coverage=covered / len(operative) if operative else 0.0,
+        # The number that should be 1.000: a declared out-of-scope duty is not a
+        # coverage failure, and folding the two together would hide a real one.
+        rule_coverage_in_scope=(
+            covered / in_scope if in_scope else 1.0
         ),
         cross_reference_edges=len(edges),
         cross_references_resolved=len(resolved),

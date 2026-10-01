@@ -33,7 +33,19 @@ problems — not another "chat with your PDFs" demo.
 - Single regulation: EU AI Act only.
 - Free-text case input → structured extraction → hybrid retrieval → grounded
   determination → cited output.
-- Risk-tier classification against Annex III (`high_risk` / `not_high_risk`).
+- Risk-tier classification against **Article 6** and Annex III (`high_risk` /
+  `not_high_risk`), covering both high-risk routes (Article 6(1) product-embedded,
+  Article 6(2) Annex III) and the Article 6(3) derogation under which an Annex III
+  system is *not* high-risk.
+  **[Scope extended on Phase 0 corpus evidence, 2026-10-01]** Article 6 was not in
+  the original V1 list. Phase 0 ingestion established it as a hard dependency
+  rather than a nice-to-have: 27 of the 73 provisions ingested without it
+  cross-referenced it (overall in-corpus cross-reference resolution was 9.1%), and
+  the `ApplicabilityRule` conditions on Articles 16 and 26 distinguish
+  `annex_iii_high_risk` from `article_6_1_high_risk` — a distinction Article 6 is
+  what defines. Without it the rule layer depended on a concept whose defining
+  provision was absent. This is the deferred-abstraction principle in §9 working as
+  intended: the scope gap was found by corpus evidence, not speculation.
 - Prohibited-practice determination against Article 5, represented as its own
   determination type (`prohibited_practice`), evaluated via the `ApplicabilityRule`
   engine where applicable-date conditions apply.
@@ -60,7 +72,12 @@ problems — not another "chat with your PDFs" demo.
 - **Full role coverage.** Importer, distributor, authorised-representative roles exist
   in the Act (Article 3) but are out of scope for V1, which covers provider/deployer
   only. This is a scoping decision, documented explicitly rather than left as an
-  unstated gap.
+  unstated gap. Ingesting Article 6 brought in duties on a further actor — the
+  Commission (Article 6(5)–(7): issuing guidelines, adopting delegated acts). These are
+  ingested as `obligation` provisions carrying an explicit
+  `applicability_gap_reason`, so the §12.1 no-orphan check reports them as *declared*
+  gaps rather than failing ingestion or silently passing. The omission is therefore
+  reviewable in the validation output instead of invisible.
 - **Legal advice.** The system produces a grounded determination with citations, not a
   substitute for legal counsel; this framing is explicit in any user-facing output and
   the README.
@@ -77,15 +94,25 @@ one rule-matching engine → cited, fail-closed output.
 
 ## 6. Implementation Phases and Milestones
 
-**Phase 0 — Corpus ingestion and validation (current → next)**
-- Deliverable: ingested Article 5, 16, 25, 26, and Annex III as structured
+**Phase 0 — Corpus ingestion and validation (COMPLETE, 2026-10-01)**
+- Deliverable: ingested Article 5, 6, 16, 25, 26, and Annex III as structured
   `Provision` records with `structural_location` paths, `content_id` deduplication, and
   populated `text_valid_from/to`.
+  **Delivered:** 85 canonical provisions and 76 `ApplicabilityRule` records from the
+  official OJ XHTML (CELEX 32024R1689, EU Publications Office Cellar API — EUR-Lex
+  itself is behind an AWS WAF challenge that blocks scripted fetches). 48 tests pass
+  against the real text; all invariants hold.
 - Deliverable: ingestion-time validation check enforcing the non-overlap invariant
   (SYSTEM_SPEC.md §11).
-- Deliverable: ingested `ApplicabilityRule` records for the V1 corpus (Article 5, 16,
-  26 — the provisions carrying applicability conditions in V1), covering the AI Act's
-  staggered application schedule (SYSTEM_SPEC.md §12).
+- Deliverable: ingested `ApplicabilityRule` records for the V1 corpus (Article 5, 6,
+  16, 25, 26 — the provisions carrying applicability conditions in V1), covering the
+  AI Act's staggered application schedule (SYSTEM_SPEC.md §12).
+  **Delivered:** every date transcribed from Article 113 with the point it came from
+  recorded in `source_reference`. Article 113(c) turned out to force *two* rules per
+  high-risk obligation rather than one date — the same Article 16 text starts
+  applying 2026-08-02 for Annex III systems and 2027-08-02 for Article 6(1) systems.
+  Article 6(1) and 6(2) carry their own application dates too, so a determination can
+  distinguish "not high-risk" from "that classification route was not yet in force".
 - Deliverable: ingestion-time validation of `ApplicabilityRule` temporal fields
   (`applicable_from`/`applicable_to`), `conditions`/`scope` content, and each rule's
   `legal_provision_id` reference against an ingested `Provision` (SYSTEM_SPEC.md
@@ -94,10 +121,26 @@ one rule-matching engine → cited, fail-closed output.
   terminal case handled correctly; Article 5(1)(h) nested structure preserved intact as
   one canonical provision; every ingested `ApplicabilityRule` passes temporal-field and
   provision-reference validation, with no rule left dangling or unvalidated.
+  **Met.** Each clause above has a test named after it. Three hazards in the real
+  text, not anticipated by this plan, are now covered by tests: (1) marker text is
+  ambiguous across levels — Article 16 has a lettered point "(i)" and Article 5(1)(h)
+  a roman sub-point "(i)" — so level is decided by tree position, never by parsing the
+  marker; (2) Article 5(1)'s closing savings clause sits *after* its (a)–(h) list and
+  qualifies point (h) only, so a node's text and children must be stored in one
+  ordered sequence or the clause is re-emitted before the list it qualifies; (3) a
+  canonical provision needs its ancestor lead-in — Article 5(1)(a) read alone is a
+  bare noun phrase, the operative verb is in the parent.
 - Deliverable: initial measured baselines for the metric categories in
   SYSTEM_SPEC.md §18 (retrieval recall/precision, extraction accuracy) using early
   ingested data — establishing that numbers exist to set targets against. Numerical
   targets themselves are locked progressively through Phase 0–1, not invented upfront.
+  **Delivered** via `eu-ai-check baseline`, which reports the corpus-side numbers that
+  can honestly be measured now (granularity and depth distribution, canonical text
+  size, `content_id` dedup rate, rule coverage, cross-reference resolution) and names
+  each deferred §18 category with the phase component that unblocks it, rather than
+  inventing a number for it. Phase 1 input worth noting: canonical text runs 90 / 418
+  / 2726 chars (min/median/max) and exactly one provision exceeds 2000 chars — Article
+  5(1)(h), the very provision whose sub-chunking makes parent resolution mandatory.
 
 **Phase 1 — Retrieval layer**
 - Deliverable: hybrid search (semantic + BM25) over ingested provisions, with hard
@@ -175,6 +218,13 @@ deliverable (§10), not an afterthought.
   with correctly unioned and deduplicated obligations (SYSTEM_SPEC.md §4.1).
 - At least one eval case explicitly demonstrates correct temporal behavior (same
   provision, two different `relevant_date`s, two different applicability outcomes).
+- At least one eval case explicitly demonstrates the Article 6(3) derogation: a system
+  listed in Annex III that is nonetheless **not** high-risk because it does not pose a
+  significant risk of harm. Without this the risk-tier determination collapses to
+  "appears in Annex III ⇒ high_risk", which is not what the Act says.
+- At least one eval case explicitly distinguishes the two high-risk routes (Article
+  6(1) product-embedded vs Article 6(2) Annex III), since they carry different
+  application dates (2027-08-02 vs 2026-08-02).
 - At least one eval case explicitly demonstrates the `not_in_force` vs. `not_applicable`
   distinction on the same provision at two different dates.
 - README documents the architecture decisions and rejected alternatives at a level

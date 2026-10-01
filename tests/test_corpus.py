@@ -70,7 +70,7 @@ def test_v1_corpus_scope_is_fully_ingested(corpus: Corpus) -> None:
         for seg in p.structural_location
         if seg.type == SegmentType.ANNEX
     }
-    assert articles == {"5", "16", "25", "26"}
+    assert articles == {"5", "6", "16", "25", "26"}
     assert annexes == {"III"}
 
 
@@ -298,10 +298,32 @@ def test_external_instrument_references_are_not_treated_as_internal(
 # §12 applicability rules -- the staggered schedule
 # --------------------------------------------------------------------------
 
-def test_every_obligation_and_prohibition_has_a_rule(corpus: Corpus) -> None:
+def test_every_obligation_and_prohibition_has_a_rule_or_a_declared_gap(
+    corpus: Corpus,
+) -> None:
+    """§12.1 as written: an operative provision carries at least one rule, *or* its
+    gap is declared. What is forbidden is a silent zero -- that is what becomes a
+    false `unresolved` at determination time."""
     for p in corpus.provisions:
-        if p.requires_applicability_rule:
+        if not p.requires_applicability_rule:
+            continue
+        has_rule = bool(corpus.rules_for(p.logical_provision_id))
+        assert has_rule or p.applicability_gap_reason, p.logical_provision_id
+
+
+def test_provider_and_deployer_obligations_are_all_scheduled(corpus: Corpus) -> None:
+    """The declared-gap escape hatch must not have quietly swallowed an obligation
+    that V1 is actually responsible for. Every operative provision of Articles
+    5/16/25/26 carries a real rule."""
+    for p in corpus.provisions:
+        if not p.requires_applicability_rule:
+            continue
+        article = next(
+            s.value for s in p.structural_location if s.type == SegmentType.ARTICLE
+        )
+        if article in ("5", "16", "25", "26"):
             assert corpus.rules_for(p.logical_provision_id), p.logical_provision_id
+            assert not p.applicability_gap_reason, p.logical_provision_id
 
 
 def test_non_operative_provisions_carry_no_rules(corpus: Corpus) -> None:
@@ -365,6 +387,135 @@ def test_applicability_is_never_inferred_from_text_validity(corpus: Corpus) -> N
     for p in corpus.provisions:
         for rule in corpus.rules_for(p.logical_provision_id):
             assert rule.applicable_from != p.text_valid_from, rule.rule_id
+
+
+# --------------------------------------------------------------------------
+# Article 6 -- added to V1 scope on Phase 0 corpus evidence
+# --------------------------------------------------------------------------
+
+def test_article_6_is_ingested_with_heterogeneous_types(corpus: Corpus) -> None:
+    """Article 6 mixes classification rules, a derogation and duties, so typing it
+    uniformly would misdescribe it."""
+    types = {
+        p.logical_provision_id: p.provision_type
+        for p in corpus.provisions
+        if ":art_6:" in p.logical_provision_id
+    }
+    # The two classification routes.
+    assert types["aiact:art_6:para_1:point_a"] == ProvisionType.SCOPE
+    assert types["aiact:art_6:para_2"] == ProvisionType.SCOPE
+    # The derogation that lets an Annex III system be found not high-risk.
+    assert types["aiact:art_6:para_3:point_a"] == ProvisionType.EXCEPTION
+    # A genuine provider duty.
+    assert types["aiact:art_6:para_4"] == ProvisionType.OBLIGATION
+
+
+def test_article_6_3_derogation_is_ingested(corpus: Corpus) -> None:
+    """Article 6(3) is a real determination branch: an Annex III system that does
+    not pose a significant risk of harm is not high-risk."""
+    points = [
+        p for p in corpus.provisions
+        if p.logical_provision_id.startswith("aiact:art_6:para_3:point_")
+    ]
+    assert len(points) == 4, "Article 6(3) has conditions (a)-(d)"
+    assert all("By derogation from paragraph 2" in p.text for p in points)
+
+
+def test_article_6_classification_routes_have_different_dates(corpus: Corpus) -> None:
+    """Article 113(c) dates Article 6(1) to 2027-08-02 while Article 6(2) falls
+    under the general 2026-08-02 date. Both routes must be represented on Article 6
+    itself, or a determination cannot tell "not high-risk" from "this route was not
+    yet in force" (§14)."""
+    route_6_1 = corpus.rules_for("aiact:art_6:para_1:point_a")
+    route_6_2 = corpus.rules_for("aiact:art_6:para_2")
+
+    assert len(route_6_1) == 1
+    assert route_6_1[0].applicable_from == ARTICLE_6_1_APPLICATION
+    assert route_6_1[0].source_reference == "Article 113, point (c)"
+
+    assert len(route_6_2) == 1
+    assert route_6_2[0].applicable_from == GENERAL_APPLICATION
+
+    # The same date that separates the Article 16 obligation rules.
+    assert route_6_2[0].applicable_from < route_6_1[0].applicable_from
+
+
+def test_article_6_1_route_not_in_force_before_2027(corpus: Corpus) -> None:
+    """The `not_in_force` case, on the classification rule itself."""
+    rule = corpus.rules_for("aiact:art_6:para_1:point_b")[0]
+    assert not rule.in_force_on(date(2026, 8, 2)), (
+        "the Annex III route is live here, but the Article 6(1) route is not"
+    )
+    assert rule.in_force_on(date(2027, 8, 2))
+
+
+def test_article_6_1_rule_applies_to_its_points_not_just_the_paragraph(
+    corpus: Corpus,
+) -> None:
+    """Article 6(1) has lettered points, so the canonical units are the points and
+    the paragraph itself is never a provision. A rule declared for Article 6(1) has
+    to reach them, or Article 113(c) would be recorded nowhere."""
+    assert not [
+        p for p in corpus.provisions
+        if p.logical_provision_id == "aiact:art_6:para_1"
+    ], "6(1) is not itself canonical -- it has points"
+    for marker in ("a", "b"):
+        rules = corpus.rules_for(f"aiact:art_6:para_1:point_{marker}")
+        assert len(rules) == 1, f"6(1)({marker}) must inherit the Article 6(1) rule"
+
+
+def test_article_6_4_is_scoped_to_annex_iii_only(corpus: Corpus) -> None:
+    """6(4)'s own text limits it to "an AI system referred to in Annex III", so it
+    takes one rule -- not the two-date split used for obligations covering both
+    high-risk routes."""
+    rules = corpus.rules_for("aiact:art_6:para_4")
+    assert len(rules) == 1
+    assert rules[0].conditions["system_category"] == "annex_iii_high_risk"
+    assert rules[0].conditions["actor_role"] == "provider"
+
+
+def test_commission_duties_are_declared_gaps_not_silent_ones(corpus: Corpus) -> None:
+    """Article 6(5)-(7) bind the Commission, an actor V1 does not model. They must
+    be recorded as declared gaps, so the omission is reviewable rather than
+    invisible (§12.1)."""
+    report = validate_corpus(corpus)
+    gap_subjects = {
+        f.subject for f in report.declared_gaps
+        if f.check == "no_orphan_obligations"
+    }
+    for para in ("5", "6", "7"):
+        logical_id = f"aiact:art_6:para_{para}"
+        provision = find(corpus, logical_id)
+        assert provision.provision_type == ProvisionType.OBLIGATION
+        assert provision.applicability_gap_reason, logical_id
+        assert logical_id in gap_subjects, logical_id
+    assert report.ok, "declared gaps must not fail ingestion"
+
+
+def test_adding_article_6_resolved_its_cross_references(corpus: Corpus) -> None:
+    """The dependency that motivated the scope change: Article 6 was the largest
+    unresolved cross-reference target before it was ingested."""
+    citing = [p for p in corpus.provisions if "aiact:art_6" in p.cross_references]
+    assert len(citing) > 20, "Article 6 is referenced across the corpus"
+
+    report = validate_corpus(corpus)
+    unresolved = {
+        f.subject for f in report.declared_gaps
+        if f.check == "cross_reference_integrity"
+    }
+    assert "aiact:art_6" not in unresolved, (
+        "Article 6 must now resolve inside the V1 corpus"
+    )
+
+
+def test_declared_rule_prefix_matches_only_at_segment_boundaries() -> None:
+    """`para_1` must not match `para_10`."""
+    from eu_ai_check.corpus.rules import _declared_templates
+
+    assert _declared_templates("aiact:art_6:para_1") is not None
+    assert _declared_templates("aiact:art_6:para_1:point_a") is not None
+    assert _declared_templates("aiact:art_6:para_10") is None
+    assert _declared_templates("aiact:art_16:point_a") is None
 
 
 # --------------------------------------------------------------------------
