@@ -458,6 +458,416 @@
     "applicability_gap_reason": null
   },
   {
+    "logical_provision_id": "aiact:art_6:para_1:point_a",
+    "versioned_provision_id": "aiact:art_6:para_1:point_a@2024-08-01",
+    "content_id": "8923218958ac6fcf30f0a379d77899cd07b3145df705d4b7b047c972d9d269ec",
+    "provision_type": "scope",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "1"
+      },
+      {
+        "type": "article",
+        "value": "6"
+      },
+      {
+        "type": "paragraph",
+        "value": "1"
+      },
+      {
+        "type": "point",
+        "value": "a"
+      }
+    ],
+    "text": "Irrespective of whether an AI system is placed on the market or put into service independently of the products referred to in points (a) and (b), that AI system shall be considered to be high-risk where both of the following conditions are fulfilled: the AI system is intended to be used as a safety component of a product, or the AI system is itself a product, covered by the Union harmonisation legislation listed in Annex I;",
+    "heading": "Classification rules for high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:anx_I"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_6:para_1:point_b",
+    "versioned_provision_id": "aiact:art_6:para_1:point_b@2024-08-01",
+    "content_id": "a87536e5323e04cb393eb4de3ca149e273a21e1d9e442a268c35d0ab109c8805",
+    "provision_type": "scope",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "1"
+      },
+      {
+        "type": "article",
+        "value": "6"
+      },
+      {
+        "type": "paragraph",
+        "value": "1"
+      },
+      {
+        "type": "point",
+        "value": "b"
+      }
+    ],
+    "text": "Irrespective of whether an AI system is placed on the market or put into service independently of the products referred to in points (a) and (b), that AI system shall be considered to be high-risk where both of the following conditions are fulfilled: the product whose safety component pursuant to point (a) is the AI system, or the AI system itself as a product, is required to undergo a third-party conformity assessment, with a view to the placing on the market or the putting into service of that product pursuant to the Union harmonisation legislation listed in Annex I.",
+    "heading": "Classification rules for high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:anx_I"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_6:para_2",
+    "versioned_provision_id": "aiact:art_6:para_2@2024-08-01",
+    "content_id": "17f500c4676631b568780fc06be89fbdff5a927b58c7333b74274f9c36609cc8",
+    "provision_type": "scope",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "1"
+      },
+      {
+        "type": "article",
+        "value": "6"
+      },
+      {
+        "type": "paragraph",
+        "value": "2"
+      }
+    ],
+    "text": "In addition to the high-risk AI systems referred to in paragraph 1, AI systems referred to in Annex III shall be considered to be high-risk.",
+    "heading": "Classification rules for high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:anx_III"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_6:para_3:point_a",
+    "versioned_provision_id": "aiact:art_6:para_3:point_a@2024-08-01",
+    "content_id": "1e1a2d69bd7e8201c8cc58878fb910708dc971ae6d8643cb75ac58ca752914dd",
+    "provision_type": "exception",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "1"
+      },
+      {
+        "type": "article",
+        "value": "6"
+      },
+      {
+        "type": "paragraph",
+        "value": "3"
+      },
+      {
+        "type": "point",
+        "value": "a"
+      }
+    ],
+    "text": "By derogation from paragraph 2, an AI system referred to in Annex III shall not be considered to be high-risk where it does not pose a significant risk of harm to the health, safety or fundamental rights of natural persons, including by not materially influencing the outcome of decision making. The first subparagraph shall apply where any of the following conditions is fulfilled: the AI system is intended to perform a narrow procedural task;",
+    "heading": "Classification rules for high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:anx_III"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_6:para_3:point_b",
+    "versioned_provision_id": "aiact:art_6:para_3:point_b@2024-08-01",
+    "content_id": "1ac56fea4d1ab174e59668c302be8e6a597f924ac88f56c925ecac045a1cb8b5",
+    "provision_type": "exception",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "1"
+      },
+      {
+        "type": "article",
+        "value": "6"
+      },
+      {
+        "type": "paragraph",
+        "value": "3"
+      },
+      {
+        "type": "point",
+        "value": "b"
+      }
+    ],
+    "text": "By derogation from paragraph 2, an AI system referred to in Annex III shall not be considered to be high-risk where it does not pose a significant risk of harm to the health, safety or fundamental rights of natural persons, including by not materially influencing the outcome of decision making. The first subparagraph shall apply where any of the following conditions is fulfilled: the AI system is intended to improve the result of a previously completed human activity;",
+    "heading": "Classification rules for high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:anx_III"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_6:para_3:point_c",
+    "versioned_provision_id": "aiact:art_6:para_3:point_c@2024-08-01",
+    "content_id": "c0c86cdcb937a332038dfdf19bd49d9fd053f2b27b6ebb17357e58dc4b2dc933",
+    "provision_type": "exception",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "1"
+      },
+      {
+        "type": "article",
+        "value": "6"
+      },
+      {
+        "type": "paragraph",
+        "value": "3"
+      },
+      {
+        "type": "point",
+        "value": "c"
+      }
+    ],
+    "text": "By derogation from paragraph 2, an AI system referred to in Annex III shall not be considered to be high-risk where it does not pose a significant risk of harm to the health, safety or fundamental rights of natural persons, including by not materially influencing the outcome of decision making. The first subparagraph shall apply where any of the following conditions is fulfilled: the AI system is intended to detect decision-making patterns or deviations from prior decision-making patterns and is not meant to replace or influence the previously completed human assessment, without proper human review; or",
+    "heading": "Classification rules for high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:anx_III"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_6:para_3:point_d",
+    "versioned_provision_id": "aiact:art_6:para_3:point_d@2024-08-01",
+    "content_id": "5f606f7ca6457b95f3a387d1a6fcc29c21e8b4a1b1aa88e449e0998bb760b0ff",
+    "provision_type": "exception",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "1"
+      },
+      {
+        "type": "article",
+        "value": "6"
+      },
+      {
+        "type": "paragraph",
+        "value": "3"
+      },
+      {
+        "type": "point",
+        "value": "d"
+      }
+    ],
+    "text": "By derogation from paragraph 2, an AI system referred to in Annex III shall not be considered to be high-risk where it does not pose a significant risk of harm to the health, safety or fundamental rights of natural persons, including by not materially influencing the outcome of decision making. The first subparagraph shall apply where any of the following conditions is fulfilled: the AI system is intended to perform a preparatory task to an assessment relevant for the purposes of the use cases listed in Annex III.",
+    "heading": "Classification rules for high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:anx_III"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_6:para_4",
+    "versioned_provision_id": "aiact:art_6:para_4@2024-08-01",
+    "content_id": "96425693b48c2de1bc37212b0d18a9a945fcd23f0a6e83b849771a9094eeb74d",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "1"
+      },
+      {
+        "type": "article",
+        "value": "6"
+      },
+      {
+        "type": "paragraph",
+        "value": "4"
+      }
+    ],
+    "text": "A provider who considers that an AI system referred to in Annex III is not high-risk shall document its assessment before that system is placed on the market or put into service. Such provider shall be subject to the registration obligation set out in Article 49(2). Upon request of national competent authorities, the provider shall provide the documentation of the assessment.",
+    "heading": "Classification rules for high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_49",
+      "aiact:anx_III"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_6:para_5",
+    "versioned_provision_id": "aiact:art_6:para_5@2024-08-01",
+    "content_id": "01dced2ef3edf1c2d7729856ac5ca505b0f6965e9b38b4de1bca3fd180bf7df3",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "1"
+      },
+      {
+        "type": "article",
+        "value": "6"
+      },
+      {
+        "type": "paragraph",
+        "value": "5"
+      }
+    ],
+    "text": "The Commission shall, after consulting the European Artificial Intelligence Board (the ‘Board’), and no later than 2 February 2026, provide guidelines specifying the practical implementation of this Article in line with Article 96 together with a comprehensive list of practical examples of use cases of AI systems that are high-risk and not high-risk.",
+    "heading": "Classification rules for high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_96"
+    ],
+    "applicability_gap_reason": "duty on the Commission (issue guidelines), not on a provider or deployer; V1 covers provider/deployer obligations only (PROJECT_PLAN.md §4)"
+  },
+  {
+    "logical_provision_id": "aiact:art_6:para_6",
+    "versioned_provision_id": "aiact:art_6:para_6@2024-08-01",
+    "content_id": "479d38554ce5abc0c352199a83e7b573cce6aeb1c96c68cc6a0ef7b5523f61cc",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "1"
+      },
+      {
+        "type": "article",
+        "value": "6"
+      },
+      {
+        "type": "paragraph",
+        "value": "6"
+      }
+    ],
+    "text": "The Commission is empowered to adopt delegated acts in accordance with Article 97 in order to amend paragraph 3, second subparagraph, of this Article by adding new conditions to those laid down therein, or by modifying them, where there is concrete and reliable evidence of the existence of AI systems that fall under the scope of Annex III, but do not pose a significant risk of harm to the health, safety or fundamental rights of natural persons.",
+    "heading": "Classification rules for high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_97",
+      "aiact:anx_III"
+    ],
+    "applicability_gap_reason": "empowerment of the Commission to adopt delegated acts; not a provider/deployer duty (PROJECT_PLAN.md §4)"
+  },
+  {
+    "logical_provision_id": "aiact:art_6:para_7",
+    "versioned_provision_id": "aiact:art_6:para_7@2024-08-01",
+    "content_id": "18a5161e230477b993636d26ff8127b525a54d4835a5108ff54593e2760bc0b5",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "1"
+      },
+      {
+        "type": "article",
+        "value": "6"
+      },
+      {
+        "type": "paragraph",
+        "value": "7"
+      }
+    ],
+    "text": "The Commission shall adopt delegated acts in accordance with Article 97 in order to amend paragraph 3, second subparagraph, of this Article by deleting any of the conditions laid down therein, where there is concrete and reliable evidence that this is necessary to maintain the level of protection of health, safety and fundamental rights provided for by this Regulation.",
+    "heading": "Classification rules for high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_97"
+    ],
+    "applicability_gap_reason": "duty on the Commission to adopt delegated acts; not a provider/deployer duty (PROJECT_PLAN.md §4)"
+  },
+  {
+    "logical_provision_id": "aiact:art_6:para_8",
+    "versioned_provision_id": "aiact:art_6:para_8@2024-08-01",
+    "content_id": "be7235aa4292778685529d32627c472aaf16c00f97f1809d56b91861c59c4d09",
+    "provision_type": "scope",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "1"
+      },
+      {
+        "type": "article",
+        "value": "6"
+      },
+      {
+        "type": "paragraph",
+        "value": "8"
+      }
+    ],
+    "text": "Any amendment to the conditions laid down in paragraph 3, second subparagraph, adopted in accordance with paragraphs 6 and 7 of this Article shall not decrease the overall level of protection of health, safety and fundamental rights provided for by this Regulation and shall ensure consistency with the delegated acts adopted pursuant to Article 7(1), and take account of market and technological developments.",
+    "heading": "Classification rules for high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_7"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
     "logical_provision_id": "aiact:art_16:point_a",
     "versioned_provision_id": "aiact:art_16:point_a@2024-08-01",
     "content_id": "7de087d4c810d8375239657d198bc58c6a2fc6d64e9a0b715c594fc98e05a482",

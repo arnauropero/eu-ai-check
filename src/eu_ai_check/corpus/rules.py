@@ -141,6 +141,95 @@ ARTICLE_RULE_TEMPLATES: dict[str, tuple[RuleTemplate, ...]] = {
 }
 
 
+#: Rules attached to one specific part of an article rather than to every operative
+#: provision of it. Keyed by a `logical_provision_id` **prefix**, which is matched
+#: at segment boundaries and resolved longest-first.
+#:
+#: Prefix rather than exact match, because the keyed unit is often not itself a
+#: canonical provision: Article 6(1) has lettered points, so the canonical units are
+#: `art_6:para_1:point_a` and `:point_b`, and Article 113(c) dates the whole of
+#: Article 6(1) -- points included. An exact-match lookup silently emits nothing
+#: here.
+#:
+#: Article 6 needs this because Article 113(c) names **Article 6(1)** itself, not
+#: just the obligations that depend on it: the Article 6(1) high-risk
+#: classification route does not start applying until 2027-08-02, while the Annex
+#: III route in Article 6(2) applies from the general date. Representing that on
+#: Article 6 itself is what lets a determination distinguish "this system is not
+#: high-risk" from "this classification route was not yet in force on the relevant
+#: date" -- the `not_applicable` vs `not_in_force` distinction the four-state
+#: contract requires (§14).
+#:
+#: These are declared per-provision because they are *not* uniform across the
+#: article: typing them at article level would wrongly date Article 6(2) to 2027.
+PROVISION_RULE_TEMPLATES: dict[str, tuple[RuleTemplate, ...]] = {
+    "aiact:art_6:para_1": (
+        RuleTemplate(
+            suffix="art6_1",
+            applicable_from=ARTICLE_6_1_APPLICATION,
+            conditions={
+                "actor_role": "any",
+                "system_category": "article_6_1_high_risk",
+            },
+            scope={
+                "regulation": REGULATION,
+                "structural_basis": "Chapter III Section 1",
+                "territorial_scope": "union",
+            },
+            source_reference="Article 113, point (c)",
+        ),
+    ),
+    "aiact:art_6:para_2": (
+        RuleTemplate(
+            suffix="annex3",
+            applicable_from=GENERAL_APPLICATION,
+            conditions={
+                "actor_role": "any",
+                "system_category": "annex_iii_high_risk",
+            },
+            scope={
+                "regulation": REGULATION,
+                "structural_basis": "Chapter III Section 1",
+                "territorial_scope": "union",
+            },
+            source_reference="Article 113, first subparagraph",
+        ),
+    ),
+    # Article 6(4) is a provider duty, and it is scoped to Annex III systems by its
+    # own text ("an AI system referred to in Annex III"), so it takes one rule --
+    # not the two-date split that applies to obligations covering both high-risk
+    # routes.
+    "aiact:art_6:para_4": (
+        RuleTemplate(
+            suffix="annex3",
+            applicable_from=GENERAL_APPLICATION,
+            conditions={
+                "actor_role": "provider",
+                "system_category": "annex_iii_high_risk",
+            },
+            scope={
+                "regulation": REGULATION,
+                "structural_basis": "Chapter III Section 1",
+                "territorial_scope": "union",
+            },
+            source_reference="Article 113, first subparagraph",
+        ),
+    ),
+}
+
+
+def _declared_templates(logical_id: str) -> tuple[RuleTemplate, ...] | None:
+    """Longest-prefix lookup in `PROVISION_RULE_TEMPLATES`, matched only at segment
+    boundaries so `para_1` cannot match `para_10`."""
+    best: tuple[RuleTemplate, ...] | None = None
+    best_len = -1
+    for prefix, templates in PROVISION_RULE_TEMPLATES.items():
+        if logical_id == prefix or logical_id.startswith(prefix + ":"):
+            if len(prefix) > best_len:
+                best, best_len = templates, len(prefix)
+    return best
+
+
 def _article_of(provision: Provision) -> str | None:
     from .models import SegmentType
 
@@ -160,10 +249,15 @@ def build_rules(provisions: list[Provision]) -> list[ApplicabilityRule]:
     """
     rules: list[ApplicabilityRule] = []
     for provision in provisions:
-        if not provision.requires_applicability_rule:
-            continue
-        article = _article_of(provision)
-        for template in ARTICLE_RULE_TEMPLATES.get(article or "", ()):
+        # A provision-specific declaration wins over the article-level default, and
+        # applies whatever the provision's type: Article 6(1)/(2) are `scope`
+        # provisions that nonetheless carry their own application dates.
+        templates = _declared_templates(provision.logical_provision_id)
+        if templates is None:
+            if not provision.requires_applicability_rule:
+                continue
+            templates = ARTICLE_RULE_TEMPLATES.get(_article_of(provision) or "", ())
+        for template in templates:
             rules.append(
                 ApplicabilityRule(
                     rule_id=f"{provision.logical_provision_id}#{template.suffix}",

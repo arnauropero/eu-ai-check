@@ -62,6 +62,14 @@ ID_PREFIX = "aiact"
 #: (PROJECT_PLAN.md §3).
 V1_ARTICLES: dict[str, ProvisionType] = {
     "5": ProvisionType.PROHIBITION,
+    # Article 6 carries the high-risk classification rules. It is in V1 scope
+    # because Phase 0 ingestion showed the rest of the corpus depends on it: 27 of
+    # the 73 provisions ingested without it cross-referenced it, and the
+    # applicability conditions on Articles 16/26 distinguish Annex III high-risk
+    # (Article 6(2)) from Article 6(1) high-risk -- a distinction Article 6 is what
+    # defines. Its default character is `scope`: it classifies, it does not itself
+    # impose a duty.
+    "6": ProvisionType.SCOPE,
     "16": ProvisionType.OBLIGATION,
     "25": ProvisionType.OBLIGATION,
     "26": ProvisionType.OBLIGATION,
@@ -70,11 +78,56 @@ V1_ANNEXES: dict[str, ProvisionType] = {
     "III": ProvisionType.ANNEX_CATEGORY,
 }
 
-#: Article 5 paragraphs 2-8 set out the authorisation procedure and safeguards
-#: conditioning the point (h) exception. They are not themselves prohibitions, so
-#: they are typed as exceptions and do not attract the obligation/prohibition
-#: no-orphan-rule requirement in §12.1.
-_ARTICLE_5_EXCEPTION_PARAGRAPHS = {"2", "3", "4", "5", "6", "7", "8"}
+#: Per-paragraph type overrides, where an article's paragraphs do not all share the
+#: article's default character. Keyed article -> paragraph -> type.
+#:
+#: Article 5: paragraphs 2-8 set out the authorisation procedure and safeguards
+#: conditioning the point (h) exception. They are not themselves prohibitions.
+#:
+#: Article 6 is genuinely heterogeneous, so typing it uniformly would misdescribe
+#: it. Paragraphs 1 and 2 are the two high-risk classification routes (`scope`).
+#: Paragraph 3 opens "By derogation from paragraph 2" and lets an Annex III system
+#: be found *not* high-risk -- a real determination branch, so `exception`.
+#: Paragraph 4 is a genuine provider duty ("A provider ... shall document its
+#: assessment"), so `obligation`. Paragraph 8 constrains future amendments rather
+#: than regulating an AI system, so `scope`.
+_PARAGRAPH_TYPE_OVERRIDES: dict[str, dict[str, ProvisionType]] = {
+    "5": {
+        para: ProvisionType.EXCEPTION
+        for para in ("2", "3", "4", "5", "6", "7", "8")
+    },
+    "6": {
+        "1": ProvisionType.SCOPE,
+        "2": ProvisionType.SCOPE,
+        "3": ProvisionType.EXCEPTION,
+        "4": ProvisionType.OBLIGATION,
+        "5": ProvisionType.OBLIGATION,
+        "6": ProvisionType.OBLIGATION,
+        "7": ProvisionType.OBLIGATION,
+        "8": ProvisionType.SCOPE,
+    },
+}
+
+#: Obligations that V1 deliberately does not schedule, with the reason recorded on
+#: the provision so §12.1's no-orphan check reports a declared gap instead of an
+#: error. Article 6(5)-(7) place duties on the Commission (issuing guidelines,
+#: adopting delegated acts), not on a provider or deployer. V1 covers the
+#: provider/deployer determination surface only (PROJECT_PLAN.md §4), so scheduling
+#: them would mean inventing an actor role the system does not model.
+_DECLARED_APPLICABILITY_GAPS: dict[str, str] = {
+    "aiact:art_6:para_5": (
+        "duty on the Commission (issue guidelines), not on a provider or deployer; "
+        "V1 covers provider/deployer obligations only (PROJECT_PLAN.md §4)"
+    ),
+    "aiact:art_6:para_6": (
+        "empowerment of the Commission to adopt delegated acts; not a "
+        "provider/deployer duty (PROJECT_PLAN.md §4)"
+    ),
+    "aiact:art_6:para_7": (
+        "duty on the Commission to adopt delegated acts; not a provider/deployer "
+        "duty (PROJECT_PLAN.md §4)"
+    ),
+}
 
 
 # A trailing colon marks an introductory lead-in rather than a standalone rule.
@@ -195,15 +248,19 @@ def _cross_references(text: str, self_article: str | None) -> list[str]:
 
 def _provision_type(article: ArticleNode, path: list[StructuralSegment],
                     default: ProvisionType) -> ProvisionType:
+    """The provision's legal character: the article default, unless the paragraph
+    it sits under is overridden (see `_PARAGRAPH_TYPE_OVERRIDES`).
+
+    A point inherits its paragraph's type, because a lettered point of a
+    derogation is part of that derogation.
+    """
     if article.is_annex:
         return default
-    if article.number == "5":
-        para = next(
-            (s.value for s in path if s.type == SegmentType.PARAGRAPH), None
-        )
-        if para in _ARTICLE_5_EXCEPTION_PARAGRAPHS:
-            return ProvisionType.EXCEPTION
-    return default
+    overrides = _PARAGRAPH_TYPE_OVERRIDES.get(article.number)
+    if not overrides:
+        return default
+    para = next((s.value for s in path if s.type == SegmentType.PARAGRAPH), None)
+    return overrides.get(para, default) if para else default
 
 
 def ingest_article(article: ArticleNode) -> tuple[list[Provision], list[IngestIssue]]:
@@ -255,6 +312,9 @@ def ingest_article(article: ArticleNode) -> tuple[list[Provision], list[IngestIs
                     text_valid_to=None,
                     cross_references=_cross_references(
                         text, None if article.is_annex else article.number
+                    ),
+                    applicability_gap_reason=_DECLARED_APPLICABILITY_GAPS.get(
+                        logical_id
                     ),
                 )
             )

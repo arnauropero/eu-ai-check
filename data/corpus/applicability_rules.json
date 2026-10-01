@@ -128,6 +128,70 @@
     "source_reference": "Article 113, point (a)"
   },
   {
+    "rule_id": "aiact:art_6:para_1:point_a#art6_1",
+    "legal_provision_id": "aiact:art_6:para_1:point_a",
+    "applicable_from": "2027-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "any",
+      "system_category": "article_6_1_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 1",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (c)"
+  },
+  {
+    "rule_id": "aiact:art_6:para_1:point_b#art6_1",
+    "legal_provision_id": "aiact:art_6:para_1:point_b",
+    "applicable_from": "2027-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "any",
+      "system_category": "article_6_1_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 1",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (c)"
+  },
+  {
+    "rule_id": "aiact:art_6:para_2#annex3",
+    "legal_provision_id": "aiact:art_6:para_2",
+    "applicable_from": "2026-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "any",
+      "system_category": "annex_iii_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 1",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, first subparagraph"
+  },
+  {
+    "rule_id": "aiact:art_6:para_4#annex3",
+    "legal_provision_id": "aiact:art_6:para_4",
+    "applicable_from": "2026-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "annex_iii_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 1",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, first subparagraph"
+  },
+  {
     "rule_id": "aiact:art_16:point_a#annex3",
     "legal_provision_id": "aiact:art_16:point_a",
     "applicable_from": "2026-08-02",

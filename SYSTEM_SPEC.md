@@ -1,9 +1,30 @@
 # SYSTEM_SPEC.md — EU AI Act Compliance Determination System
 
-Status: V1 architecture locked pending implementation. This document is the technical
-source of truth for implementation in Claude Code. Where a decision rests on assumption
-rather than verified source material, it is marked **[ASSUMPTION]**. Where a decision has
-been checked against the actual EUR-Lex / AI Act Explorer text, it is marked **[VERIFIED]**.
+Status: V1 architecture locked. **Phase 0 (corpus ingestion and validation) is
+implemented as of 2026-10-01**; Phase 1 (retrieval) is next. This document is the
+technical source of truth for implementation in Claude Code. Where a decision rests on
+assumption rather than verified source material, it is marked **[ASSUMPTION]**. Where a
+decision has been checked against the actual EUR-Lex / AI Act Explorer text, it is marked
+**[VERIFIED]**.
+
+Phase 0 changed the architecture in exactly one place: **Article 6 was added to the V1
+corpus** on corpus evidence (§9). Every other invariant, identity, and structural
+decision in this document survived contact with the real Official Journal text unchanged.
+The corpus is 85 canonical provisions and 76 `ApplicabilityRule` records, built from
+CELEX 32024R1689 retrieved via the EU Publications Office Cellar API — note that EUR-Lex
+itself sits behind an AWS WAF JavaScript challenge that blocks scripted fetching.
+
+Three hazards in the real text were not anticipated by this document and are now
+enforced by tests. They are recorded here because each one silently corrupts legal text
+rather than failing loudly: (1) enumerator markers are ambiguous across levels — Article
+16 has a lettered point "(i)" and Article 5(1)(h) a roman sub-point "(i)" — so a
+provision's level must be derived from its position in the parsed tree, never from
+parsing its marker; (2) a node's own text and its enumerated children must be stored in
+one **ordered** sequence, because Article 5(1) closes with a subparagraph that follows
+its (a)–(h) list and qualifies point (h), and separate buckets re-emit it before the list
+it qualifies; (3) a canonical provision must carry its ancestor lead-in, since Article
+5(1)(a) read alone is a bare noun phrase whose operative verb ("The following AI
+practices shall be prohibited:") lives in the parent — see §5.
 
 ---
 
@@ -343,7 +364,25 @@ hop) is a stretch goal, not a V1 requirement** (see §17).
 
 ## 9. Annex III Special Handling
 
-Annex III is a taxonomy of high-risk use-case categories, not narrative prose, and is
+**Annex III does not stand alone: Article 6 is what gives it legal effect.**
+**[Scope extended on Phase 0 corpus evidence, 2026-10-01]** Article 6 is in the V1
+corpus. Annex III is a list; Article 6(2) is the provision that makes appearing on that
+list mean "high-risk", Article 6(1) is the separate product-embedded route, and Article
+6(3) is the derogation under which an Annex III system is **not** high-risk where it
+does not pose a significant risk of harm. A risk-tier determination built on Annex III
+alone would collapse to "appears in Annex III ⇒ high_risk", which the Act does not say.
+
+Article 6 was absent from the original V1 scope and was added because ingestion produced
+evidence rather than an opinion: 27 of the 73 provisions ingested without it
+cross-referenced it, in-corpus cross-reference resolution sat at 9.1%, and the
+applicability conditions on Articles 16 and 26 already distinguished
+`annex_iii_high_risk` from `article_6_1_high_risk` — a distinction only Article 6
+defines. Article 6 is typed `scope` by default, since it classifies rather than imposing
+duties, with per-paragraph overrides where its character differs (6(3) is an
+`exception`; 6(4)–6(7) are `obligation`s).
+
+Annex III itself is a taxonomy of high-risk use-case categories, not narrative prose,
+and is
 chunked accordingly: `Annex III → numbered area (1–8) → lettered item (a, b, c...)`,
 with the lettered item as the canonical chunk where one exists.
 
@@ -433,6 +472,16 @@ and that the AI Act's staggered application dates (prohibitions from Feb 2025, G
 obligations from Aug 2025, most high-risk obligations from Aug 2026, embedded-product
 obligations from Aug 2027) make a first-class modeling concern rather than an edge case.
 
+**[VERIFIED against Article 113 in Phase 0]** The concrete case that makes a conditioned
+rule layer necessary rather than merely tidy: Article 113(c) defers "Article 6(1) and
+the corresponding obligations in this Regulation" to 2027-08-02, while the general date
+is 2026-08-02. The *same* Article 16 provider-obligation text therefore starts applying
+a year apart depending on which high-risk route the system falls under — Article 6(2)
+(Annex III) or Article 6(1) (product-embedded). One date per provision cannot express
+this; a second date pair on the `Provision` would have to be duplicated per category and
+would re-conflate text validity with applicability. Each high-risk obligation provision
+consequently carries two rules differing only in `conditions.system_category`.
+
 Sub-chunks and content records never carry applicability metadata directly — it lives
 at the version/provision level and is resolved via the rule-matching engine. This
 engine is not a mandatory layer for every `GroundedDetermination` instantiation (§4):
@@ -466,11 +515,26 @@ applicability distinction (§13.1).
   silently accepted, since a malformed rule would otherwise fail closed at query time
   in a way that is hard to distinguish from a genuine coverage gap.
 - **No orphan provisions requiring rules:** every `Provision` with `provision_type =
-  obligation` or `provision_type = prohibition` (Article 5, 16, 26 in V1 scope) either
-  has at least one associated `ApplicabilityRule` or is explicitly logged as an
-  intentional gap — an obligation/prohibition provision silently ingested with zero
-  rules is the source of a false `unresolved` later, and Phase 0 is where that should
-  surface, not Phase 3.
+  obligation` or `provision_type = prohibition` (Article 5, 6(4)–6(7), 16, 25, 26 in V1
+  scope) either has at least one associated `ApplicabilityRule` or is explicitly logged
+  as an intentional gap — an obligation/prohibition provision silently ingested with
+  zero rules is the source of a false `unresolved` later, and Phase 0 is where that
+  should surface, not Phase 3.
+
+  **[VERIFIED in Phase 0]** The escape hatch is load-bearing, not decorative. Article
+  6(5)–(7) place duties on the Commission (issuing guidelines, adopting delegated
+  acts), an actor V1 does not model. They are ingested with an explicit
+  `applicability_gap_reason`, so this check reports them as declared gaps. A declared
+  gap does not fail ingestion; an undeclared one does. The distinction is the point:
+  it converts an invisible omission into a reviewable statement.
+
+  A rule may also be declared for a **non**-operative provision. Article 6(1) and 6(2)
+  are `scope` provisions — they classify rather than impose duties — but Article 113(c)
+  dates Article 6(1) itself to 2027-08-02 while 6(2) falls under the general
+  2026-08-02 date, so both carry rules. Without this, a determination cannot separate
+  "this system is not high-risk" from "that classification route was not yet in force
+  on the relevant date", which is precisely the `not_applicable` vs `not_in_force`
+  distinction §14 forbids collapsing.
 
 These checks are additive to, not a replacement for, the version-integrity invariant in
 §11 — a `Provision` can pass text-validity validation while its `ApplicabilityRule`
