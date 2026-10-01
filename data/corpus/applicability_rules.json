@@ -1,0 +1,1154 @@
+[
+  {
+    "rule_id": "aiact:art_5:para_1:point_a#ch2",
+    "legal_provision_id": "aiact:art_5:para_1:point_a",
+    "applicable_from": "2025-02-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "any",
+      "system_category": "any"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter II",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (a)"
+  },
+  {
+    "rule_id": "aiact:art_5:para_1:point_b#ch2",
+    "legal_provision_id": "aiact:art_5:para_1:point_b",
+    "applicable_from": "2025-02-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "any",
+      "system_category": "any"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter II",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (a)"
+  },
+  {
+    "rule_id": "aiact:art_5:para_1:point_c#ch2",
+    "legal_provision_id": "aiact:art_5:para_1:point_c",
+    "applicable_from": "2025-02-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "any",
+      "system_category": "any"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter II",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (a)"
+  },
+  {
+    "rule_id": "aiact:art_5:para_1:point_d#ch2",
+    "legal_provision_id": "aiact:art_5:para_1:point_d",
+    "applicable_from": "2025-02-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "any",
+      "system_category": "any"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter II",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (a)"
+  },
+  {
+    "rule_id": "aiact:art_5:para_1:point_e#ch2",
+    "legal_provision_id": "aiact:art_5:para_1:point_e",
+    "applicable_from": "2025-02-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "any",
+      "system_category": "any"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter II",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (a)"
+  },
+  {
+    "rule_id": "aiact:art_5:para_1:point_f#ch2",
+    "legal_provision_id": "aiact:art_5:para_1:point_f",
+    "applicable_from": "2025-02-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "any",
+      "system_category": "any"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter II",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (a)"
+  },
+  {
+    "rule_id": "aiact:art_5:para_1:point_g#ch2",
+    "legal_provision_id": "aiact:art_5:para_1:point_g",
+    "applicable_from": "2025-02-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "any",
+      "system_category": "any"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter II",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (a)"
+  },
+  {
+    "rule_id": "aiact:art_5:para_1:point_h#ch2",
+    "legal_provision_id": "aiact:art_5:para_1:point_h",
+    "applicable_from": "2025-02-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "any",
+      "system_category": "any"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter II",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (a)"
+  },
+  {
+    "rule_id": "aiact:art_16:point_a#annex3",
+    "legal_provision_id": "aiact:art_16:point_a",
+    "applicable_from": "2026-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "annex_iii_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, first subparagraph"
+  },
+  {
+    "rule_id": "aiact:art_16:point_a#art6_1",
+    "legal_provision_id": "aiact:art_16:point_a",
+    "applicable_from": "2027-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "article_6_1_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (c)"
+  },
+  {
+    "rule_id": "aiact:art_16:point_b#annex3",
+    "legal_provision_id": "aiact:art_16:point_b",
+    "applicable_from": "2026-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "annex_iii_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, first subparagraph"
+  },
+  {
+    "rule_id": "aiact:art_16:point_b#art6_1",
+    "legal_provision_id": "aiact:art_16:point_b",
+    "applicable_from": "2027-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "article_6_1_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (c)"
+  },
+  {
+    "rule_id": "aiact:art_16:point_c#annex3",
+    "legal_provision_id": "aiact:art_16:point_c",
+    "applicable_from": "2026-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "annex_iii_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, first subparagraph"
+  },
+  {
+    "rule_id": "aiact:art_16:point_c#art6_1",
+    "legal_provision_id": "aiact:art_16:point_c",
+    "applicable_from": "2027-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "article_6_1_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (c)"
+  },
+  {
+    "rule_id": "aiact:art_16:point_d#annex3",
+    "legal_provision_id": "aiact:art_16:point_d",
+    "applicable_from": "2026-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "annex_iii_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, first subparagraph"
+  },
+  {
+    "rule_id": "aiact:art_16:point_d#art6_1",
+    "legal_provision_id": "aiact:art_16:point_d",
+    "applicable_from": "2027-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "article_6_1_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (c)"
+  },
+  {
+    "rule_id": "aiact:art_16:point_e#annex3",
+    "legal_provision_id": "aiact:art_16:point_e",
+    "applicable_from": "2026-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "annex_iii_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, first subparagraph"
+  },
+  {
+    "rule_id": "aiact:art_16:point_e#art6_1",
+    "legal_provision_id": "aiact:art_16:point_e",
+    "applicable_from": "2027-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "article_6_1_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (c)"
+  },
+  {
+    "rule_id": "aiact:art_16:point_f#annex3",
+    "legal_provision_id": "aiact:art_16:point_f",
+    "applicable_from": "2026-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "annex_iii_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, first subparagraph"
+  },
+  {
+    "rule_id": "aiact:art_16:point_f#art6_1",
+    "legal_provision_id": "aiact:art_16:point_f",
+    "applicable_from": "2027-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "article_6_1_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (c)"
+  },
+  {
+    "rule_id": "aiact:art_16:point_g#annex3",
+    "legal_provision_id": "aiact:art_16:point_g",
+    "applicable_from": "2026-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "annex_iii_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, first subparagraph"
+  },
+  {
+    "rule_id": "aiact:art_16:point_g#art6_1",
+    "legal_provision_id": "aiact:art_16:point_g",
+    "applicable_from": "2027-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "article_6_1_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (c)"
+  },
+  {
+    "rule_id": "aiact:art_16:point_h#annex3",
+    "legal_provision_id": "aiact:art_16:point_h",
+    "applicable_from": "2026-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "annex_iii_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, first subparagraph"
+  },
+  {
+    "rule_id": "aiact:art_16:point_h#art6_1",
+    "legal_provision_id": "aiact:art_16:point_h",
+    "applicable_from": "2027-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "article_6_1_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (c)"
+  },
+  {
+    "rule_id": "aiact:art_16:point_i#annex3",
+    "legal_provision_id": "aiact:art_16:point_i",
+    "applicable_from": "2026-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "annex_iii_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, first subparagraph"
+  },
+  {
+    "rule_id": "aiact:art_16:point_i#art6_1",
+    "legal_provision_id": "aiact:art_16:point_i",
+    "applicable_from": "2027-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "article_6_1_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (c)"
+  },
+  {
+    "rule_id": "aiact:art_16:point_j#annex3",
+    "legal_provision_id": "aiact:art_16:point_j",
+    "applicable_from": "2026-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "annex_iii_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, first subparagraph"
+  },
+  {
+    "rule_id": "aiact:art_16:point_j#art6_1",
+    "legal_provision_id": "aiact:art_16:point_j",
+    "applicable_from": "2027-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "article_6_1_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (c)"
+  },
+  {
+    "rule_id": "aiact:art_16:point_k#annex3",
+    "legal_provision_id": "aiact:art_16:point_k",
+    "applicable_from": "2026-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "annex_iii_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, first subparagraph"
+  },
+  {
+    "rule_id": "aiact:art_16:point_k#art6_1",
+    "legal_provision_id": "aiact:art_16:point_k",
+    "applicable_from": "2027-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "article_6_1_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (c)"
+  },
+  {
+    "rule_id": "aiact:art_16:point_l#annex3",
+    "legal_provision_id": "aiact:art_16:point_l",
+    "applicable_from": "2026-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "annex_iii_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, first subparagraph"
+  },
+  {
+    "rule_id": "aiact:art_16:point_l#art6_1",
+    "legal_provision_id": "aiact:art_16:point_l",
+    "applicable_from": "2027-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "article_6_1_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (c)"
+  },
+  {
+    "rule_id": "aiact:art_25:para_1:point_a#annex3",
+    "legal_provision_id": "aiact:art_25:para_1:point_a",
+    "applicable_from": "2026-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "annex_iii_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, first subparagraph"
+  },
+  {
+    "rule_id": "aiact:art_25:para_1:point_a#art6_1",
+    "legal_provision_id": "aiact:art_25:para_1:point_a",
+    "applicable_from": "2027-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "article_6_1_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (c)"
+  },
+  {
+    "rule_id": "aiact:art_25:para_1:point_b#annex3",
+    "legal_provision_id": "aiact:art_25:para_1:point_b",
+    "applicable_from": "2026-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "annex_iii_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, first subparagraph"
+  },
+  {
+    "rule_id": "aiact:art_25:para_1:point_b#art6_1",
+    "legal_provision_id": "aiact:art_25:para_1:point_b",
+    "applicable_from": "2027-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "article_6_1_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (c)"
+  },
+  {
+    "rule_id": "aiact:art_25:para_1:point_c#annex3",
+    "legal_provision_id": "aiact:art_25:para_1:point_c",
+    "applicable_from": "2026-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "annex_iii_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, first subparagraph"
+  },
+  {
+    "rule_id": "aiact:art_25:para_1:point_c#art6_1",
+    "legal_provision_id": "aiact:art_25:para_1:point_c",
+    "applicable_from": "2027-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "article_6_1_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (c)"
+  },
+  {
+    "rule_id": "aiact:art_25:para_2#annex3",
+    "legal_provision_id": "aiact:art_25:para_2",
+    "applicable_from": "2026-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "annex_iii_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, first subparagraph"
+  },
+  {
+    "rule_id": "aiact:art_25:para_2#art6_1",
+    "legal_provision_id": "aiact:art_25:para_2",
+    "applicable_from": "2027-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "article_6_1_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (c)"
+  },
+  {
+    "rule_id": "aiact:art_25:para_3:point_a#annex3",
+    "legal_provision_id": "aiact:art_25:para_3:point_a",
+    "applicable_from": "2026-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "annex_iii_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, first subparagraph"
+  },
+  {
+    "rule_id": "aiact:art_25:para_3:point_a#art6_1",
+    "legal_provision_id": "aiact:art_25:para_3:point_a",
+    "applicable_from": "2027-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "article_6_1_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (c)"
+  },
+  {
+    "rule_id": "aiact:art_25:para_3:point_b#annex3",
+    "legal_provision_id": "aiact:art_25:para_3:point_b",
+    "applicable_from": "2026-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "annex_iii_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, first subparagraph"
+  },
+  {
+    "rule_id": "aiact:art_25:para_3:point_b#art6_1",
+    "legal_provision_id": "aiact:art_25:para_3:point_b",
+    "applicable_from": "2027-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "article_6_1_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (c)"
+  },
+  {
+    "rule_id": "aiact:art_25:para_4#annex3",
+    "legal_provision_id": "aiact:art_25:para_4",
+    "applicable_from": "2026-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "annex_iii_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, first subparagraph"
+  },
+  {
+    "rule_id": "aiact:art_25:para_4#art6_1",
+    "legal_provision_id": "aiact:art_25:para_4",
+    "applicable_from": "2027-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "article_6_1_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (c)"
+  },
+  {
+    "rule_id": "aiact:art_25:para_5#annex3",
+    "legal_provision_id": "aiact:art_25:para_5",
+    "applicable_from": "2026-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "annex_iii_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, first subparagraph"
+  },
+  {
+    "rule_id": "aiact:art_25:para_5#art6_1",
+    "legal_provision_id": "aiact:art_25:para_5",
+    "applicable_from": "2027-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "provider",
+      "system_category": "article_6_1_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (c)"
+  },
+  {
+    "rule_id": "aiact:art_26:para_1#annex3",
+    "legal_provision_id": "aiact:art_26:para_1",
+    "applicable_from": "2026-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "deployer",
+      "system_category": "annex_iii_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, first subparagraph"
+  },
+  {
+    "rule_id": "aiact:art_26:para_1#art6_1",
+    "legal_provision_id": "aiact:art_26:para_1",
+    "applicable_from": "2027-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "deployer",
+      "system_category": "article_6_1_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (c)"
+  },
+  {
+    "rule_id": "aiact:art_26:para_2#annex3",
+    "legal_provision_id": "aiact:art_26:para_2",
+    "applicable_from": "2026-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "deployer",
+      "system_category": "annex_iii_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, first subparagraph"
+  },
+  {
+    "rule_id": "aiact:art_26:para_2#art6_1",
+    "legal_provision_id": "aiact:art_26:para_2",
+    "applicable_from": "2027-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "deployer",
+      "system_category": "article_6_1_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (c)"
+  },
+  {
+    "rule_id": "aiact:art_26:para_3#annex3",
+    "legal_provision_id": "aiact:art_26:para_3",
+    "applicable_from": "2026-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "deployer",
+      "system_category": "annex_iii_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, first subparagraph"
+  },
+  {
+    "rule_id": "aiact:art_26:para_3#art6_1",
+    "legal_provision_id": "aiact:art_26:para_3",
+    "applicable_from": "2027-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "deployer",
+      "system_category": "article_6_1_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (c)"
+  },
+  {
+    "rule_id": "aiact:art_26:para_4#annex3",
+    "legal_provision_id": "aiact:art_26:para_4",
+    "applicable_from": "2026-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "deployer",
+      "system_category": "annex_iii_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, first subparagraph"
+  },
+  {
+    "rule_id": "aiact:art_26:para_4#art6_1",
+    "legal_provision_id": "aiact:art_26:para_4",
+    "applicable_from": "2027-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "deployer",
+      "system_category": "article_6_1_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (c)"
+  },
+  {
+    "rule_id": "aiact:art_26:para_5#annex3",
+    "legal_provision_id": "aiact:art_26:para_5",
+    "applicable_from": "2026-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "deployer",
+      "system_category": "annex_iii_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, first subparagraph"
+  },
+  {
+    "rule_id": "aiact:art_26:para_5#art6_1",
+    "legal_provision_id": "aiact:art_26:para_5",
+    "applicable_from": "2027-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "deployer",
+      "system_category": "article_6_1_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (c)"
+  },
+  {
+    "rule_id": "aiact:art_26:para_6#annex3",
+    "legal_provision_id": "aiact:art_26:para_6",
+    "applicable_from": "2026-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "deployer",
+      "system_category": "annex_iii_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, first subparagraph"
+  },
+  {
+    "rule_id": "aiact:art_26:para_6#art6_1",
+    "legal_provision_id": "aiact:art_26:para_6",
+    "applicable_from": "2027-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "deployer",
+      "system_category": "article_6_1_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (c)"
+  },
+  {
+    "rule_id": "aiact:art_26:para_7#annex3",
+    "legal_provision_id": "aiact:art_26:para_7",
+    "applicable_from": "2026-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "deployer",
+      "system_category": "annex_iii_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, first subparagraph"
+  },
+  {
+    "rule_id": "aiact:art_26:para_7#art6_1",
+    "legal_provision_id": "aiact:art_26:para_7",
+    "applicable_from": "2027-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "deployer",
+      "system_category": "article_6_1_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (c)"
+  },
+  {
+    "rule_id": "aiact:art_26:para_8#annex3",
+    "legal_provision_id": "aiact:art_26:para_8",
+    "applicable_from": "2026-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "deployer",
+      "system_category": "annex_iii_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, first subparagraph"
+  },
+  {
+    "rule_id": "aiact:art_26:para_8#art6_1",
+    "legal_provision_id": "aiact:art_26:para_8",
+    "applicable_from": "2027-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "deployer",
+      "system_category": "article_6_1_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (c)"
+  },
+  {
+    "rule_id": "aiact:art_26:para_9#annex3",
+    "legal_provision_id": "aiact:art_26:para_9",
+    "applicable_from": "2026-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "deployer",
+      "system_category": "annex_iii_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, first subparagraph"
+  },
+  {
+    "rule_id": "aiact:art_26:para_9#art6_1",
+    "legal_provision_id": "aiact:art_26:para_9",
+    "applicable_from": "2027-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "deployer",
+      "system_category": "article_6_1_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (c)"
+  },
+  {
+    "rule_id": "aiact:art_26:para_10#annex3",
+    "legal_provision_id": "aiact:art_26:para_10",
+    "applicable_from": "2026-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "deployer",
+      "system_category": "annex_iii_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, first subparagraph"
+  },
+  {
+    "rule_id": "aiact:art_26:para_10#art6_1",
+    "legal_provision_id": "aiact:art_26:para_10",
+    "applicable_from": "2027-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "deployer",
+      "system_category": "article_6_1_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (c)"
+  },
+  {
+    "rule_id": "aiact:art_26:para_11#annex3",
+    "legal_provision_id": "aiact:art_26:para_11",
+    "applicable_from": "2026-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "deployer",
+      "system_category": "annex_iii_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, first subparagraph"
+  },
+  {
+    "rule_id": "aiact:art_26:para_11#art6_1",
+    "legal_provision_id": "aiact:art_26:para_11",
+    "applicable_from": "2027-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "deployer",
+      "system_category": "article_6_1_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (c)"
+  },
+  {
+    "rule_id": "aiact:art_26:para_12#annex3",
+    "legal_provision_id": "aiact:art_26:para_12",
+    "applicable_from": "2026-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "deployer",
+      "system_category": "annex_iii_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, first subparagraph"
+  },
+  {
+    "rule_id": "aiact:art_26:para_12#art6_1",
+    "legal_provision_id": "aiact:art_26:para_12",
+    "applicable_from": "2027-08-02",
+    "applicable_to": null,
+    "conditions": {
+      "actor_role": "deployer",
+      "system_category": "article_6_1_high_risk"
+    },
+    "scope": {
+      "regulation": "Regulation (EU) 2024/1689",
+      "structural_basis": "Chapter III Section 3",
+      "territorial_scope": "union"
+    },
+    "source_reference": "Article 113, point (c)"
+  }
+]

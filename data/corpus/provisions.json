@@ -1,0 +1,2185 @@
+[
+  {
+    "logical_provision_id": "aiact:art_5:para_1:point_a",
+    "versioned_provision_id": "aiact:art_5:para_1:point_a@2024-08-01",
+    "content_id": "6e49c6438befa04a53acf255b5f3acfd55e676fa517af57021946783eef31abb",
+    "provision_type": "prohibition",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "II"
+      },
+      {
+        "type": "article",
+        "value": "5"
+      },
+      {
+        "type": "paragraph",
+        "value": "1"
+      },
+      {
+        "type": "point",
+        "value": "a"
+      }
+    ],
+    "text": "The following AI practices shall be prohibited: the placing on the market, the putting into service or the use of an AI system that deploys subliminal techniques beyond a person’s consciousness or purposefully manipulative or deceptive techniques, with the objective, or the effect of materially distorting the behaviour of a person or a group of persons by appreciably impairing their ability to make an informed decision, thereby causing them to take a decision that they would not have otherwise taken in a manner that causes or is reasonably likely to cause that person, another person or group of persons significant harm;",
+    "heading": "Prohibited AI practices",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_5:para_1:point_b",
+    "versioned_provision_id": "aiact:art_5:para_1:point_b@2024-08-01",
+    "content_id": "ca2895cfc5f46c91e01deb6da54c9afa9e1cbd26a763131b5d28910952e54315",
+    "provision_type": "prohibition",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "II"
+      },
+      {
+        "type": "article",
+        "value": "5"
+      },
+      {
+        "type": "paragraph",
+        "value": "1"
+      },
+      {
+        "type": "point",
+        "value": "b"
+      }
+    ],
+    "text": "The following AI practices shall be prohibited: the placing on the market, the putting into service or the use of an AI system that exploits any of the vulnerabilities of a natural person or a specific group of persons due to their age, disability or a specific social or economic situation, with the objective, or the effect, of materially distorting the behaviour of that person or a person belonging to that group in a manner that causes or is reasonably likely to cause that person or another person significant harm;",
+    "heading": "Prohibited AI practices",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_5:para_1:point_c",
+    "versioned_provision_id": "aiact:art_5:para_1:point_c@2024-08-01",
+    "content_id": "089ed7d491e9bb8d3decc49f8eb0cd2fb4bfb519624cbd7b99c477c38c332df3",
+    "provision_type": "prohibition",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "II"
+      },
+      {
+        "type": "article",
+        "value": "5"
+      },
+      {
+        "type": "paragraph",
+        "value": "1"
+      },
+      {
+        "type": "point",
+        "value": "c"
+      }
+    ],
+    "text": "The following AI practices shall be prohibited: the placing on the market, the putting into service or the use of AI systems for the evaluation or classification of natural persons or groups of persons over a certain period of time based on their social behaviour or known, inferred or predicted personal or personality characteristics, with the social score leading to either or both of the following: (i) detrimental or unfavourable treatment of certain natural persons or groups of persons in social contexts that are unrelated to the contexts in which the data was originally generated or collected; (ii) detrimental or unfavourable treatment of certain natural persons or groups of persons that is unjustified or disproportionate to their social behaviour or its gravity;",
+    "heading": "Prohibited AI practices",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_5:para_1:point_d",
+    "versioned_provision_id": "aiact:art_5:para_1:point_d@2024-08-01",
+    "content_id": "59c98b3445b7ff87037057f11a2802165744a519c3a43c57296ef0503b35ebac",
+    "provision_type": "prohibition",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "II"
+      },
+      {
+        "type": "article",
+        "value": "5"
+      },
+      {
+        "type": "paragraph",
+        "value": "1"
+      },
+      {
+        "type": "point",
+        "value": "d"
+      }
+    ],
+    "text": "The following AI practices shall be prohibited: the placing on the market, the putting into service for this specific purpose, or the use of an AI system for making risk assessments of natural persons in order to assess or predict the risk of a natural person committing a criminal offence, based solely on the profiling of a natural person or on assessing their personality traits and characteristics; this prohibition shall not apply to AI systems used to support the human assessment of the involvement of a person in a criminal activity, which is already based on objective and verifiable facts directly linked to a criminal activity;",
+    "heading": "Prohibited AI practices",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_5:para_1:point_e",
+    "versioned_provision_id": "aiact:art_5:para_1:point_e@2024-08-01",
+    "content_id": "aeba75e44ddccc9f947408e0fb296f27d89961737929cedd6ad9c230914aefe8",
+    "provision_type": "prohibition",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "II"
+      },
+      {
+        "type": "article",
+        "value": "5"
+      },
+      {
+        "type": "paragraph",
+        "value": "1"
+      },
+      {
+        "type": "point",
+        "value": "e"
+      }
+    ],
+    "text": "The following AI practices shall be prohibited: the placing on the market, the putting into service for this specific purpose, or the use of AI systems that create or expand facial recognition databases through the untargeted scraping of facial images from the internet or CCTV footage;",
+    "heading": "Prohibited AI practices",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_5:para_1:point_f",
+    "versioned_provision_id": "aiact:art_5:para_1:point_f@2024-08-01",
+    "content_id": "22a3a1073b00980491c698f0b363faa96a5f4d258b3ec950cbc6009b66752208",
+    "provision_type": "prohibition",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "II"
+      },
+      {
+        "type": "article",
+        "value": "5"
+      },
+      {
+        "type": "paragraph",
+        "value": "1"
+      },
+      {
+        "type": "point",
+        "value": "f"
+      }
+    ],
+    "text": "The following AI practices shall be prohibited: the placing on the market, the putting into service for this specific purpose, or the use of AI systems to infer emotions of a natural person in the areas of workplace and education institutions, except where the use of the AI system is intended to be put in place or into the market for medical or safety reasons;",
+    "heading": "Prohibited AI practices",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_5:para_1:point_g",
+    "versioned_provision_id": "aiact:art_5:para_1:point_g@2024-08-01",
+    "content_id": "153c8d4ea55766a6e14130d5e6329615fd8f5ae6b97de417062140c4cc075fa2",
+    "provision_type": "prohibition",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "II"
+      },
+      {
+        "type": "article",
+        "value": "5"
+      },
+      {
+        "type": "paragraph",
+        "value": "1"
+      },
+      {
+        "type": "point",
+        "value": "g"
+      }
+    ],
+    "text": "The following AI practices shall be prohibited: the placing on the market, the putting into service for this specific purpose, or the use of biometric categorisation systems that categorise individually natural persons based on their biometric data to deduce or infer their race, political opinions, trade union membership, religious or philosophical beliefs, sex life or sexual orientation; this prohibition does not cover any labelling or filtering of lawfully acquired biometric datasets, such as images, based on biometric data or categorizing of biometric data in the area of law enforcement;",
+    "heading": "Prohibited AI practices",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_5:para_1:point_h",
+    "versioned_provision_id": "aiact:art_5:para_1:point_h@2024-08-01",
+    "content_id": "436cac6707d92797d45de92b215e465fcac106ee1f308ddb61a284ccbbf876b5",
+    "provision_type": "prohibition",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "II"
+      },
+      {
+        "type": "article",
+        "value": "5"
+      },
+      {
+        "type": "paragraph",
+        "value": "1"
+      },
+      {
+        "type": "point",
+        "value": "h"
+      }
+    ],
+    "text": "The following AI practices shall be prohibited: the use of ‘real-time’ remote biometric identification systems in publicly accessible spaces for the purposes of law enforcement, unless and in so far as such use is strictly necessary for one of the following objectives: (i) the targeted search for specific victims of abduction, trafficking in human beings or sexual exploitation of human beings, as well as the search for missing persons; (ii) the prevention of a specific, substantial and imminent threat to the life or physical safety of natural persons or a genuine and present or genuine and foreseeable threat of a terrorist attack; (iii) the localisation or identification of a person suspected of having committed a criminal offence, for the purpose of conducting a criminal investigation or prosecution or executing a criminal penalty for offences referred to in Annex II and punishable in the Member State concerned by a custodial sentence or a detention order for a maximum period of at least four years. Point (h) of the first subparagraph is without prejudice to Article 9 of Regulation (EU) 2016/679 for the processing of biometric data for purposes other than law enforcement.",
+    "heading": "Prohibited AI practices",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:anx_II"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_5:para_2:point_a",
+    "versioned_provision_id": "aiact:art_5:para_2:point_a@2024-08-01",
+    "content_id": "50df743624f58bcedee651de44253524ec58978a2089e3afaf3aacda98153835",
+    "provision_type": "exception",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "II"
+      },
+      {
+        "type": "article",
+        "value": "5"
+      },
+      {
+        "type": "paragraph",
+        "value": "2"
+      },
+      {
+        "type": "point",
+        "value": "a"
+      }
+    ],
+    "text": "The use of ‘real-time’ remote biometric identification systems in publicly accessible spaces for the purposes of law enforcement for any of the objectives referred to in paragraph 1, first subparagraph, point (h), shall be deployed for the purposes set out in that point only to confirm the identity of the specifically targeted individual, and it shall take into account the following elements: the nature of the situation giving rise to the possible use, in particular the seriousness, probability and scale of the harm that would be caused if the system were not used;",
+    "heading": "Prohibited AI practices",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_5:para_2:point_b",
+    "versioned_provision_id": "aiact:art_5:para_2:point_b@2024-08-01",
+    "content_id": "cacf7404d3859c56cd66385edef351d523feecdd1b0cff00d75cc8d70dd92588",
+    "provision_type": "exception",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "II"
+      },
+      {
+        "type": "article",
+        "value": "5"
+      },
+      {
+        "type": "paragraph",
+        "value": "2"
+      },
+      {
+        "type": "point",
+        "value": "b"
+      }
+    ],
+    "text": "The use of ‘real-time’ remote biometric identification systems in publicly accessible spaces for the purposes of law enforcement for any of the objectives referred to in paragraph 1, first subparagraph, point (h), shall be deployed for the purposes set out in that point only to confirm the identity of the specifically targeted individual, and it shall take into account the following elements: the consequences of the use of the system for the rights and freedoms of all persons concerned, in particular the seriousness, probability and scale of those consequences.",
+    "heading": "Prohibited AI practices",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_5:para_3",
+    "versioned_provision_id": "aiact:art_5:para_3@2024-08-01",
+    "content_id": "4d3a3fba41e07e499102f92174e21954663b574bcd6e79e4374bdada3523571b",
+    "provision_type": "exception",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "II"
+      },
+      {
+        "type": "article",
+        "value": "5"
+      },
+      {
+        "type": "paragraph",
+        "value": "3"
+      }
+    ],
+    "text": "For the purposes of paragraph 1, first subparagraph, point (h) and paragraph 2, each use for the purposes of law enforcement of a ‘real-time’ remote biometric identification system in publicly accessible spaces shall be subject to a prior authorisation granted by a judicial authority or an independent administrative authority whose decision is binding of the Member State in which the use is to take place, issued upon a reasoned request and in accordance with the detailed rules of national law referred to in paragraph 5. However, in a duly justified situation of urgency, the use of such system may be commenced without an authorisation provided that such authorisation is requested without undue delay, at the latest within 24 hours. If such authorisation is rejected, the use shall be stopped with immediate effect and all the data, as well as the results and outputs of that use shall be immediately discarded and deleted. The competent judicial authority or an independent administrative authority whose decision is binding shall grant the authorisation only where it is satisfied, on the basis of objective evidence or clear indications presented to it, that the use of the ‘real-time’ remote biometric identification system concerned is necessary for, and proportionate to, achieving one of the objectives specified in paragraph 1, first subparagraph, point (h), as identified in the request and, in particular, remains limited to what is strictly necessary concerning the period of time as well as the geographic and personal scope. In deciding on the request, that authority shall take into account the elements referred to in paragraph 2. No decision that produces an adverse legal effect on a person may be taken based solely on the output of the ‘real-time’ remote biometric identification system.",
+    "heading": "Prohibited AI practices",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_5:para_4",
+    "versioned_provision_id": "aiact:art_5:para_4@2024-08-01",
+    "content_id": "86f495a50dfc909978b6a0e7c21ccd9a52deb529170d1f60e39ee9be6655902a",
+    "provision_type": "exception",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "II"
+      },
+      {
+        "type": "article",
+        "value": "5"
+      },
+      {
+        "type": "paragraph",
+        "value": "4"
+      }
+    ],
+    "text": "Without prejudice to paragraph 3, each use of a ‘real-time’ remote biometric identification system in publicly accessible spaces for law enforcement purposes shall be notified to the relevant market surveillance authority and the national data protection authority in accordance with the national rules referred to in paragraph 5. The notification shall, as a minimum, contain the information specified under paragraph 6 and shall not include sensitive operational data.",
+    "heading": "Prohibited AI practices",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_5:para_5",
+    "versioned_provision_id": "aiact:art_5:para_5@2024-08-01",
+    "content_id": "a34dd4af33df3abfcf7db30b1432a61deb38b988dc6d8ad4ab39a4347fd2e238",
+    "provision_type": "exception",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "II"
+      },
+      {
+        "type": "article",
+        "value": "5"
+      },
+      {
+        "type": "paragraph",
+        "value": "5"
+      }
+    ],
+    "text": "A Member State may decide to provide for the possibility to fully or partially authorise the use of ‘real-time’ remote biometric identification systems in publicly accessible spaces for the purposes of law enforcement within the limits and under the conditions listed in paragraph 1, first subparagraph, point (h), and paragraphs 2 and 3. Member States concerned shall lay down in their national law the necessary detailed rules for the request, issuance and exercise of, as well as supervision and reporting relating to, the authorisations referred to in paragraph 3. Those rules shall also specify in respect of which of the objectives listed in paragraph 1, first subparagraph, point (h), including which of the criminal offences referred to in point (h)(iii) thereof, the competent authorities may be authorised to use those systems for the purposes of law enforcement. Member States shall notify those rules to the Commission at the latest 30 days following the adoption thereof. Member States may introduce, in accordance with Union law, more restrictive laws on the use of remote biometric identification systems.",
+    "heading": "Prohibited AI practices",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_5:para_6",
+    "versioned_provision_id": "aiact:art_5:para_6@2024-08-01",
+    "content_id": "638b15078d04292e0f14c387f49490addf62dd582050dbf43848b6312fceaf96",
+    "provision_type": "exception",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "II"
+      },
+      {
+        "type": "article",
+        "value": "5"
+      },
+      {
+        "type": "paragraph",
+        "value": "6"
+      }
+    ],
+    "text": "National market surveillance authorities and the national data protection authorities of Member States that have been notified of the use of ‘real-time’ remote biometric identification systems in publicly accessible spaces for law enforcement purposes pursuant to paragraph 4 shall submit to the Commission annual reports on such use. For that purpose, the Commission shall provide Member States and national market surveillance and data protection authorities with a template, including information on the number of the decisions taken by competent judicial authorities or an independent administrative authority whose decision is binding upon requests for authorisations in accordance with paragraph 3 and their result.",
+    "heading": "Prohibited AI practices",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_5:para_7",
+    "versioned_provision_id": "aiact:art_5:para_7@2024-08-01",
+    "content_id": "3aca883ca79457085abe7a3dd9d38554e369c4c80c8df25dfbe345ffdbea9188",
+    "provision_type": "exception",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "II"
+      },
+      {
+        "type": "article",
+        "value": "5"
+      },
+      {
+        "type": "paragraph",
+        "value": "7"
+      }
+    ],
+    "text": "The Commission shall publish annual reports on the use of real-time remote biometric identification systems in publicly accessible spaces for law enforcement purposes, based on aggregated data in Member States on the basis of the annual reports referred to in paragraph 6. Those annual reports shall not include sensitive operational data of the related law enforcement activities.",
+    "heading": "Prohibited AI practices",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_5:para_8",
+    "versioned_provision_id": "aiact:art_5:para_8@2024-08-01",
+    "content_id": "54b65c56d929432fd43029b153d3a8d8a1d15e8c02fba515ba1b37f62f38c7a4",
+    "provision_type": "exception",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "II"
+      },
+      {
+        "type": "article",
+        "value": "5"
+      },
+      {
+        "type": "paragraph",
+        "value": "8"
+      }
+    ],
+    "text": "This Article shall not affect the prohibitions that apply where an AI practice infringes other Union law.",
+    "heading": "Prohibited AI practices",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_16:point_a",
+    "versioned_provision_id": "aiact:art_16:point_a@2024-08-01",
+    "content_id": "7de087d4c810d8375239657d198bc58c6a2fc6d64e9a0b715c594fc98e05a482",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "3"
+      },
+      {
+        "type": "article",
+        "value": "16"
+      },
+      {
+        "type": "point",
+        "value": "a"
+      }
+    ],
+    "text": "Providers of high-risk AI systems shall: ensure that their high-risk AI systems are compliant with the requirements set out in Section 2;",
+    "heading": "Obligations of providers of high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_16:point_b",
+    "versioned_provision_id": "aiact:art_16:point_b@2024-08-01",
+    "content_id": "cb277917b436bfe8b66094c8b881979d84eafbde9362bcd801c932ce4dc18217",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "3"
+      },
+      {
+        "type": "article",
+        "value": "16"
+      },
+      {
+        "type": "point",
+        "value": "b"
+      }
+    ],
+    "text": "Providers of high-risk AI systems shall: indicate on the high-risk AI system or, where that is not possible, on its packaging or its accompanying documentation, as applicable, their name, registered trade name or registered trade mark, the address at which they can be contacted;",
+    "heading": "Obligations of providers of high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_16:point_c",
+    "versioned_provision_id": "aiact:art_16:point_c@2024-08-01",
+    "content_id": "cdde1a96dd89bf905cdd0e319b27de4db598c5b6269f8f4d30617a6030a9d85e",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "3"
+      },
+      {
+        "type": "article",
+        "value": "16"
+      },
+      {
+        "type": "point",
+        "value": "c"
+      }
+    ],
+    "text": "Providers of high-risk AI systems shall: have a quality management system in place which complies with Article 17;",
+    "heading": "Obligations of providers of high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_17"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_16:point_d",
+    "versioned_provision_id": "aiact:art_16:point_d@2024-08-01",
+    "content_id": "52d6cc7804579dd884d38e391df5c54cc3462d9a2f7294bafa6c0a6993925b36",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "3"
+      },
+      {
+        "type": "article",
+        "value": "16"
+      },
+      {
+        "type": "point",
+        "value": "d"
+      }
+    ],
+    "text": "Providers of high-risk AI systems shall: keep the documentation referred to in Article 18;",
+    "heading": "Obligations of providers of high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_18"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_16:point_e",
+    "versioned_provision_id": "aiact:art_16:point_e@2024-08-01",
+    "content_id": "9fe5f596684e3defa3a17ca12010a06d795d0ef61f8b4a4c43b78c73c75886e3",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "3"
+      },
+      {
+        "type": "article",
+        "value": "16"
+      },
+      {
+        "type": "point",
+        "value": "e"
+      }
+    ],
+    "text": "Providers of high-risk AI systems shall: when under their control, keep the logs automatically generated by their high-risk AI systems as referred to in Article 19;",
+    "heading": "Obligations of providers of high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_19"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_16:point_f",
+    "versioned_provision_id": "aiact:art_16:point_f@2024-08-01",
+    "content_id": "16f11576553180065f81f550a1f98ebb745f04134d69d02afcc377a70ad1c5d3",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "3"
+      },
+      {
+        "type": "article",
+        "value": "16"
+      },
+      {
+        "type": "point",
+        "value": "f"
+      }
+    ],
+    "text": "Providers of high-risk AI systems shall: ensure that the high-risk AI system undergoes the relevant conformity assessment procedure as referred to in Article 43, prior to its being placed on the market or put into service;",
+    "heading": "Obligations of providers of high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_43"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_16:point_g",
+    "versioned_provision_id": "aiact:art_16:point_g@2024-08-01",
+    "content_id": "5b843b44ba1377f2de81b9a54556cace2a969428921c0e4bb21816b7ab59a055",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "3"
+      },
+      {
+        "type": "article",
+        "value": "16"
+      },
+      {
+        "type": "point",
+        "value": "g"
+      }
+    ],
+    "text": "Providers of high-risk AI systems shall: draw up an EU declaration of conformity in accordance with Article 47;",
+    "heading": "Obligations of providers of high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_47"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_16:point_h",
+    "versioned_provision_id": "aiact:art_16:point_h@2024-08-01",
+    "content_id": "4f27ff494a169bfd882773218460205222072eecdacc890522e49f65916ff518",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "3"
+      },
+      {
+        "type": "article",
+        "value": "16"
+      },
+      {
+        "type": "point",
+        "value": "h"
+      }
+    ],
+    "text": "Providers of high-risk AI systems shall: affix the CE marking to the high-risk AI system or, where that is not possible, on its packaging or its accompanying documentation, to indicate conformity with this Regulation, in accordance with Article 48;",
+    "heading": "Obligations of providers of high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_48"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_16:point_i",
+    "versioned_provision_id": "aiact:art_16:point_i@2024-08-01",
+    "content_id": "b8c82b3db87d91c47937abf92f10ad8a09065256f4dff052ab486ca6131d22d9",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "3"
+      },
+      {
+        "type": "article",
+        "value": "16"
+      },
+      {
+        "type": "point",
+        "value": "i"
+      }
+    ],
+    "text": "Providers of high-risk AI systems shall: comply with the registration obligations referred to in Article 49(1);",
+    "heading": "Obligations of providers of high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_49"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_16:point_j",
+    "versioned_provision_id": "aiact:art_16:point_j@2024-08-01",
+    "content_id": "c745ad63180bedd0dd2a2058d07900755749b145750582e98ad0cab70c1be12a",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "3"
+      },
+      {
+        "type": "article",
+        "value": "16"
+      },
+      {
+        "type": "point",
+        "value": "j"
+      }
+    ],
+    "text": "Providers of high-risk AI systems shall: take the necessary corrective actions and provide information as required in Article 20;",
+    "heading": "Obligations of providers of high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_20"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_16:point_k",
+    "versioned_provision_id": "aiact:art_16:point_k@2024-08-01",
+    "content_id": "0439cc7300f3e6f1e7af44ba9a8609831932e353afecde5d06a87afad735a201",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "3"
+      },
+      {
+        "type": "article",
+        "value": "16"
+      },
+      {
+        "type": "point",
+        "value": "k"
+      }
+    ],
+    "text": "Providers of high-risk AI systems shall: upon a reasoned request of a national competent authority, demonstrate the conformity of the high-risk AI system with the requirements set out in Section 2;",
+    "heading": "Obligations of providers of high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_16:point_l",
+    "versioned_provision_id": "aiact:art_16:point_l@2024-08-01",
+    "content_id": "ae1c8f4754cf2f96581903b4250b82fd5fa233a0143977aa6489577f2fb22021",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "3"
+      },
+      {
+        "type": "article",
+        "value": "16"
+      },
+      {
+        "type": "point",
+        "value": "l"
+      }
+    ],
+    "text": "Providers of high-risk AI systems shall: ensure that the high-risk AI system complies with accessibility requirements in accordance with Directives (EU) 2016/2102 and (EU) 2019/882.",
+    "heading": "Obligations of providers of high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_25:para_1:point_a",
+    "versioned_provision_id": "aiact:art_25:para_1:point_a@2024-08-01",
+    "content_id": "42284e8d19e91e9acb3b72f9ea52673585d4855bfe5e8979a22acbb28134dfa3",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "3"
+      },
+      {
+        "type": "article",
+        "value": "25"
+      },
+      {
+        "type": "paragraph",
+        "value": "1"
+      },
+      {
+        "type": "point",
+        "value": "a"
+      }
+    ],
+    "text": "Any distributor, importer, deployer or other third-party shall be considered to be a provider of a high-risk AI system for the purposes of this Regulation and shall be subject to the obligations of the provider under Article 16, in any of the following circumstances: they put their name or trademark on a high-risk AI system already placed on the market or put into service, without prejudice to contractual arrangements stipulating that the obligations are otherwise allocated;",
+    "heading": "Responsibilities along the AI value chain",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_16"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_25:para_1:point_b",
+    "versioned_provision_id": "aiact:art_25:para_1:point_b@2024-08-01",
+    "content_id": "349ebe2064933f4503fc61df8fe2f0e80896d16e2c726893769680882499c048",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "3"
+      },
+      {
+        "type": "article",
+        "value": "25"
+      },
+      {
+        "type": "paragraph",
+        "value": "1"
+      },
+      {
+        "type": "point",
+        "value": "b"
+      }
+    ],
+    "text": "Any distributor, importer, deployer or other third-party shall be considered to be a provider of a high-risk AI system for the purposes of this Regulation and shall be subject to the obligations of the provider under Article 16, in any of the following circumstances: they make a substantial modification to a high-risk AI system that has already been placed on the market or has already been put into service in such a way that it remains a high-risk AI system pursuant to Article 6;",
+    "heading": "Responsibilities along the AI value chain",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_16",
+      "aiact:art_6"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_25:para_1:point_c",
+    "versioned_provision_id": "aiact:art_25:para_1:point_c@2024-08-01",
+    "content_id": "ea8092eed610ab1f3c1bea59a86c3805b73aed5c6d2156a5c234fb57664d8ca4",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "3"
+      },
+      {
+        "type": "article",
+        "value": "25"
+      },
+      {
+        "type": "paragraph",
+        "value": "1"
+      },
+      {
+        "type": "point",
+        "value": "c"
+      }
+    ],
+    "text": "Any distributor, importer, deployer or other third-party shall be considered to be a provider of a high-risk AI system for the purposes of this Regulation and shall be subject to the obligations of the provider under Article 16, in any of the following circumstances: they modify the intended purpose of an AI system, including a general-purpose AI system, which has not been classified as high-risk and has already been placed on the market or put into service in such a way that the AI system concerned becomes a high-risk AI system in accordance with Article 6.",
+    "heading": "Responsibilities along the AI value chain",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_16",
+      "aiact:art_6"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_25:para_2",
+    "versioned_provision_id": "aiact:art_25:para_2@2024-08-01",
+    "content_id": "80c9ae1d3b9696613376023934e7ed7dab8bf1995bd449d3795f0ce10fc0a8de",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "3"
+      },
+      {
+        "type": "article",
+        "value": "25"
+      },
+      {
+        "type": "paragraph",
+        "value": "2"
+      }
+    ],
+    "text": "Where the circumstances referred to in paragraph 1 occur, the provider that initially placed the AI system on the market or put it into service shall no longer be considered to be a provider of that specific AI system for the purposes of this Regulation. That initial provider shall closely cooperate with new providers and shall make available the necessary information and provide the reasonably expected technical access and other assistance that are required for the fulfilment of the obligations set out in this Regulation, in particular regarding the compliance with the conformity assessment of high-risk AI systems. This paragraph shall not apply in cases where the initial provider has clearly specified that its AI system is not to be changed into a high-risk AI system and therefore does not fall under the obligation to hand over the documentation.",
+    "heading": "Responsibilities along the AI value chain",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_25:para_3:point_a",
+    "versioned_provision_id": "aiact:art_25:para_3:point_a@2024-08-01",
+    "content_id": "8eb7b822c44d3cd70e7a73516f00f41567f6ee81fb85b91fdd4c15d5c49d8dae",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "3"
+      },
+      {
+        "type": "article",
+        "value": "25"
+      },
+      {
+        "type": "paragraph",
+        "value": "3"
+      },
+      {
+        "type": "point",
+        "value": "a"
+      }
+    ],
+    "text": "In the case of high-risk AI systems that are safety components of products covered by the Union harmonisation legislation listed in Section A of Annex I, the product manufacturer shall be considered to be the provider of the high-risk AI system, and shall be subject to the obligations under Article 16 under either of the following circumstances: the high-risk AI system is placed on the market together with the product under the name or trademark of the product manufacturer;",
+    "heading": "Responsibilities along the AI value chain",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_16",
+      "aiact:anx_I"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_25:para_3:point_b",
+    "versioned_provision_id": "aiact:art_25:para_3:point_b@2024-08-01",
+    "content_id": "0585ade3c1fed3a4c766f612e0b3adde0f2867f0c6e776be062bb96463d06df9",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "3"
+      },
+      {
+        "type": "article",
+        "value": "25"
+      },
+      {
+        "type": "paragraph",
+        "value": "3"
+      },
+      {
+        "type": "point",
+        "value": "b"
+      }
+    ],
+    "text": "In the case of high-risk AI systems that are safety components of products covered by the Union harmonisation legislation listed in Section A of Annex I, the product manufacturer shall be considered to be the provider of the high-risk AI system, and shall be subject to the obligations under Article 16 under either of the following circumstances: the high-risk AI system is put into service under the name or trademark of the product manufacturer after the product has been placed on the market.",
+    "heading": "Responsibilities along the AI value chain",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_16",
+      "aiact:anx_I"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_25:para_4",
+    "versioned_provision_id": "aiact:art_25:para_4@2024-08-01",
+    "content_id": "869e24c654f8ee894a1e3500f5066ae20d5ec3a6a45427f444b2cfd92e9dcbe0",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "3"
+      },
+      {
+        "type": "article",
+        "value": "25"
+      },
+      {
+        "type": "paragraph",
+        "value": "4"
+      }
+    ],
+    "text": "The provider of a high-risk AI system and the third party that supplies an AI system, tools, services, components, or processes that are used or integrated in a high-risk AI system shall, by written agreement, specify the necessary information, capabilities, technical access and other assistance based on the generally acknowledged state of the art, in order to enable the provider of the high-risk AI system to fully comply with the obligations set out in this Regulation. This paragraph shall not apply to third parties making accessible to the public tools, services, processes, or components, other than general-purpose AI models, under a free and open-source licence. The AI Office may develop and recommend voluntary model terms for contracts between providers of high-risk AI systems and third parties that supply tools, services, components or processes that are used for or integrated into high-risk AI systems. When developing those voluntary model terms, the AI Office shall take into account possible contractual requirements applicable in specific sectors or business cases. The voluntary model terms shall be published and be available free of charge in an easily usable electronic format.",
+    "heading": "Responsibilities along the AI value chain",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_25:para_5",
+    "versioned_provision_id": "aiact:art_25:para_5@2024-08-01",
+    "content_id": "720c0f0f3735746d079d12e94d08a6104992586fc11e251e2c2d5a2240b037b4",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "3"
+      },
+      {
+        "type": "article",
+        "value": "25"
+      },
+      {
+        "type": "paragraph",
+        "value": "5"
+      }
+    ],
+    "text": "Paragraphs 2 and 3 are without prejudice to the need to observe and protect intellectual property rights, confidential business information and trade secrets in accordance with Union and national law.",
+    "heading": "Responsibilities along the AI value chain",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_26:para_1",
+    "versioned_provision_id": "aiact:art_26:para_1@2024-08-01",
+    "content_id": "90156ac5f3975d377afa371867d81dac7dff275ce46bfbb753da2c10ad246280",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "3"
+      },
+      {
+        "type": "article",
+        "value": "26"
+      },
+      {
+        "type": "paragraph",
+        "value": "1"
+      }
+    ],
+    "text": "Deployers of high-risk AI systems shall take appropriate technical and organisational measures to ensure they use such systems in accordance with the instructions for use accompanying the systems, pursuant to paragraphs 3 and 6.",
+    "heading": "Obligations of deployers of high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_26:para_2",
+    "versioned_provision_id": "aiact:art_26:para_2@2024-08-01",
+    "content_id": "ec6fcc70732e1560c1429e896d72052ae7542d36564311576e474a9e40518d47",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "3"
+      },
+      {
+        "type": "article",
+        "value": "26"
+      },
+      {
+        "type": "paragraph",
+        "value": "2"
+      }
+    ],
+    "text": "Deployers shall assign human oversight to natural persons who have the necessary competence, training and authority, as well as the necessary support.",
+    "heading": "Obligations of deployers of high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_26:para_3",
+    "versioned_provision_id": "aiact:art_26:para_3@2024-08-01",
+    "content_id": "b0776d57b287f0d6b80c1dafa288e15e874998a1bbc40f1d65d9dc560f0712ef",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "3"
+      },
+      {
+        "type": "article",
+        "value": "26"
+      },
+      {
+        "type": "paragraph",
+        "value": "3"
+      }
+    ],
+    "text": "The obligations set out in paragraphs 1 and 2, are without prejudice to other deployer obligations under Union or national law and to the deployer’s freedom to organise its own resources and activities for the purpose of implementing the human oversight measures indicated by the provider.",
+    "heading": "Obligations of deployers of high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_26:para_4",
+    "versioned_provision_id": "aiact:art_26:para_4@2024-08-01",
+    "content_id": "dbd302457f1c08348693bb6401613a26f5cf896e8b5da159029eb2d070c4d261",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "3"
+      },
+      {
+        "type": "article",
+        "value": "26"
+      },
+      {
+        "type": "paragraph",
+        "value": "4"
+      }
+    ],
+    "text": "Without prejudice to paragraphs 1 and 2, to the extent the deployer exercises control over the input data, that deployer shall ensure that input data is relevant and sufficiently representative in view of the intended purpose of the high-risk AI system.",
+    "heading": "Obligations of deployers of high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_26:para_5",
+    "versioned_provision_id": "aiact:art_26:para_5@2024-08-01",
+    "content_id": "e64aeca1e4206df821cf3d44d917be593a734b4093f715f273e6b6e6eddcdbeb",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "3"
+      },
+      {
+        "type": "article",
+        "value": "26"
+      },
+      {
+        "type": "paragraph",
+        "value": "5"
+      }
+    ],
+    "text": "Deployers shall monitor the operation of the high-risk AI system on the basis of the instructions for use and, where relevant, inform providers in accordance with Article 72. Where deployers have reason to consider that the use of the high-risk AI system in accordance with the instructions may result in that AI system presenting a risk within the meaning of Article 79(1), they shall, without undue delay, inform the provider or distributor and the relevant market surveillance authority, and shall suspend the use of that system. Where deployers have identified a serious incident, they shall also immediately inform first the provider, and then the importer or distributor and the relevant market surveillance authorities of that incident. If the deployer is not able to reach the provider, Article 73 shall apply mutatis mutandis. This obligation shall not cover sensitive operational data of deployers of AI systems which are law enforcement authorities. For deployers that are financial institutions subject to requirements regarding their internal governance, arrangements or processes under Union financial services law, the monitoring obligation set out in the first subparagraph shall be deemed to be fulfilled by complying with the rules on internal governance arrangements, processes and mechanisms pursuant to the relevant financial service law.",
+    "heading": "Obligations of deployers of high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_72",
+      "aiact:art_79",
+      "aiact:art_73"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_26:para_6",
+    "versioned_provision_id": "aiact:art_26:para_6@2024-08-01",
+    "content_id": "2644a567c766e55d3b1eff5c0081319fa1c0b43450520ff4d7f5e75c2a3c3dfc",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "3"
+      },
+      {
+        "type": "article",
+        "value": "26"
+      },
+      {
+        "type": "paragraph",
+        "value": "6"
+      }
+    ],
+    "text": "Deployers of high-risk AI systems shall keep the logs automatically generated by that high-risk AI system to the extent such logs are under their control, for a period appropriate to the intended purpose of the high-risk AI system, of at least six months, unless provided otherwise in applicable Union or national law, in particular in Union law on the protection of personal data. Deployers that are financial institutions subject to requirements regarding their internal governance, arrangements or processes under Union financial services law shall maintain the logs as part of the documentation kept pursuant to the relevant Union financial service law.",
+    "heading": "Obligations of deployers of high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_26:para_7",
+    "versioned_provision_id": "aiact:art_26:para_7@2024-08-01",
+    "content_id": "036b140423a53a7f25ab62a22589c4fadea756d649ac5eeb117d7f6c7ab0e8c6",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "3"
+      },
+      {
+        "type": "article",
+        "value": "26"
+      },
+      {
+        "type": "paragraph",
+        "value": "7"
+      }
+    ],
+    "text": "Before putting into service or using a high-risk AI system at the workplace, deployers who are employers shall inform workers’ representatives and the affected workers that they will be subject to the use of the high-risk AI system. This information shall be provided, where applicable, in accordance with the rules and procedures laid down in Union and national law and practice on information of workers and their representatives.",
+    "heading": "Obligations of deployers of high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_26:para_8",
+    "versioned_provision_id": "aiact:art_26:para_8@2024-08-01",
+    "content_id": "1c9031fb4dd1e9d92326dd0450f1f91dd7321d4f9770e278e62b80099afd9dd9",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "3"
+      },
+      {
+        "type": "article",
+        "value": "26"
+      },
+      {
+        "type": "paragraph",
+        "value": "8"
+      }
+    ],
+    "text": "Deployers of high-risk AI systems that are public authorities, or Union institutions, bodies, offices or agencies shall comply with the registration obligations referred to in Article 49. When such deployers find that the high-risk AI system that they envisage using has not been registered in the EU database referred to in Article 71, they shall not use that system and shall inform the provider or the distributor.",
+    "heading": "Obligations of deployers of high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_49",
+      "aiact:art_71"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_26:para_9",
+    "versioned_provision_id": "aiact:art_26:para_9@2024-08-01",
+    "content_id": "259cdc777bd55c3fe5586e75460652c4fe5daf37ab9f380e5538b79eccf5b7a0",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "3"
+      },
+      {
+        "type": "article",
+        "value": "26"
+      },
+      {
+        "type": "paragraph",
+        "value": "9"
+      }
+    ],
+    "text": "Where applicable, deployers of high-risk AI systems shall use the information provided under Article 13 of this Regulation to comply with their obligation to carry out a data protection impact assessment under Article 35 of Regulation (EU) 2016/679 or Article 27 of Directive (EU) 2016/680.",
+    "heading": "Obligations of deployers of high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_13",
+      "aiact:art_3",
+      "aiact:art_2"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_26:para_10",
+    "versioned_provision_id": "aiact:art_26:para_10@2024-08-01",
+    "content_id": "6fcaf8ccd43ed908331731b7057589d2af3c458d2121d3319b40decd23c0ed26",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "3"
+      },
+      {
+        "type": "article",
+        "value": "26"
+      },
+      {
+        "type": "paragraph",
+        "value": "10"
+      }
+    ],
+    "text": "Without prejudice to Directive (EU) 2016/680, in the framework of an investigation for the targeted search of a person suspected or convicted of having committed a criminal offence, the deployer of a high-risk AI system for post-remote biometric identification shall request an authorisation, ex ante, or without undue delay and no later than 48 hours, by a judicial authority or an administrative authority whose decision is binding and subject to judicial review, for the use of that system, except when it is used for the initial identification of a potential suspect based on objective and verifiable facts directly linked to the offence. Each use shall be limited to what is strictly necessary for the investigation of a specific criminal offence. If the authorisation requested pursuant to the first subparagraph is rejected, the use of the post-remote biometric identification system linked to that requested authorisation shall be stopped with immediate effect and the personal data linked to the use of the high-risk AI system for which the authorisation was requested shall be deleted. In no case shall such high-risk AI system for post-remote biometric identification be used for law enforcement purposes in an untargeted way, without any link to a criminal offence, a criminal proceeding, a genuine and present or genuine and foreseeable threat of a criminal offence, or the search for a specific missing person. It shall be ensured that no decision that produces an adverse legal effect on a person may be taken by the law enforcement authorities based solely on the output of such post-remote biometric identification systems. This paragraph is without prejudice to Article 9 of Regulation (EU) 2016/679 and Article 10 of Directive (EU) 2016/680 for the processing of biometric data. Regardless of the purpose or deployer, each use of such high-risk AI systems shall be documented in the relevant police file and shall be made available to the relevant market surveillance authority and the national data protection authority upon request, excluding the disclosure of sensitive operational data related to law enforcement. This subparagraph shall be without prejudice to the powers conferred by Directive (EU) 2016/680 on supervisory authorities. Deployers shall submit annual reports to the relevant market surveillance and national data protection authorities on their use of post-remote biometric identification systems, excluding the disclosure of sensitive operational data related to law enforcement. The reports may be aggregated to cover more than one deployment. Member States may introduce, in accordance with Union law, more restrictive laws on the use of post-remote biometric identification systems.",
+    "heading": "Obligations of deployers of high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_1"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_26:para_11",
+    "versioned_provision_id": "aiact:art_26:para_11@2024-08-01",
+    "content_id": "c01c7ffb0c641ed2afb87dfe4210a543d441eae363bc7208f8aede59776a8a1f",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "3"
+      },
+      {
+        "type": "article",
+        "value": "26"
+      },
+      {
+        "type": "paragraph",
+        "value": "11"
+      }
+    ],
+    "text": "Without prejudice to Article 50 of this Regulation, deployers of high-risk AI systems referred to in Annex III that make decisions or assist in making decisions related to natural persons shall inform the natural persons that they are subject to the use of the high-risk AI system. For high-risk AI systems used for law enforcement purposes Article 13 of Directive (EU) 2016/680 shall apply.",
+    "heading": "Obligations of deployers of high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_50",
+      "aiact:art_1",
+      "aiact:anx_III"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_26:para_12",
+    "versioned_provision_id": "aiact:art_26:para_12@2024-08-01",
+    "content_id": "dd4b24f9a77a6a28cf26747f773a38499c3448abe977128874f6df859d4639f8",
+    "provision_type": "obligation",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "3"
+      },
+      {
+        "type": "article",
+        "value": "26"
+      },
+      {
+        "type": "paragraph",
+        "value": "12"
+      }
+    ],
+    "text": "Deployers shall cooperate with the relevant competent authorities in any action those authorities take in relation to the high-risk AI system in order to implement this Regulation.",
+    "heading": "Obligations of deployers of high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_III:area_1:item_a",
+    "versioned_provision_id": "aiact:anx_III:area_1:item_a@2024-08-01",
+    "content_id": "303bdc2de2dba855dd588d41f7b288ae83983faad8c7cd150d097fd1c127d7b0",
+    "provision_type": "annex_category",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "III"
+      },
+      {
+        "type": "annex_area",
+        "value": "1"
+      },
+      {
+        "type": "annex_item",
+        "value": "a"
+      }
+    ],
+    "text": "High-risk AI systems pursuant to Article 6(2) are the AI systems listed in any of the following areas: Biometrics, in so far as their use is permitted under relevant Union or national law: remote biometric identification systems. This shall not include AI systems intended to be used for biometric verification the sole purpose of which is to confirm that a specific natural person is the person he or she claims to be;",
+    "heading": "High-risk AI systems referred to in Article 6(2)",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_6"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_III:area_1:item_b",
+    "versioned_provision_id": "aiact:anx_III:area_1:item_b@2024-08-01",
+    "content_id": "2cb1b43391316fe1ce9e636762c9df6fe0881e73daf87590b31cdca7cee9737c",
+    "provision_type": "annex_category",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "III"
+      },
+      {
+        "type": "annex_area",
+        "value": "1"
+      },
+      {
+        "type": "annex_item",
+        "value": "b"
+      }
+    ],
+    "text": "High-risk AI systems pursuant to Article 6(2) are the AI systems listed in any of the following areas: Biometrics, in so far as their use is permitted under relevant Union or national law: AI systems intended to be used for biometric categorisation, according to sensitive or protected attributes or characteristics based on the inference of those attributes or characteristics;",
+    "heading": "High-risk AI systems referred to in Article 6(2)",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_6"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_III:area_1:item_c",
+    "versioned_provision_id": "aiact:anx_III:area_1:item_c@2024-08-01",
+    "content_id": "38c865f51c9f3177cf84b26a081b4f5cccb31a06e3e7bd9e667dc08cf7e1e680",
+    "provision_type": "annex_category",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "III"
+      },
+      {
+        "type": "annex_area",
+        "value": "1"
+      },
+      {
+        "type": "annex_item",
+        "value": "c"
+      }
+    ],
+    "text": "High-risk AI systems pursuant to Article 6(2) are the AI systems listed in any of the following areas: Biometrics, in so far as their use is permitted under relevant Union or national law: AI systems intended to be used for emotion recognition.",
+    "heading": "High-risk AI systems referred to in Article 6(2)",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_6"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_III:area_2",
+    "versioned_provision_id": "aiact:anx_III:area_2@2024-08-01",
+    "content_id": "aae805b62abdcbf83b2ad8ae0b01ad90b5a079c2e2e30897af2b2f4bfc65d414",
+    "provision_type": "annex_category",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "III"
+      },
+      {
+        "type": "annex_area",
+        "value": "2"
+      }
+    ],
+    "text": "High-risk AI systems pursuant to Article 6(2) are the AI systems listed in any of the following areas: Critical infrastructure: AI systems intended to be used as safety components in the management and operation of critical digital infrastructure, road traffic, or in the supply of water, gas, heating or electricity.",
+    "heading": "High-risk AI systems referred to in Article 6(2)",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_6"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_III:area_3:item_a",
+    "versioned_provision_id": "aiact:anx_III:area_3:item_a@2024-08-01",
+    "content_id": "df3a157275b19dd3a2200e20a040eb2a0ab6933ee90c94794ef36578371e95ed",
+    "provision_type": "annex_category",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "III"
+      },
+      {
+        "type": "annex_area",
+        "value": "3"
+      },
+      {
+        "type": "annex_item",
+        "value": "a"
+      }
+    ],
+    "text": "High-risk AI systems pursuant to Article 6(2) are the AI systems listed in any of the following areas: Education and vocational training: AI systems intended to be used to determine access or admission or to assign natural persons to educational and vocational training institutions at all levels;",
+    "heading": "High-risk AI systems referred to in Article 6(2)",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_6"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_III:area_3:item_b",
+    "versioned_provision_id": "aiact:anx_III:area_3:item_b@2024-08-01",
+    "content_id": "28d0d4b8b01bbc459c6e899dc81ee2acde42341a8ec0211c348b2732390f5c27",
+    "provision_type": "annex_category",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "III"
+      },
+      {
+        "type": "annex_area",
+        "value": "3"
+      },
+      {
+        "type": "annex_item",
+        "value": "b"
+      }
+    ],
+    "text": "High-risk AI systems pursuant to Article 6(2) are the AI systems listed in any of the following areas: Education and vocational training: AI systems intended to be used to evaluate learning outcomes, including when those outcomes are used to steer the learning process of natural persons in educational and vocational training institutions at all levels;",
+    "heading": "High-risk AI systems referred to in Article 6(2)",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_6"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_III:area_3:item_c",
+    "versioned_provision_id": "aiact:anx_III:area_3:item_c@2024-08-01",
+    "content_id": "ea7760b56ab35ba6c2d5800d19d7a63f2ea046db5e9fe96ae26eec7f620dad79",
+    "provision_type": "annex_category",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "III"
+      },
+      {
+        "type": "annex_area",
+        "value": "3"
+      },
+      {
+        "type": "annex_item",
+        "value": "c"
+      }
+    ],
+    "text": "High-risk AI systems pursuant to Article 6(2) are the AI systems listed in any of the following areas: Education and vocational training: AI systems intended to be used for the purpose of assessing the appropriate level of education that an individual will receive or will be able to access, in the context of or within educational and vocational training institutions at all levels;",
+    "heading": "High-risk AI systems referred to in Article 6(2)",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_6"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_III:area_3:item_d",
+    "versioned_provision_id": "aiact:anx_III:area_3:item_d@2024-08-01",
+    "content_id": "4388fcae15ca92dfe6991591f287c965aab48ee3ad320a4ca2440550317085bf",
+    "provision_type": "annex_category",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "III"
+      },
+      {
+        "type": "annex_area",
+        "value": "3"
+      },
+      {
+        "type": "annex_item",
+        "value": "d"
+      }
+    ],
+    "text": "High-risk AI systems pursuant to Article 6(2) are the AI systems listed in any of the following areas: Education and vocational training: AI systems intended to be used for monitoring and detecting prohibited behaviour of students during tests in the context of or within educational and vocational training institutions at all levels.",
+    "heading": "High-risk AI systems referred to in Article 6(2)",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_6"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_III:area_4:item_a",
+    "versioned_provision_id": "aiact:anx_III:area_4:item_a@2024-08-01",
+    "content_id": "1dcb53e56069e35c0172664ed8f1aa168112e88219035e4431cad449c121ef01",
+    "provision_type": "annex_category",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "III"
+      },
+      {
+        "type": "annex_area",
+        "value": "4"
+      },
+      {
+        "type": "annex_item",
+        "value": "a"
+      }
+    ],
+    "text": "High-risk AI systems pursuant to Article 6(2) are the AI systems listed in any of the following areas: Employment, workers’ management and access to self-employment: AI systems intended to be used for the recruitment or selection of natural persons, in particular to place targeted job advertisements, to analyse and filter job applications, and to evaluate candidates;",
+    "heading": "High-risk AI systems referred to in Article 6(2)",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_6"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_III:area_4:item_b",
+    "versioned_provision_id": "aiact:anx_III:area_4:item_b@2024-08-01",
+    "content_id": "1c73cfda1b370447b44cf11d9af57fdd88ce943ca7f2e7c00b3b8b8667e1e8ee",
+    "provision_type": "annex_category",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "III"
+      },
+      {
+        "type": "annex_area",
+        "value": "4"
+      },
+      {
+        "type": "annex_item",
+        "value": "b"
+      }
+    ],
+    "text": "High-risk AI systems pursuant to Article 6(2) are the AI systems listed in any of the following areas: Employment, workers’ management and access to self-employment: AI systems intended to be used to make decisions affecting terms of work-related relationships, the promotion or termination of work-related contractual relationships, to allocate tasks based on individual behaviour or personal traits or characteristics or to monitor and evaluate the performance and behaviour of persons in such relationships.",
+    "heading": "High-risk AI systems referred to in Article 6(2)",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_6"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_III:area_5:item_a",
+    "versioned_provision_id": "aiact:anx_III:area_5:item_a@2024-08-01",
+    "content_id": "b511af02d3a45d2db9bffcc7b0109cb35c34309151c210c54a62122d9902a466",
+    "provision_type": "annex_category",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "III"
+      },
+      {
+        "type": "annex_area",
+        "value": "5"
+      },
+      {
+        "type": "annex_item",
+        "value": "a"
+      }
+    ],
+    "text": "High-risk AI systems pursuant to Article 6(2) are the AI systems listed in any of the following areas: Access to and enjoyment of essential private services and essential public services and benefits: AI systems intended to be used by public authorities or on behalf of public authorities to evaluate the eligibility of natural persons for essential public assistance benefits and services, including healthcare services, as well as to grant, reduce, revoke, or reclaim such benefits and services;",
+    "heading": "High-risk AI systems referred to in Article 6(2)",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_6"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_III:area_5:item_b",
+    "versioned_provision_id": "aiact:anx_III:area_5:item_b@2024-08-01",
+    "content_id": "ecbee5ec56033a5eca4526280fb5de38b251c8dc79603e159180b068f0c36cb1",
+    "provision_type": "annex_category",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "III"
+      },
+      {
+        "type": "annex_area",
+        "value": "5"
+      },
+      {
+        "type": "annex_item",
+        "value": "b"
+      }
+    ],
+    "text": "High-risk AI systems pursuant to Article 6(2) are the AI systems listed in any of the following areas: Access to and enjoyment of essential private services and essential public services and benefits: AI systems intended to be used to evaluate the creditworthiness of natural persons or establish their credit score, with the exception of AI systems used for the purpose of detecting financial fraud;",
+    "heading": "High-risk AI systems referred to in Article 6(2)",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_6"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_III:area_5:item_c",
+    "versioned_provision_id": "aiact:anx_III:area_5:item_c@2024-08-01",
+    "content_id": "43663a713feffce3957f9f586f0849e2bb3445294240006383dda89b378949fe",
+    "provision_type": "annex_category",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "III"
+      },
+      {
+        "type": "annex_area",
+        "value": "5"
+      },
+      {
+        "type": "annex_item",
+        "value": "c"
+      }
+    ],
+    "text": "High-risk AI systems pursuant to Article 6(2) are the AI systems listed in any of the following areas: Access to and enjoyment of essential private services and essential public services and benefits: AI systems intended to be used for risk assessment and pricing in relation to natural persons in the case of life and health insurance;",
+    "heading": "High-risk AI systems referred to in Article 6(2)",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_6"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_III:area_5:item_d",
+    "versioned_provision_id": "aiact:anx_III:area_5:item_d@2024-08-01",
+    "content_id": "f7acf9523966dd9aeb9da2a1e6cdbc7f6733d84536304de45a9ffa195c777978",
+    "provision_type": "annex_category",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "III"
+      },
+      {
+        "type": "annex_area",
+        "value": "5"
+      },
+      {
+        "type": "annex_item",
+        "value": "d"
+      }
+    ],
+    "text": "High-risk AI systems pursuant to Article 6(2) are the AI systems listed in any of the following areas: Access to and enjoyment of essential private services and essential public services and benefits: AI systems intended to evaluate and classify emergency calls by natural persons or to be used to dispatch, or to establish priority in the dispatching of, emergency first response services, including by police, firefighters and medical aid, as well as of emergency healthcare patient triage systems.",
+    "heading": "High-risk AI systems referred to in Article 6(2)",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_6"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_III:area_6:item_a",
+    "versioned_provision_id": "aiact:anx_III:area_6:item_a@2024-08-01",
+    "content_id": "3f3aa7782fd4f18ca87e901eee89054d6edb7b1d59e411ee139c8aae87a62431",
+    "provision_type": "annex_category",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "III"
+      },
+      {
+        "type": "annex_area",
+        "value": "6"
+      },
+      {
+        "type": "annex_item",
+        "value": "a"
+      }
+    ],
+    "text": "High-risk AI systems pursuant to Article 6(2) are the AI systems listed in any of the following areas: Law enforcement, in so far as their use is permitted under relevant Union or national law: AI systems intended to be used by or on behalf of law enforcement authorities, or by Union institutions, bodies, offices or agencies in support of law enforcement authorities or on their behalf to assess the risk of a natural person becoming the victim of criminal offences;",
+    "heading": "High-risk AI systems referred to in Article 6(2)",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_6"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_III:area_6:item_b",
+    "versioned_provision_id": "aiact:anx_III:area_6:item_b@2024-08-01",
+    "content_id": "e66f639aa2ba6651180e7e92e3557345ceddcf899cd09a394736ab58f08caa9b",
+    "provision_type": "annex_category",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "III"
+      },
+      {
+        "type": "annex_area",
+        "value": "6"
+      },
+      {
+        "type": "annex_item",
+        "value": "b"
+      }
+    ],
+    "text": "High-risk AI systems pursuant to Article 6(2) are the AI systems listed in any of the following areas: Law enforcement, in so far as their use is permitted under relevant Union or national law: AI systems intended to be used by or on behalf of law enforcement authorities or by Union institutions, bodies, offices or agencies in support of law enforcement authorities as polygraphs or similar tools;",
+    "heading": "High-risk AI systems referred to in Article 6(2)",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_6"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_III:area_6:item_c",
+    "versioned_provision_id": "aiact:anx_III:area_6:item_c@2024-08-01",
+    "content_id": "22805e210169e6b03d61b7a3bac04bb81ec882e5157334a04cfcf6e577b3e189",
+    "provision_type": "annex_category",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "III"
+      },
+      {
+        "type": "annex_area",
+        "value": "6"
+      },
+      {
+        "type": "annex_item",
+        "value": "c"
+      }
+    ],
+    "text": "High-risk AI systems pursuant to Article 6(2) are the AI systems listed in any of the following areas: Law enforcement, in so far as their use is permitted under relevant Union or national law: AI systems intended to be used by or on behalf of law enforcement authorities, or by Union institutions, bodies, offices or agencies, in support of law enforcement authorities to evaluate the reliability of evidence in the course of the investigation or prosecution of criminal offences;",
+    "heading": "High-risk AI systems referred to in Article 6(2)",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_6"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_III:area_6:item_d",
+    "versioned_provision_id": "aiact:anx_III:area_6:item_d@2024-08-01",
+    "content_id": "c70dd74866f9957e373a26c41ee0cda8987e0490f9a759da30c8d083ba23bcb0",
+    "provision_type": "annex_category",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "III"
+      },
+      {
+        "type": "annex_area",
+        "value": "6"
+      },
+      {
+        "type": "annex_item",
+        "value": "d"
+      }
+    ],
+    "text": "High-risk AI systems pursuant to Article 6(2) are the AI systems listed in any of the following areas: Law enforcement, in so far as their use is permitted under relevant Union or national law: AI systems intended to be used by law enforcement authorities or on their behalf or by Union institutions, bodies, offices or agencies in support of law enforcement authorities for assessing the risk of a natural person offending or re-offending not solely on the basis of the profiling of natural persons as referred to in Article 3(4) of Directive (EU) 2016/680, or to assess personality traits and characteristics or past criminal behaviour of natural persons or groups;",
+    "heading": "High-risk AI systems referred to in Article 6(2)",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_6",
+      "aiact:art_3"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_III:area_6:item_e",
+    "versioned_provision_id": "aiact:anx_III:area_6:item_e@2024-08-01",
+    "content_id": "f6f5b0dd5308164b51eb621fd011dbcfff59592a837c70316d1486fbff126fc4",
+    "provision_type": "annex_category",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "III"
+      },
+      {
+        "type": "annex_area",
+        "value": "6"
+      },
+      {
+        "type": "annex_item",
+        "value": "e"
+      }
+    ],
+    "text": "High-risk AI systems pursuant to Article 6(2) are the AI systems listed in any of the following areas: Law enforcement, in so far as their use is permitted under relevant Union or national law: AI systems intended to be used by or on behalf of law enforcement authorities or by Union institutions, bodies, offices or agencies in support of law enforcement authorities for the profiling of natural persons as referred to in Article 3(4) of Directive (EU) 2016/680 in the course of the detection, investigation or prosecution of criminal offences.",
+    "heading": "High-risk AI systems referred to in Article 6(2)",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_6",
+      "aiact:art_3"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_III:area_7:item_a",
+    "versioned_provision_id": "aiact:anx_III:area_7:item_a@2024-08-01",
+    "content_id": "aac444f498fdb4757fbd2a529124a8c45a22ff0816db7ad1e066498aa7a732c8",
+    "provision_type": "annex_category",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "III"
+      },
+      {
+        "type": "annex_area",
+        "value": "7"
+      },
+      {
+        "type": "annex_item",
+        "value": "a"
+      }
+    ],
+    "text": "High-risk AI systems pursuant to Article 6(2) are the AI systems listed in any of the following areas: Migration, asylum and border control management, in so far as their use is permitted under relevant Union or national law: AI systems intended to be used by or on behalf of competent public authorities or by Union institutions, bodies, offices or agencies as polygraphs or similar tools;",
+    "heading": "High-risk AI systems referred to in Article 6(2)",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_6"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_III:area_7:item_b",
+    "versioned_provision_id": "aiact:anx_III:area_7:item_b@2024-08-01",
+    "content_id": "3aedcdcc906b45d078dc3c26543082fd8ddf7128935c5a6e84abad6a5130e106",
+    "provision_type": "annex_category",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "III"
+      },
+      {
+        "type": "annex_area",
+        "value": "7"
+      },
+      {
+        "type": "annex_item",
+        "value": "b"
+      }
+    ],
+    "text": "High-risk AI systems pursuant to Article 6(2) are the AI systems listed in any of the following areas: Migration, asylum and border control management, in so far as their use is permitted under relevant Union or national law: AI systems intended to be used by or on behalf of competent public authorities or by Union institutions, bodies, offices or agencies to assess a risk, including a security risk, a risk of irregular migration, or a health risk, posed by a natural person who intends to enter or who has entered into the territory of a Member State;",
+    "heading": "High-risk AI systems referred to in Article 6(2)",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_6"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_III:area_7:item_c",
+    "versioned_provision_id": "aiact:anx_III:area_7:item_c@2024-08-01",
+    "content_id": "f15879669e50fb44fb580dd505c36ebd44ec5d79fd4736d12929cd46b138a132",
+    "provision_type": "annex_category",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "III"
+      },
+      {
+        "type": "annex_area",
+        "value": "7"
+      },
+      {
+        "type": "annex_item",
+        "value": "c"
+      }
+    ],
+    "text": "High-risk AI systems pursuant to Article 6(2) are the AI systems listed in any of the following areas: Migration, asylum and border control management, in so far as their use is permitted under relevant Union or national law: AI systems intended to be used by or on behalf of competent public authorities or by Union institutions, bodies, offices or agencies to assist competent public authorities for the examination of applications for asylum, visa or residence permits and for associated complaints with regard to the eligibility of the natural persons applying for a status, including related assessments of the reliability of evidence;",
+    "heading": "High-risk AI systems referred to in Article 6(2)",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_6"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_III:area_7:item_d",
+    "versioned_provision_id": "aiact:anx_III:area_7:item_d@2024-08-01",
+    "content_id": "fdac90bc6b8f223f4583452407d731d01bc86ac6098b1d52da4e39743279e625",
+    "provision_type": "annex_category",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "III"
+      },
+      {
+        "type": "annex_area",
+        "value": "7"
+      },
+      {
+        "type": "annex_item",
+        "value": "d"
+      }
+    ],
+    "text": "High-risk AI systems pursuant to Article 6(2) are the AI systems listed in any of the following areas: Migration, asylum and border control management, in so far as their use is permitted under relevant Union or national law: AI systems intended to be used by or on behalf of competent public authorities, or by Union institutions, bodies, offices or agencies, in the context of migration, asylum or border control management, for the purpose of detecting, recognising or identifying natural persons, with the exception of the verification of travel documents.",
+    "heading": "High-risk AI systems referred to in Article 6(2)",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_6"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_III:area_8:item_a",
+    "versioned_provision_id": "aiact:anx_III:area_8:item_a@2024-08-01",
+    "content_id": "436afff031626fb3d1cdd8dbebe24a6fee9b547ac996347100cc83abecc1ee61",
+    "provision_type": "annex_category",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "III"
+      },
+      {
+        "type": "annex_area",
+        "value": "8"
+      },
+      {
+        "type": "annex_item",
+        "value": "a"
+      }
+    ],
+    "text": "High-risk AI systems pursuant to Article 6(2) are the AI systems listed in any of the following areas: Administration of justice and democratic processes: AI systems intended to be used by a judicial authority or on their behalf to assist a judicial authority in researching and interpreting facts and the law and in applying the law to a concrete set of facts, or to be used in a similar way in alternative dispute resolution;",
+    "heading": "High-risk AI systems referred to in Article 6(2)",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_6"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_III:area_8:item_b",
+    "versioned_provision_id": "aiact:anx_III:area_8:item_b@2024-08-01",
+    "content_id": "de575deeb06439ccad3da11eb879a1b5afd70efd34c0323e4ad5d316ec97cc6d",
+    "provision_type": "annex_category",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "III"
+      },
+      {
+        "type": "annex_area",
+        "value": "8"
+      },
+      {
+        "type": "annex_item",
+        "value": "b"
+      }
+    ],
+    "text": "High-risk AI systems pursuant to Article 6(2) are the AI systems listed in any of the following areas: Administration of justice and democratic processes: AI systems intended to be used for influencing the outcome of an election or referendum or the voting behaviour of natural persons in the exercise of their vote in elections or referenda. This does not include AI systems to the output of which natural persons are not directly exposed, such as tools used to organise, optimise or structure political campaigns from an administrative or logistical point of view.",
+    "heading": "High-risk AI systems referred to in Article 6(2)",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_6"
+    ],
+    "applicability_gap_reason": null
+  }
+]
