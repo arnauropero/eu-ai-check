@@ -1,0 +1,168 @@
+Phase 2 extraction evaluation
+================================================================================================
+
+## gpt-6.1-sol effort=low   runs=90 ok=90
+  requested (provider, model, effort): {('openai', 'gpt-6.1-sol', 'low'): 90}
+  served by: {'gpt-6.1-sol': 90}  fallbacks=0  tokens in/out=107835/11532
+  ZERO-TOLERANCE conclusion leaks: 0
+  overall field accuracy          0.967
+    booleans                      0.984
+    dates                         1.000
+    free text (concept groups)    0.942
+  null discipline: expected-null kept null 0.987; expected-value filled 0.968
+  per field:
+    intended_purpose                      0.967
+    ai_functionality                      0.967
+    role_in_decision_making               0.944
+    affected_persons                      0.833
+    jurisdiction                          1.000
+    develops_system                       0.967
+    uses_system                           1.000
+    puts_own_name_or_trademark            0.967
+    modifies_intended_purpose             0.989
+    modifies_safety_relevant_components   1.000
+    relevant_date                         1.000
+  per category:
+    actor                                 0.974
+    adversarial                           0.945
+    date                                  0.964
+    missing                               0.939
+    multilingual                          1.000
+    non_high_risk                         1.000
+    standard                              0.970
+  unstable (case, field) across repeats: 4
+    E18 puts_own_name_or_trademark
+    E20 role_in_decision_making
+    E26 modifies_intended_purpose
+    E28 puts_own_name_or_trademark
+  SECONDARY judge (gpt-6-astra, effort=low) agreement with the primary concept-group score: 268/298 (informational only; never changes the score)
+    E01#0 intended_purpose: concepts=miss judge=same  value='Screening applicants for warehouse roles at a logistics company.'  (Screening applicants for warehouse roles describes the stated recruitment purpose; the logistics-company detail does not change it.)
+    E01#1 intended_purpose: concepts=miss judge=same  value='Screening applicants for warehouse roles at a logistics company.'  (Screening applicants for warehouse roles expresses the recruitment purpose; the logistics-company detail is harmless.)
+    E01#2 intended_purpose: concepts=miss judge=same  value='Screening applicants for warehouse roles at a logistics company.'  (Screening applicants for warehouse roles states the recruitment purpose; the logistics-company detail is harmless.)
+    E04#0 affected_persons: concepts=ok judge=diff  value='People whose emergencies are reported through incoming 112 calls.'  (The reference identifies people making calls, while the extraction identifies people whose emergencies are reported. These can differ when someone calls on another person's behalf.)
+    E04#1 affected_persons: concepts=ok judge=diff  value='People whose emergencies are reported through incoming 112 calls.'  (The reference identifies callers, whereas the extraction identifies people whose emergencies are reported. Callers may report emergencies on behalf of others, so these groups are not equivalent.)
+    E04#2 affected_persons: concepts=ok judge=diff  value='People whose emergencies are reported through incoming 112 calls.'  (People making emergency calls are not necessarily the people experiencing the reported emergencies; callers may report emergencies on behalf of others.)
+    E06#0 intended_purpose: concepts=ok judge=diff  value="Confirming travellers' identities at a Schengen airport."  (The extraction includes identity checks at an airport but omits that they occur at border control.)
+    E06#1 intended_purpose: concepts=ok judge=diff  value="Confirming travellers' identities at a Schengen airport."  (The extracted value mentions identity checks at an airport but omits the key border-control purpose; a Schengen airport does not necessarily imply border control.)
+    E06#2 intended_purpose: concepts=ok judge=diff  value="Confirming travellers' identities at a Schengen airport."  (The extracted value identifies airport identity checks but omits the key border-control context; a Schengen airport does not necessarily imply border control.)
+    E09#0 affected_persons: concepts=ok judge=diff  value='Customers asking questions about delivery times.'  (The extracted value narrows the group to customers asking delivery-time questions and omits the reference's webshop scope.)
+    E10#0 affected_persons: concepts=miss judge=same  value='People whose CVs are screened.'  (In this context, people whose CVs are screened are the job applicants.)
+    E16#0 intended_purpose: concepts=ok judge=diff  value='Detecting hate speech in comments on a newspaper website.'  (The extracted value describes detecting hate speech, but omits the intended purpose of moderating comments.)
+    E16#1 intended_purpose: concepts=ok judge=diff  value='Detecting hate speech in comments on a newspaper website.'  (The extraction describes hate-speech detection but omits the intended purpose of moderating comments.)
+    E16#2 intended_purpose: concepts=ok judge=diff  value='Detecting hate speech in comments on a newspaper website.'  (The extracted value describes detecting hate speech, but omits the intended purpose of moderating comments.)
+    E17#0 role_in_decision_making: concepts=ok judge=diff  value='Gives landlords an accept/reject recommendation about rental applicants.'  (The extracted value states that the system recommends but omits that landlords make the decision.)
+    E17#1 role_in_decision_making: concepts=ok judge=diff  value='Gives landlords an accept/reject recommendation about rental applicants.'  (The extraction includes the recommendation but omits the key fact that landlords make the final decision.)
+    E17#2 role_in_decision_making: concepts=ok judge=diff  value='Gives landlords an accept/reject recommendation about rental applicants.'  (The extraction states that the system recommends but omits that landlords make the decision.)
+    E20#0 affected_persons: concepts=miss judge=same  value='Individuals whose car-insurance premiums are set using the model.'  (Individuals whose car-insurance premiums are set using the model are the affected car-insurance customers.)
+    E20#2 affected_persons: concepts=miss judge=same  value='Individuals whose car-insurance premiums are set using the model.'  (Individuals whose car-insurance premiums are set using the model are the affected car-insurance customers.)
+    E23#0 role_in_decision_making: concepts=ok judge=diff  value='The AI would help the municipality decide who receives social housing; the decision process and final decision-maker are not specified.'  (The reference explicitly identifies assistance to a human decision, while the extraction leaves the decision-maker unspecified and does not establish human involvement.)
+    E25#0 role_in_decision_making: concepts=ok judge=diff  value="The ratings are used to decide citizens' access to public benefits; the description does not specify who makes the final decision."  (The reference says the system decides access, whereas the extraction only says its ratings inform that decision and leaves the final decision-maker unspecified.)
+    E25#0 affected_persons: concepts=ok judge=diff  value='Citizens whose access to public benefits is decided using their trustworthiness ratings.'  (The extraction identifies citizens affected by benefits decisions but omits the reference's specific qualification that they are applying for benefits.)
+    E25#1 role_in_decision_making: concepts=ok judge=diff  value="The trustworthiness ratings are used to decide citizens' access to public benefits; the description does not specify who makes the final decision."  (The reference assigns the AI the role of deciding access, whereas the extraction only says its ratings inform the decision and leaves the final decision-maker unspecified.)
+    E25#1 affected_persons: concepts=ok judge=diff  value='Citizens whose access to public benefits is decided using the ratings.'  (The extraction does not preserve the reference's specification that the affected citizens are applying for benefits.)
+    E25#2 role_in_decision_making: concepts=ok judge=diff  value="The team uses citizens' trustworthiness ratings to decide their access to public benefits."  (The reference assigns the access decision to the system, whereas the extraction describes a team making the decision using the ratings.)
+    E25#2 affected_persons: concepts=ok judge=diff  value='Citizens whose access to public benefits is decided using the ratings.'  (The extraction does not specify that the affected citizens are applying for benefits, as the reference does.)
+    E26#2 affected_persons: concepts=miss judge=same  value='People seeking small loans.'  (People seeking small loans are loan applicants in this context.)
+    E27#0 role_in_decision_making: concepts=ok judge=diff  value='Provides relevant case-law summaries to assist judges considering a case.'  (The extraction states that the system assists judges but omits that judges make the decisions.)
+    E27#1 role_in_decision_making: concepts=ok judge=diff  value='Provides relevant case-law summaries to assist judges considering a case.'  (The extracted value describes assistance to judges but omits the key point that judges make the decisions.)
+    E27#2 role_in_decision_making: concepts=ok judge=diff  value='Provides relevant case-law summaries to assist judges considering a case.'  (The extraction states that the system assists judges but omits the key point that judges retain decision-making authority.)
+  wrong fields (first repeat only):
+    E01 intended_purpose: got 'Screening applicants for warehouse roles at a logistics company.', expected 'recruiting staff for warehouse roles'
+    E03 develops_system: got None, expected True
+    E06 role_in_decision_making: got "Border guards use the kiosk's facial comparison to confirm travellers' identities.", expected None
+    E10 affected_persons: got 'People whose CVs are screened.', expected 'job applicants'
+    E16 affected_persons: got None, expected 'people who post comments'
+    E20 role_in_decision_making: got 'The AI model is used to set individual car-insurance premiums; any human involvement is not described.', expected None
+    E20 affected_persons: got 'Individuals whose car-insurance premiums are set using the model.', expected 'car-insurance customers'
+    E22 ai_functionality: got 'Not described.', expected 'unspecified AI support for hiring'
+    E26 affected_persons: got None, expected 'loan applicants'
+    E28 affected_persons: got None, expected 'callers and/or call-centre staff'
+    E28 puts_own_name_or_trademark: got None, expected False
+
+## gpt-6.1-sol effort=medium   runs=90 ok=90
+  requested (provider, model, effort): {('openai', 'gpt-6.1-sol', 'medium'): 90}
+  served by: {'gpt-6.1-sol': 90}  fallbacks=0  tokens in/out=107835/18532
+  ZERO-TOLERANCE conclusion leaks: 0
+  overall field accuracy          0.959
+    booleans                      0.982
+    dates                         1.000
+    free text (concept groups)    0.927
+  null discipline: expected-null kept null 0.980; expected-value filled 0.966
+  per field:
+    intended_purpose                      0.967
+    ai_functionality                      0.956
+    role_in_decision_making               0.900
+    affected_persons                      0.811
+    jurisdiction                          1.000
+    develops_system                       0.967
+    uses_system                           1.000
+    puts_own_name_or_trademark            0.944
+    modifies_intended_purpose             1.000
+    modifies_safety_relevant_components   1.000
+    relevant_date                         1.000
+  per category:
+    actor                                 0.952
+    adversarial                           0.945
+    date                                  0.964
+    missing                               0.929
+    multilingual                          1.000
+    non_high_risk                         0.970
+    standard                              0.970
+  unstable (case, field) across repeats: 5
+    E03 puts_own_name_or_trademark
+    E09 role_in_decision_making
+    E11 affected_persons
+    E14 role_in_decision_making
+    E23 ai_functionality
+  SECONDARY judge (gpt-6-astra, effort=low) agreement with the primary concept-group score: 263/299 (informational only; never changes the score)
+    E01#0 intended_purpose: concepts=miss judge=same  value='Screening applicants for warehouse roles at a logistics company.'  (Screening applicants for warehouse roles expresses the recruitment purpose; the logistics-company detail does not change it.)
+    E01#1 intended_purpose: concepts=miss judge=same  value='Screening applicants for warehouse roles at a logistics company.'  (Screening applicants for warehouse roles expresses the stated recruitment purpose; the logistics-company detail is harmless.)
+    E01#2 intended_purpose: concepts=miss judge=same  value='Screening applicants for warehouse roles at a logistics company.'  (Screening applicants for warehouse roles is part of recruiting staff for those roles; the logistics-company detail does not change the purpose.)
+    E04#0 affected_persons: concepts=ok judge=diff  value='People whose emergencies are reported through incoming 112 calls.'  (The reference identifies callers, whereas the extraction identifies people experiencing the reported emergencies. These may differ when someone calls on another person's behalf.)
+    E04#1 affected_persons: concepts=ok judge=diff  value='People whose emergencies are reported in incoming 112 calls.'  (People making emergency calls are not necessarily the people whose emergencies are reported; callers may report emergencies on behalf of others.)
+    E06#1 intended_purpose: concepts=ok judge=diff  value="Confirming travellers' identities at a Schengen airport."  (The extraction specifies identity checks at an airport but omits the key border-control context.)
+    E06#2 intended_purpose: concepts=ok judge=diff  value="Confirming travellers' identities at a Schengen airport."  (The extraction identifies airport identity checks but omits that they occur at border control; a Schengen airport does not establish that context.)
+    E07#1 intended_purpose: concepts=ok judge=diff  value="Detecting likely pipe bursts in the city's water network and closing valves in response."  (The extraction describes a specific burst-response task rather than the broader purpose of operating the city water network.)
+    E10#0 affected_persons: concepts=miss judge=same  value='Individuals whose CVs are screened.'  (In this hiring context, individuals whose CVs are screened are job applicants.)
+    E10#1 affected_persons: concepts=miss judge=same  value='People whose CVs are screened.'  (In this recruitment context, people whose CVs are screened are the job applicants.)
+    E10#2 affected_persons: concepts=miss judge=same  value='People whose CVs are screened.'  (In this hiring context, people whose CVs are screened are job applicants.)
+    E11#0 affected_persons: concepts=miss judge=same  value='People whose X-ray images are analysed in the clinic.'  (People whose X-rays are analysed in the clinic are the clinic patients affected by the system.)
+    E13#0 intended_purpose: concepts=ok judge=diff  value="Analysing product reviews and rating call-centre agents' friendliness for their annual appraisals."  (Includes rating agents for annual appraisals, but adds product-review analysis as a separate, unsupported purpose.)
+    E13#0 ai_functionality: concepts=ok judge=diff  value='Analyses product reviews and call recordings, producing friendliness ratings for individual call-centre agents.'  (Includes friendliness ratings from call recordings, but adds product-review analysis as an unsupported functionality.)
+    E13#2 intended_purpose: concepts=ok judge=diff  value="Analysing product reviews and evaluating call-centre agents' friendliness for their annual appraisals."  (The extraction includes annual appraisal ratings but adds analysing product reviews as a separate purpose not in the reference.)
+    E13#2 ai_functionality: concepts=ok judge=diff  value="Analyses product reviews and recordings of call-centre staff's calls, producing a friendliness rating for each agent."  (The extraction correctly describes friendliness ratings from call recordings but adds product-review analysis as a distinct functionality not in the reference.)
+    E16#0 intended_purpose: concepts=ok judge=diff  value='Detecting hate speech in comments on a newspaper website.'  (The extracted value describes hate-speech detection but omits the intended purpose of moderating comments.)
+    E16#1 intended_purpose: concepts=ok judge=diff  value='Detecting hate speech in comments on a newspaper website.'  (The extracted value describes detecting hate speech, but omits the intended purpose of moderating comments.)
+    E16#2 intended_purpose: concepts=ok judge=diff  value='Detecting hate speech in comments on a newspaper website.'  (The extracted value describes detecting hate speech, but does not state the intended purpose of moderating comments.)
+    E17#0 role_in_decision_making: concepts=ok judge=diff  value='Gives landlords an accept/reject recommendation about rental applicants.'  (The extracted value states that the system recommends but omits that landlords make the final decision.)
+    E17#1 role_in_decision_making: concepts=ok judge=diff  value='Provides landlords with an accept/reject recommendation about rental applicants.'  (The extraction states that the system recommends but omits that landlords make the final decision.)
+    E17#2 role_in_decision_making: concepts=ok judge=diff  value='Provides landlords with an accept/reject recommendation about rental applicants.'  (The extracted value states that the system recommends but omits that landlords make the decision.)
+    E20#0 affected_persons: concepts=miss judge=same  value='Individuals whose car-insurance premiums are set.'  (Individuals whose car-insurance premiums are set are the car-insurance customers described in the reference.)
+    E20#1 affected_persons: concepts=miss judge=same  value='Individuals whose car-insurance premiums are set by the model.'  (Individuals whose car-insurance premiums are set by the model are the affected car-insurance customers.)
+    E20#2 affected_persons: concepts=miss judge=same  value='Individuals whose car-insurance premiums are set using the model.'  (Individuals whose car-insurance premiums are set by the model are the affected car-insurance customers.)
+    E23#0 role_in_decision_making: concepts=ok judge=diff  value='The AI would help decide who receives social housing; the final decision-maker and degree of automation are not specified.'  (The reference specifies support for a human decision, whereas the extraction leaves the decision-maker and degree of automation unspecified.)
+    E23#1 ai_functionality: concepts=miss judge=same  value='Assisting in decisions about who receives social housing; no specific technical functionality is described.'  (The extracted value states that AI assists social-housing allocation decisions; the technical-detail caveat does not change that fact.)
+    E23#2 role_in_decision_making: concepts=ok judge=diff  value='Would help inform decisions about who receives social housing; the final decision-maker and degree of automation are not specified.'  (The reference explicitly identifies support for a human decision, whereas the extraction leaves the decision-maker and degree of automation unspecified.)
+    E25#0 role_in_decision_making: concepts=ok judge=diff  value="The system's trustworthiness ratings are used to decide citizens' access to public benefits; who makes the final decision is not stated."  (The reference says the system decides access, whereas the extraction only says its ratings inform the decision and leaves the final decision-maker unspecified.)
+    E25#1 role_in_decision_making: concepts=ok judge=diff  value="The system's trustworthiness ratings are used to decide citizens' access to public benefits."  (The reference says the system decides access, whereas the extraction only says its ratings are used in deciding access, which could mean an advisory role.)
+    E25#1 affected_persons: concepts=ok judge=diff  value='Citizens whose access to public benefits is being decided.'  (The extraction omits that the affected citizens are applying for benefits and could also encompass existing beneficiaries whose access is being reviewed.)
+    E25#2 role_in_decision_making: concepts=ok judge=diff  value="Trustworthiness ratings are used to decide citizens' access to public benefits; the description does not specify who makes the final decision."  (The reference assigns the system the role of deciding access, while the extraction only says its ratings are used in decisions and leaves the final decision-maker unspecified.)
+    E25#2 affected_persons: concepts=ok judge=diff  value='Citizens whose access to public benefits is decided using their trustworthiness ratings.'  (The extraction identifies citizens subject to benefit-access decisions but omits the key qualification that they are applying for benefits.)
+    E27#0 role_in_decision_making: concepts=ok judge=diff  value='Provides relevant case-law summaries to assist judges.'  (The extraction states that the system assists judges, but omits that judges make the decisions.)
+    E27#1 role_in_decision_making: concepts=ok judge=diff  value='Provides summaries of relevant case law to assist judges considering a case.'  (The extraction states that the system assists judges but omits that judges make the decisions.)
+    E27#2 role_in_decision_making: concepts=ok judge=diff  value='Provides relevant case-law summaries to assist judges considering a case.'  (The extraction states that the system assists judges but omits the key point that judges retain decision-making authority.)
+  wrong fields (first repeat only):
+    E01 intended_purpose: got 'Screening applicants for warehouse roles at a logistics company.', expected 'recruiting staff for warehouse roles'
+    E03 develops_system: got None, expected True
+    E06 role_in_decision_making: got "Border guards use the kiosk's face comparison to confirm travellers' identities.", expected None
+    E09 role_in_decision_making: got "Answers customers' questions directly through the webshop chatbot.", expected None
+    E10 affected_persons: got 'Individuals whose CVs are screened.', expected 'job applicants'
+    E11 affected_persons: got 'People whose X-ray images are analysed in the clinic.', expected 'clinic patients'
+    E16 affected_persons: got None, expected 'people who post comments'
+    E20 role_in_decision_making: got 'The model is used to set individual premiums; human involvement is not described.', expected None
+    E20 affected_persons: got 'Individuals whose car-insurance premiums are set.', expected 'car-insurance customers'
+    E22 ai_functionality: got 'Not described.', expected 'unspecified AI support for hiring'
+    E26 affected_persons: got None, expected 'loan applicants'
+    E28 affected_persons: got None, expected 'callers and/or call-centre staff'
+    E28 puts_own_name_or_trademark: got None, expected False
+

@@ -1,0 +1,70 @@
+{
+  "gpt-6.1-sol effort=low": {
+    "requested": [
+      "openai:gpt-6.1-sol:effort=low"
+    ],
+    "served_models": {
+      "gpt-6.1-sol": 90
+    },
+    "runs": 90,
+    "ok": 90,
+    "leaks": 0,
+    "overall": 0.9666666666666667,
+    "booleans": 0.9844444444444445,
+    "dates": 1.0,
+    "free_text": 0.9422222222222222,
+    "null_kept_null": 0.9867549668874173,
+    "value_filled": 0.9683426443202979,
+    "per_field": {
+      "intended_purpose": 0.9666666666666667,
+      "ai_functionality": 0.9666666666666667,
+      "role_in_decision_making": 0.9444444444444444,
+      "affected_persons": 0.8333333333333334,
+      "jurisdiction": 1.0,
+      "develops_system": 0.9666666666666667,
+      "uses_system": 1.0,
+      "puts_own_name_or_trademark": 0.9666666666666667,
+      "modifies_intended_purpose": 0.9888888888888889,
+      "modifies_safety_relevant_components": 1.0,
+      "relevant_date": 1.0
+    },
+    "unstable": 4,
+    "fallbacks": 0,
+    "input_tokens": 107835,
+    "output_tokens": 11532
+  },
+  "gpt-6.1-sol effort=medium": {
+    "requested": [
+      "openai:gpt-6.1-sol:effort=medium"
+    ],
+    "served_models": {
+      "gpt-6.1-sol": 90
+    },
+    "runs": 90,
+    "ok": 90,
+    "leaks": 0,
+    "overall": 0.9585858585858585,
+    "booleans": 0.9822222222222222,
+    "dates": 1.0,
+    "free_text": 0.9266666666666666,
+    "null_kept_null": 0.9801324503311258,
+    "value_filled": 0.9664804469273743,
+    "per_field": {
+      "intended_purpose": 0.9666666666666667,
+      "ai_functionality": 0.9555555555555556,
+      "role_in_decision_making": 0.9,
+      "affected_persons": 0.8111111111111111,
+      "jurisdiction": 1.0,
+      "develops_system": 0.9666666666666667,
+      "uses_system": 1.0,
+      "puts_own_name_or_trademark": 0.9444444444444444,
+      "modifies_intended_purpose": 1.0,
+      "modifies_safety_relevant_components": 1.0,
+      "relevant_date": 1.0
+    },
+    "unstable": 5,
+    "fallbacks": 0,
+    "input_tokens": 107835,
+    "output_tokens": 18532
+  }
+}

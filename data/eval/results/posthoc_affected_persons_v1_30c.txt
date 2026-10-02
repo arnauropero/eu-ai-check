@@ -1,0 +1,62 @@
+POST-HOC ANALYSIS -- NOT PRE-REGISTERED. Frozen baseline (82467bb), no API calls.
+affected_persons re-scored: correct = primary concept-group correct OR the
+secondary judge (gpt-6-astra, already in the frozen records) said same_fact.
+The frozen scoring rules and the frozen results are unchanged; this is analysis only.
+================================================================================================
+
+## effort=low  (90 ok runs)
+  frozen primary score   75/90 = 0.833
+  post-hoc judge-union   79/90 = 0.878   (POST-HOC)
+    correct (primary)                              75
+    empty where label has a value                  11
+    filled, primary miss, judge accepted           4
+  E10  label='job applicants'
+      #0 filled, primary miss, judge accepted: 'People whose CVs are screened.'
+      #1 empty where label has a value: None
+      #2 empty where label has a value: None
+  E16  label='people who post comments'
+      #0 empty where label has a value: None
+      #1 empty where label has a value: None
+      #2 empty where label has a value: None
+  E20  label='car-insurance customers'
+      #0 filled, primary miss, judge accepted: 'Individuals whose car-insurance premiums are set using the model.'
+      #1 empty where label has a value: None
+      #2 filled, primary miss, judge accepted: 'Individuals whose car-insurance premiums are set using the model.'
+  E26  label='loan applicants'
+      #0 empty where label has a value: None
+      #1 empty where label has a value: None
+      #2 filled, primary miss, judge accepted: 'People seeking small loans.'
+  E28  label='callers and/or call-centre staff'
+      #0 empty where label has a value: None
+      #1 empty where label has a value: None
+      #2 empty where label has a value: None
+
+## effort=medium  (90 ok runs)
+  frozen primary score   73/90 = 0.811
+  post-hoc judge-union   80/90 = 0.889   (POST-HOC)
+    correct (primary)                              73
+    empty where label has a value                  10
+    filled, primary miss, judge accepted           7
+  E10  label='job applicants'
+      #0 filled, primary miss, judge accepted: 'Individuals whose CVs are screened.'
+      #1 filled, primary miss, judge accepted: 'People whose CVs are screened.'
+      #2 filled, primary miss, judge accepted: 'People whose CVs are screened.'
+  E11  label='clinic patients'
+      #0 filled, primary miss, judge accepted: 'People whose X-ray images are analysed in the clinic.'
+      #2 empty where label has a value: None
+  E16  label='people who post comments'
+      #0 empty where label has a value: None
+      #1 empty where label has a value: None
+      #2 empty where label has a value: None
+  E20  label='car-insurance customers'
+      #0 filled, primary miss, judge accepted: 'Individuals whose car-insurance premiums are set.'
+      #1 filled, primary miss, judge accepted: 'Individuals whose car-insurance premiums are set by the model.'
+      #2 filled, primary miss, judge accepted: 'Individuals whose car-insurance premiums are set using the model.'
+  E26  label='loan applicants'
+      #0 empty where label has a value: None
+      #1 empty where label has a value: None
+      #2 empty where label has a value: None
+  E28  label='callers and/or call-centre staff'
+      #0 empty where label has a value: None
+      #1 empty where label has a value: None
+      #2 empty where label has a value: None

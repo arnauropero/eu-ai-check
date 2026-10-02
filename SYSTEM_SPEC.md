@@ -1,8 +1,9 @@
 # SYSTEM_SPEC.md — EU AI Act Compliance Determination System
 
 Status: V1 architecture locked. **Phase 0 (corpus ingestion and validation) is
-implemented as of 2026-10-01; Phase 1 (retrieval) as of 2026-10-02**; Phase 2
-(extraction) is next. Phase 1 changed the retrieval design in three measured
+implemented as of 2026-10-01; Phase 1 (retrieval) and Phase 2 (extraction) as of
+2026-10-02**. Phase 2 accepted `gpt-6.1-sol` with the baseline prompt at `low` effort
+against a target locked after the first run (§18). Phase 1 changed the retrieval design in three measured
 places — exact-citation priority (§7.4), reranker off by default (§7.4), and date
 payload indexes as a hard index requirement (§13.2) — and closed the §21
 filtered-HNSW open question. This document is the
@@ -144,12 +145,144 @@ validity should be evaluated for the user's scenario.** V1 uses a single field; 
 into `event_date` / `assessment_date` / `deployment_date` is deferred until a concrete
 use case demonstrates the single field is insufficient.
 
+**[Changed in Phase 2, 2026-10-02]** Two fields became nullable in the extraction
+output (`CaseFacts`, `src/eu_ai_check/extraction/schema.py`):
+
+- `relevant_date: date | null`. Many descriptions state no date. Forcing a value
+  would make the extractor decide a default, which is pipeline policy rather than a
+  fact in the text. Extraction reports `null`; the pipeline's `Case` then substitutes
+  the assessment date **explicitly** and records `relevant_date_basis: stated |
+  assessment_date`, so "the user said this date" and "we defaulted it" are never
+  confused.
+- `role_in_decision_making: str | null`, for the same reason.
+
+Only `intended_purpose` and `ai_functionality` remain non-nullable: every AI use-case
+description has some purpose and capability, even if vague. The schema is closed
+(`additionalProperties: false`; pydantic `extra="forbid"`), so the excluded fields
+cannot be emitted at all. Structured outputs constrain decoding to it, and validation
+rejects anything else.
+
 ### 3.3 Why the raw text is preserved separately
 
 The extraction schema is not the retrieval query. The original free text remains
 available to semantic/BM25 retrieval directly; structured fields provide query
 enrichment and metadata/temporal filtering, not a replacement for the text. Structured
 fields are necessarily lossier than the source description.
+
+### 3.4 Field rules and labelling decisions (Phase 2)
+
+Several actor and date fields are ambiguous without explicit rules. Does a fine-tuned
+purchased model count as developed? Is "since January" a relevant date? If the rules
+lived only in the labeller's head, the eval would measure whether the model can guess
+them. The rules are therefore written once and used in two places:
+
+- **in the extractor's system prompt** (`FIELD_RULES`,
+  `src/eu_ai_check/extraction/extractor.py`), and
+- **verbatim in the eval set** (`data/eval/extraction_cases.json` →
+  `labelling_rules.field_rules_verbatim`). A test fails if the two drift apart.
+
+Labelling decisions, each tied in the eval file to the cases it decides, with tests
+checking the labels against them:
+
+| # | Decision | Cases |
+|---|---|---|
+| L1 | Fine-tuning or retraining a system obtained from someone else is a *modification*, not development. | E11, E26 |
+| L2 | A separate legal entity in the same group (e.g. a sister company) is "someone else": its system was obtained, not developed. | E25 |
+| L3 | `puts_own_name_or_trademark = false` only for use under another party's name, including a **named** third-party product used without rebranding. Unnamed product or undescribed branding → `null`. Selling under one's own brand → `true`. | false: E01, E08, E13, E15, E28, E30 · null: E18 · true: E03, E10, E14, E17 |
+| L4 | `uses_system` covers current **and planned** use. Build/sell/supply-only → `false`. | planned: E05, E21, E23 · supplier only: E03, E10, E14, E17 |
+| L5 | Development may be inferred when the organisation calls the system its own product that it makes or sells. | E03, E14 |
+| L6 | Repurposing a general-purpose system for a specific use → `modifies_intended_purpose = true`. | E11 |
+| L7 | Dates: explicit launch/start date or "where we stood on X" → that date; "as of today" → the assessment date; "next month" → 1st of that month; already in use with no date asked for, or vague timing → `null`. | E17, E19, E20, E18, E13, E29, E21 |
+| L8 | Null discipline: `role_in_decision_making` and `affected_persons` are `null` unless described; they are not filled in from what such systems usually do. | 15 cases, listed in the eval file |
+| L9 | A legal conclusion asserted without supporting facts ("we are the provider") yields no actor facts. | E24, E27 |
+
+### 3.5 The LLM evaluation stack: OpenAI only (Phase 2)
+
+The whole LLM evaluation workflow runs on OpenAI and needs only `OPENAI_API_KEY`.
+It has two roles, kept deliberately separate:
+
+| Role | Model | Setting | Status |
+|---|---|---|---|
+| **Extractor**, the system under test | GPT-6.1 Sol, `gpt-6.1-sol` | `reasoning.effort` = `low` / `medium` (the two arms) | required |
+| **Judge**, a secondary signal | GPT-6 Astra, `gpt-6-astra` | `reasoning.effort` = `low` | optional (`--no-judge`) |
+
+**Accepted configuration (Phase 2 closure, 2026-10-02):** extractor `gpt-6.1-sol`,
+`baseline` prompt, `reasoning.effort = low`. The judge is evaluation-only and is not
+part of the production extraction path. See §18 for the acceptance result.
+
+### 3.5.1 Extractor
+
+**The extraction model is OpenAI GPT-6.1 Sol, `gpt-6.1-sol`**, called through the
+Responses API (`src/eu_ai_check/extraction/openai_extractor.py`; the default in
+`providers.py`).
+
+- **Reasoning effort.** The pre-registered arms `low` and `medium` map one-to-one
+  onto GPT-6.1 Sol's `reasoning.effort` values `"low"` and `"medium"`. The model
+  supports `low`, `medium` (its default), `high`, `xhigh` and `max`, but not `none`
+  or `minimal` (OpenAI model page, checked 2026-10-02). No approximation is
+  involved, and the extractor rejects any other value.
+- **Structured Outputs.** `text.format = {type: "json_schema", name: "case_facts",
+  strict: true, schema: openai_strict_schema()}`. That schema is derived
+  mechanically from the same `CaseFacts` pydantic model, so property set,
+  `required`, `additionalProperties: false`, base types, nullability and
+  descriptions are identical, and a test compares the two field by field. Only two
+  things differ:
+  - nullable fields use the type-array form OpenAI documents
+    (`["string", "null"]`) rather than `anyOf`;
+  - `"format": "date"` is not sent, because OpenAI's documentation did not confirm
+    strict-mode support for string formats. The date constraint is still enforced
+    by pydantic validation of every output, which fails closed on a non-ISO date.
+- **Same prompt, same rules.** The system prompt, FIELD RULES and user message are
+  byte-identical to the pre-registered commit.
+- **Recording.** Every result records the provider, the requested model, the
+  reasoning effort and the model the API reports as having served the request.
+  The harness writes all of them per call to `<out>.runs.jsonl`.
+- **Fail-closed.** A refusal content item, an incomplete response, invalid JSON or a
+  schema mismatch gives `facts = None` with the reason. There is no server-side
+  fallback on this path.
+### 3.5.2 Judge
+
+**The secondary judge is OpenAI GPT-6 Astra, `gpt-6-astra`**, at `reasoning.effort:
+"low"`, through the Responses API with strict Structured Outputs
+(`text.format = {type: "json_schema", name: "judge_verdicts", strict: true}`).
+
+- **Why GPT-6 Astra.** It's OpenAI's most capable model, and it is a *different*
+  model from the extractor, so no output is graded by the model that produced it.
+  `low` effort matches the effort the pre-registered judge used.
+- **Method unchanged.** The judge's system prompt and verdict schema are identical
+  to the pre-registration (`fe0b0f6`); tests pin their SHA-256. Only the provider and
+  model changed.
+- **It never defines or changes the ground truth.** The judge sees the label's
+  reference sentence and the extracted value, read-only, and only for text fields
+  with a non-null label and a non-null prediction. Its verdict is stored next to the
+  primary concept-group score and reported as agreement / disagreement. It never
+  alters per-field correctness, any accuracy figure or any label. A test runs a
+  judge that disagrees with everything and checks that correctness and accuracy
+  are identical to a run without a judge.
+- **Optional.** `--no-judge` runs the primary evaluation with the extractor alone. A
+  judge refusal or malformed verdict is recorded as a judge error and yields no
+  verdicts, without touching the primary score. API errors are not swallowed.
+
+### 3.5.3 Provenance
+
+Both changes were made on 2026-10-02: *after* the eval set was pre-registered
+(`fe0b0f6`) and *before* any API call.
+
+1. **Extractor:** Claude Opus 5.5 → GPT-6.1 Sol (commit `7434d4d`).
+2. **Judge:** Claude Opus 5.5 → GPT-6 Astra, making the stack OpenAI-only.
+
+Unchanged by either: eval set, labels, labelling rules, null discipline, leakage
+check, scoring, categories, 3 repeats, effort arms, extractor prompt and judge
+prompt. Tests pin SHA-256 fingerprints of the pre-registered eval content and judge
+method. The models under test changed; the pre-registered evaluation did not, and no
+result had been seen. The Claude Opus 5.5 extractor remains available as an optional,
+non-evaluated `extract --provider anthropic`, behind the `anthropic` package extra.
+Nothing in the evaluation workflow imports it.
+
+**Review record.** The user reviewed all 30 labels before pre-registration. One
+label changed during that review, E18 `puts_own_name_or_trademark` false → null
+(L3: the payroll provider's tool is not named). Because the change was made before
+any API run, it is *not* post-hoc. Any change after the first run is.
 
 ---
 
@@ -1013,6 +1146,195 @@ evaluated.
   excluded/conclusion-level field (risk_tier, prohibited_practice, actor_roles,
   substantial_modification) — any occurrence in the eval set is a hard failure, not a
   score to optimize.
+
+**Extraction — Phase 2 pre-registration (2026-10-02).** Learning from Phase 1, the
+extraction eval set (`data/eval/extraction_cases.json`, 30 hand-labelled cases), the
+scoring rules, the leakage term list and the extractor were **committed before the
+first API run**, so the first results count as pre-registered. Scoring, as committed:
+
+- booleans and dates: exact match, `null` included (`null` ≠ `false`);
+- free text, **primary**: hand-written concept groups (every group matched by at least
+  one stem; an expected `null` must be predicted `null`);
+- free text, **secondary**: an LLM judge compares each value with the label's
+  reference sentence. It never overrides the primary metric, and every disagreement
+  is listed. The pre-registered judge was Claude Opus 5.5; it was migrated to OpenAI
+  GPT-6 Astra before any API call, with the same prompt and verdict schema (§3.5.2);
+- zero tolerance: no excluded field *and* no conclusion term
+  (`src/eu_ai_check/extraction/leakage.py`) in any free-text value. Structured
+  outputs prevent the first; the second is the realistic failure, and 5 adversarial
+  cases assert conclusions outright to provoke it.
+
+Each case runs three times per effort arm (`low`, `medium`), and fields whose
+correctness changes between repeats are reported as unstable. **LLM stack: OpenAI
+only** — extractor GPT-6.1 Sol (`gpt-6.1-sol`), optional judge GPT-6 Astra
+(`gpt-6-astra`); only `OPENAI_API_KEY` is needed. Both were switched from Claude
+Opus 5.5 after pre-registration and before any API call; the evaluation is unchanged
+(§3.5). The numerical accuracy target is locked only after the first run is seen,
+and is labelled accordingly.
+
+**Extraction — Phase 2 first run (pre-registered, 2026-10-02).** Run with the
+committed defaults (30 cases × 3 repeats × effort `low`/`medium`, judge on) and frozen
+unchanged in `data/eval/results/extraction_v1_30c.{txt,json,runs.jsonl}`. No label,
+scoring rule, prompt or case was changed before or after the run.
+
+| arm | overall | booleans | dates | free text | unstable | output tokens |
+|---|---|---|---|---|---|---|
+| `low` | 0.967 | 0.984 | 1.000 | 0.942 | 4 | 11.5k |
+| `medium` | 0.959 | 0.982 | 1.000 | 0.927 | 5 | 18.5k |
+
+180/180 runs succeeded, with 0 leakage hits and 0 fallbacks. `medium` scored no higher
+than `low` (8 fewer correct field scores out of 990) and used about 60% more output
+tokens. No significance test was pre-registered, so this difference is reported as
+observed, not as a finding. The weakest field in both arms is `affected_persons`
+(0.833 / 0.811). Secondary judge agreement with the primary score was 268/298
+(`low`) and 263/299 (`medium`). **No accuracy target had been locked at this point**
+(it was locked later; see "Phase 2 acceptance" below), and any later label or scoring
+change will be flagged as post-hoc.
+
+**Extraction — follow-up experiment `role-null-v1` (pre-registered 2026-10-02, before
+any follow-up API call).** This experiment is separate from the frozen first run.
+It tests one prompt-only intervention suggested by the error analysis of that run.
+The frozen eval set, labels, scoring rules, `FIELD_RULES` and the v1 results are all
+unchanged; tests pin the eval content, the baseline prompt's SHA-256 and the v1
+results file.
+
+- *Intervention.* `ROLE_NULL_V1` in `src/eu_ai_check/extraction/extractor.py` is
+  appended after FIELD RULES as a `CLARIFICATION: role_in_decision_making` section,
+  selected with `--prompt-variants role-null-v1`. The default, `baseline`, is the
+  frozen prompt. The clarification restates L8's condition and does not change the
+  definition: fill the field only when the description says what happens with the
+  output, and never fill it just to say the role is not described. Its two examples
+  appear in no eval case.
+- *Hypothesis.* Most role false fills on cases with a null role label come from two
+  habits: restating the system's task as its role, and filling the field just to say
+  the role is not described. Stating L8's condition explicitly removes those habits
+  without causing nulls where a role is described.
+- *Target cases.* E09 and E14 are clear extractor errors in the baseline, at medium
+  only. E20's outcome is uncertain and its label possibly ambiguous. E06 is not
+  targeted, and turning it null would be read as over-correction. The guard is the
+  17 cases with a non-null role label, especially E07, E12, E25, E26 and E29, where
+  the system acts by itself. `affected_persons` is deliberately not addressed and
+  serves as a no-regression field.
+- *Design.* 4 arms: {baseline prompt, `role-null-v1`} × {`low`, `medium`}, each
+  30 cases × 3 repeats, for 360 extraction calls. The judge is on, with the
+  baseline's configuration. Results go to
+  `data/eval/results/extraction_v2_role_null_*`. The frozen v1 run stays the
+  reference; the baseline re-run only measures run-to-run noise.
+- *Metrics.* These are fixed in code in `src/eu_ai_check/extraction/followup.py`
+  and checked against the frozen run:
+
+  | metric | measured on | frozen low / medium |
+  |---|---|---|
+  | role false fills | 13 null-role cases, 39 runs per arm | 5/39 / 9/39 |
+  | of which E09+E14 | 6 runs | 0/6 / 3/6 |
+  | absence-only fills (`ABSENCE_RE`, descriptive) | filled values on null-role cases | 2 / 4 |
+  | guard misses | 17 non-null-role cases, 51 runs | 0/51 / 0/51 |
+  | other fields | per-field accuracy | first-run table above |
+  | leaks | all runs | 0 / 0 |
+
+- *Decision rule (fixed now; it may not change after results are seen).*
+  `role-null-v1` counts as having worked only if all four checks hold at both
+  efforts:
+  1. total false fills fall below the frozen run's, and E09+E14 false fills do not
+     rise;
+  2. guard misses rise by at most 1 over the frozen run, with every new miss listed;
+  3. for every scored field other than `role_in_decision_making`,
+     |acc(role-null-v1) − acc(frozen)| ≤ |acc(baseline re-run) − acc(frozen)|. A
+     movement in either direction counts;
+  4. zero leaks in the `role-null-v1` arms.
+
+  Results are reported per arm, per case and per repeat, with E09/E14 separate from
+  E06/E20. With 39 runs per arm the result shows the direction of an effect, not
+  statistical significance. Even if the rule passes, adopting the prompt and changing
+  the default effort remain separate decisions.
+- *Separate POST-HOC analysis (not pre-registered).* `affected_persons` in the
+  frozen run is re-scored so that a value also counts as correct when the secondary
+  judge accepted it (`followup.posthoc_affected_persons`). It uses no API calls and
+  never replaces the frozen scoring rules.
+
+**Extraction — follow-up `role-null-v1` result (2026-10-02): the decision rule was
+NOT met.** The run used the pre-registered design: 360 calls, all succeeded, 0 leaks.
+Results are in `data/eval/results/extraction_v2_role_null.{txt,json,runs.jsonl}`,
+and the decision report, with every value per case and per repeat, is in
+`extraction_v2_role_null_decision.{txt,json}`. The prompt was **not adopted**. The
+default prompt (`baseline`), the default effort and the official v1 evaluation are
+unchanged.
+
+| check | `low` | `medium` |
+|---|---|---|
+| 1 false fills down, E09+E14 not up | pass (5→2; 0→0) | pass (9→2; 3→0) |
+| 2 guard: ≤ 1 new miss | pass (0→1) | **fail** (0→3) |
+| 3 other fields within re-run noise | **fail** | **fail** |
+| 4 zero leaks | pass | pass |
+
+- **Improved:** E09 and E14 were clean in all 12 `role-null-v1` runs. The baseline
+  re-run showed both errors also occur intermittently at `low`. Values that only
+  say "not described" fell to 0.
+- **Key regression, E27** (a guard case with role label "assists judges, who
+  decide"). The new prompt left the role null for "helps judges by summarising case
+  law": 3/3 runs at `medium` and 1/3 at `low`. It read the description as a task
+  description alone.
+- **Over-correction, E06.** The role became null in 6/6 runs. That matches the
+  label, but the pre-registration named this in advance as an over-correction
+  signal, since the description says border guards use the kiosk to confirm identity.
+- **E20** stays mostly filled ("the model is used to set individual premiums"), now
+  without the absence clause.
+- **Check 3** compares each field's movement with the baseline re-run's gap, which
+  was 0.000 on every failing field, so any single change fails. Three of the four
+  failing moves were improvements: `low` ai_functionality +0.011 and affected_persons
+  +0.022; `medium` intended_purpose +0.022. The fourth was a regression: `medium`
+  relevant_date −0.011 (E27, assessment date given where the label is null). The
+  rule is applied as written.
+
+**POST-HOC (not pre-registered, not part of the official evaluation):
+`affected_persons` re-score of the frozen v1 run.** A value also counts as correct
+when the secondary judge accepted it. This raises the apparent score from 0.833 to
+0.878 at `low` and from 0.811 to 0.889 at `medium`. Every remaining miss is an empty
+answer where the label infers the group (E16, E26, E28, and partly E10/E11). The
+**official v1 scores stay 0.833 / 0.811**, and this re-score does not change them
+(`data/eval/results/posthoc_affected_persons_v1_30c.txt`).
+
+**Reporting incident and known bug (maintenance, not yet fixed).**
+`followup.py --out` builds file names with `Path.with_suffix`. A dotted output name
+(`extraction_v2_role_null.decision`) therefore became `extraction_v2_role_null.txt`
+and `.json`, and overwrote the harness summaries. The raw `.runs.jsonl` (360 records)
+was never affected. Both summaries were rebuilt offline from it. Rebuilding v1 the
+same way reproduced the committed `extraction_v1_30c.json` exactly, and
+`extraction_v1_30c.txt` identically apart from line endings. The decision report was
+regenerated under the undotted name `extraction_v2_role_null_decision`. Until it is
+fixed, pass `--out` an undotted name.
+
+**Extraction — Phase 2 acceptance (2026-10-02): MET.**
+
+- *Accepted configuration.* `gpt-6.1-sol`, `baseline` prompt, `reasoning.effort =
+  low`. This is an engineering choice based on the observed results and lower output
+  token use: `low` used 11.5k output tokens vs 18.5k for `medium` in v1. It is **not**
+  a claim that `low` is more accurate: the baseline re-run scored 0.967 at both
+  efforts. The judge is evaluation-only and is not part of the production extraction
+  path.
+- *Baseline.* Phase 0 contained **no extraction accuracy measurement**; it deferred
+  the number to Phase 2 (`src/eu_ai_check/corpus/baseline.py`). The "Phase 0
+  baseline" in the acceptance criterion is therefore the frozen v1 run (`82467bb`),
+  the committed Phase 2 baseline used for this target check.
+- *Locked target.* Overall field-level accuracy **≥ 0.95**, measured with the
+  pre-registered primary concept-group scorer on the frozen 30-case v1 eval set, in
+  the accepted `low` configuration. **This target was locked after the first
+  evaluation results were seen**, which the Phase 2 pre-registration permits ("locked
+  only after the first run is seen, and labelled accordingly"). It is **not** a
+  pre-registered target. Like Phase 1's locked thresholds, it serves as a regression
+  guard and does not independently confirm the result.
+- *Zero tolerance.* No excluded field and no legal-conclusion term in any value.
+
+| criterion | committed result | outcome |
+|---|---|---|
+| overall field accuracy ≥ 0.95 (`low`, v1 `82467bb`) | 0.967 | met |
+| zero leaks | 0 in v1 (180 runs); also 0 in all 360 v2 runs | met |
+
+The post-hoc `affected_persons` re-score is **not** used for acceptance. The official
+v1 scores are unchanged. The implementation default now matches the accepted
+configuration. `DEFAULT_EFFORT = "low"` drives `extract --effort`,
+`create_extractor` and `OpenAIExtractor`, and tests pin it. `--effort medium`
+remains available. The eval harness still runs both pre-registered arms by default.
 
 **Determination:**
 - Correctness against the four-state contract (§14): `applicable` /
