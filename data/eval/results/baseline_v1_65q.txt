@@ -1,0 +1,76 @@
+Phase 1 retrieval evaluation
+================================================================================================
+
+1. Ranking arms, real corpus, temporal pre-filter on
+
+-- terminology  (n=20)
+  arm                                      R@5      R@10       P@5      P@10       MRR invalid@5
+  vector/pre_filter                      1.000     1.000     0.220     0.110     0.975         0
+  bm25/pre_filter                        1.000     1.000     0.220     0.110     1.000         0
+  hybrid/pre_filter                      1.000     1.000     0.220     0.110     1.000         0
+  vector+rerank/pre_filter               1.000     1.000     0.220     0.110     1.000         0
+  bm25+rerank/pre_filter                 1.000     1.000     0.220     0.110     1.000         0
+  hybrid+rerank/pre_filter               1.000     1.000     0.220     0.110     1.000         0
+
+-- use_case  (n=28)
+  arm                                      R@5      R@10       P@5      P@10       MRR invalid@5
+  vector/pre_filter                      0.929     0.982     0.200     0.107     0.814         0
+  bm25/pre_filter                        0.857     0.875     0.179     0.093     0.786         0
+  hybrid/pre_filter                      0.946     0.982     0.207     0.107     0.832         0
+  vector+rerank/pre_filter               0.911     0.982     0.200     0.107     0.830         0
+  bm25+rerank/pre_filter                 0.875     0.875     0.186     0.093     0.804         0
+  hybrid+rerank/pre_filter               0.875     0.982     0.193     0.107     0.819         0
+
+-- all real-corpus queries  (n=48)
+  arm                                      R@5      R@10       P@5      P@10       MRR invalid@5
+  vector/pre_filter                      0.958     0.990     0.208     0.108     0.881         0
+  bm25/pre_filter                        0.917     0.927     0.196     0.100     0.875         0
+  hybrid/pre_filter                      0.969     0.990     0.213     0.108     0.902         0
+  vector+rerank/pre_filter               0.948     0.990     0.208     0.108     0.901         0
+  bm25+rerank/pre_filter                 0.927     0.927     0.200     0.100     0.885         0
+  hybrid+rerank/pre_filter               0.927     0.990     0.204     0.108     0.894         0
+
+2. Temporal arms, real corpus + SYNTHETIC version fixture
+
+-- temporal queries (amended wording)  (n=16)
+  arm                                      R@5      R@10       P@5      P@10       MRR invalid@5
+  vector/pre_filter                      1.000     1.000     0.200     0.100     1.000         0
+  vector/post_filter                     1.000     1.000     0.200     0.100     1.000         0
+  vector/none                            1.000     1.000     0.200     0.100     0.750        28
+  hybrid+rerank/pre_filter               1.000     1.000     0.200     0.100     0.969         0
+  hybrid+rerank/post_filter              1.000     1.000     0.200     0.100     0.969         0
+  hybrid+rerank/none                     1.000     1.000     0.200     0.100     0.740        26
+
+  pre-entry-into-force queries (correct answer: no results)
+    vector/pre_filter                1/1 correctly empty
+    vector/post_filter               1/1 correctly empty
+    vector/none                      0/1 correctly empty
+    hybrid+rerank/pre_filter         1/1 correctly empty
+    hybrid+rerank/post_filter        1/1 correctly empty
+    hybrid+rerank/none               0/1 correctly empty
+
+Misses (expected version not in top-5)
+  [vector/pre_filter] U07: expected ['aiact:anx_III:area_6:item_d@2024-08-01', 'aiact:art_5:para_1:point_d@2024-08-01'] got ['aiact:art_5:para_1:point_h@2024-08-01', 'aiact:art_5:para_1:point_d@2024-08-01', 'aiact:art_5:para_2:point_b@2024-08-01', 'aiact:art_5:para_2:point_a@2024-08-01', 'aiact:art_26:para_10@2024-08-01']
+  [vector/pre_filter] U15: expected ['aiact:art_26:para_11@2024-08-01'] got ['aiact:anx_III:area_8:item_b@2024-08-01', 'aiact:art_6:para_3:point_c@2024-08-01', 'aiact:anx_III:area_4:item_b@2024-08-01', 'aiact:art_6:para_3:point_a@2024-08-01', 'aiact:anx_III:area_4:item_a@2024-08-01']
+  [vector/pre_filter] U22: expected ['aiact:anx_III:area_1:item_b@2024-08-01', 'aiact:art_5:para_1:point_g@2024-08-01'] got ['aiact:art_5:para_1:point_g@2024-08-01', 'aiact:art_5:para_1:point_c@2024-08-01', 'aiact:art_5:para_1:point_f@2024-08-01', 'aiact:art_5:para_1:point_d@2024-08-01', 'aiact:art_5:para_1:point_e@2024-08-01']
+  [bm25/pre_filter] U02: expected ['aiact:anx_III:area_1:item_c@2024-08-01', 'aiact:art_5:para_1:point_f@2024-08-01'] got ['aiact:art_5:para_1:point_e@2024-08-01', 'aiact:anx_III:area_3:item_d@2024-08-01', 'aiact:anx_III:area_5:item_d@2024-08-01', 'aiact:art_6:para_3:point_c@2024-08-01']
+  [bm25/pre_filter] U04: expected ['aiact:anx_III:area_5:item_b@2024-08-01'] got ['aiact:art_25:para_4@2024-08-01', 'aiact:anx_III:area_3:item_b@2024-08-01', 'aiact:art_5:para_5@2024-08-01']
+  [bm25/pre_filter] U06: expected ['aiact:anx_III:area_3:item_b@2024-08-01'] got ['aiact:art_16:point_e@2024-08-01', 'aiact:art_26:para_6@2024-08-01', 'aiact:art_25:para_1:point_c@2024-08-01', 'aiact:art_6:para_1:point_a@2024-08-01', 'aiact:art_16:point_a@2024-08-01']
+  [bm25/pre_filter] U07: expected ['aiact:anx_III:area_6:item_d@2024-08-01', 'aiact:art_5:para_1:point_d@2024-08-01'] got ['aiact:art_5:para_1:point_d@2024-08-01', 'aiact:art_26:para_10@2024-08-01', 'aiact:art_5:para_1:point_c@2024-08-01', 'aiact:art_6:para_1:point_a@2024-08-01', 'aiact:art_6:para_1:point_b@2024-08-01']
+  [bm25/pre_filter] U22: expected ['aiact:anx_III:area_1:item_b@2024-08-01', 'aiact:art_5:para_1:point_g@2024-08-01'] got ['aiact:art_5:para_1:point_g@2024-08-01', 'aiact:art_26:para_3@2024-08-01', 'aiact:art_5:para_1:point_a@2024-08-01', 'aiact:art_5:para_1:point_h@2024-08-01']
+  [hybrid/pre_filter] U06: expected ['aiact:anx_III:area_3:item_b@2024-08-01'] got ['aiact:anx_III:area_5:item_b@2024-08-01', 'aiact:anx_III:area_3:item_a@2024-08-01', 'aiact:anx_III:area_3:item_d@2024-08-01', 'aiact:art_16:point_e@2024-08-01', 'aiact:anx_III:area_1:item_c@2024-08-01']
+  [hybrid/pre_filter] U22: expected ['aiact:anx_III:area_1:item_b@2024-08-01', 'aiact:art_5:para_1:point_g@2024-08-01'] got ['aiact:art_5:para_1:point_g@2024-08-01', 'aiact:art_5:para_1:point_a@2024-08-01', 'aiact:art_5:para_1:point_h@2024-08-01', 'aiact:art_5:para_1:point_c@2024-08-01', 'aiact:art_26:para_3@2024-08-01']
+  [vector+rerank/pre_filter] U04: expected ['aiact:anx_III:area_5:item_b@2024-08-01'] got ['aiact:art_25:para_4@2024-08-01', 'aiact:art_6:para_3:point_c@2024-08-01', 'aiact:art_5:para_1:point_c@2024-08-01', 'aiact:art_25:para_2@2024-08-01', 'aiact:art_5:para_1:point_d@2024-08-01']
+  [vector+rerank/pre_filter] U05: expected ['aiact:anx_III:area_3:item_d@2024-08-01'] got ['aiact:art_26:para_10@2024-08-01', 'aiact:art_5:para_1:point_c@2024-08-01', 'aiact:art_5:para_1:point_d@2024-08-01', 'aiact:art_5:para_2:point_a@2024-08-01', 'aiact:art_5:para_1:point_g@2024-08-01']
+  [vector+rerank/pre_filter] U22: expected ['aiact:anx_III:area_1:item_b@2024-08-01', 'aiact:art_5:para_1:point_g@2024-08-01'] got ['aiact:art_5:para_1:point_g@2024-08-01', 'aiact:art_5:para_1:point_c@2024-08-01', 'aiact:art_5:para_1:point_f@2024-08-01', 'aiact:art_5:para_1:point_h@2024-08-01', 'aiact:art_5:para_1:point_d@2024-08-01']
+  [bm25+rerank/pre_filter] U02: expected ['aiact:anx_III:area_1:item_c@2024-08-01', 'aiact:art_5:para_1:point_f@2024-08-01'] got ['aiact:art_6:para_3:point_c@2024-08-01', 'aiact:art_5:para_1:point_e@2024-08-01', 'aiact:anx_III:area_5:item_d@2024-08-01', 'aiact:anx_III:area_3:item_d@2024-08-01']
+  [bm25+rerank/pre_filter] U04: expected ['aiact:anx_III:area_5:item_b@2024-08-01'] got ['aiact:art_25:para_4@2024-08-01', 'aiact:art_5:para_5@2024-08-01', 'aiact:anx_III:area_3:item_b@2024-08-01']
+  [bm25+rerank/pre_filter] U06: expected ['aiact:anx_III:area_3:item_b@2024-08-01'] got ['aiact:anx_III:area_3:item_d@2024-08-01', 'aiact:art_26:para_6@2024-08-01', 'aiact:art_16:point_e@2024-08-01', 'aiact:anx_III:area_3:item_a@2024-08-01', 'aiact:art_5:para_1:point_f@2024-08-01']
+  [bm25+rerank/pre_filter] U22: expected ['aiact:anx_III:area_1:item_b@2024-08-01', 'aiact:art_5:para_1:point_g@2024-08-01'] got ['aiact:art_5:para_1:point_g@2024-08-01', 'aiact:art_5:para_1:point_h@2024-08-01', 'aiact:art_5:para_1:point_a@2024-08-01', 'aiact:art_26:para_3@2024-08-01']
+  [hybrid+rerank/pre_filter] U04: expected ['aiact:anx_III:area_5:item_b@2024-08-01'] got ['aiact:art_25:para_4@2024-08-01', 'aiact:art_6:para_3:point_c@2024-08-01', 'aiact:art_5:para_1:point_c@2024-08-01', 'aiact:art_5:para_1:point_d@2024-08-01', 'aiact:art_5:para_1:point_g@2024-08-01']
+  [hybrid+rerank/pre_filter] U05: expected ['aiact:anx_III:area_3:item_d@2024-08-01'] got ['aiact:art_26:para_10@2024-08-01', 'aiact:art_5:para_1:point_c@2024-08-01', 'aiact:art_5:para_1:point_d@2024-08-01', 'aiact:art_5:para_2:point_a@2024-08-01', 'aiact:art_5:para_1:point_g@2024-08-01']
+  [hybrid+rerank/pre_filter] U06: expected ['aiact:anx_III:area_3:item_b@2024-08-01'] got ['aiact:anx_III:area_3:item_d@2024-08-01', 'aiact:art_26:para_6@2024-08-01', 'aiact:art_16:point_e@2024-08-01', 'aiact:art_5:para_1:point_c@2024-08-01', 'aiact:anx_III:area_3:item_c@2024-08-01']
+  [hybrid+rerank/pre_filter] U22: expected ['aiact:anx_III:area_1:item_b@2024-08-01', 'aiact:art_5:para_1:point_g@2024-08-01'] got ['aiact:art_5:para_1:point_g@2024-08-01', 'aiact:art_5:para_1:point_c@2024-08-01', 'aiact:art_5:para_1:point_f@2024-08-01', 'aiact:art_5:para_1:point_h@2024-08-01', 'aiact:art_5:para_1:point_d@2024-08-01']
+
+embedding dedup: 104 passages encoded for 200 index documents across both indexes (each distinct text computed once, SYSTEM_SPEC.md §15)
+wrote data\eval\results\retrieval_baseline.json

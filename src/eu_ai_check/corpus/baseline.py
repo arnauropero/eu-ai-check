@@ -178,8 +178,8 @@ def measure(corpus: Corpus) -> Baseline:
         deferred={
             "retrieval Recall@k / Precision@k (vector-only vs hybrid, "
             "with/without temporal filtering)":
-                "Phase 1 hybrid index + hand-built query set with known-correct "
-                "versioned_provision_id ground truth",
+                "measured since Phase 1 by `eu-ai-check eval-retrieval`, not by this "
+                "corpus-side report (SYSTEM_SPEC.md §18)",
             "extraction field-level accuracy":
                 "Phase 2 extractor + hand-labelled free-text eval set",
             "determination correctness across the four applicability outcomes":

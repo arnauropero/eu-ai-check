@@ -1,7 +1,11 @@
 # SYSTEM_SPEC.md — EU AI Act Compliance Determination System
 
 Status: V1 architecture locked. **Phase 0 (corpus ingestion and validation) is
-implemented as of 2026-10-01**; Phase 1 (retrieval) is next. This document is the
+implemented as of 2026-10-01; Phase 1 (retrieval) as of 2026-10-02**; Phase 2
+(extraction) is next. Phase 1 changed the retrieval design in three measured
+places — exact-citation priority (§7.4), reranker off by default (§7.4), and date
+payload indexes as a hard index requirement (§13.2) — and closed the §21
+filtered-HNSW open question. This document is the
 technical source of truth for implementation in Claude Code. Where a decision rests on
 assumption rather than verified source material, it is marked **[ASSUMPTION]**. Where a
 decision has been checked against the actual EUR-Lex / AI Act Explorer text, it is marked
@@ -318,9 +322,29 @@ exact failure mode the parent-resolution invariant exists to prevent.
   complete canonical legal provision — never an isolated sub-chunk fragment.
 
 ```
-Query → Semantic + BM25 search → Matched sub-chunk(s) → Reranking
-      → Parent resolution → Full canonical provision(s) → Generation context
+Query → Semantic + BM25 search → RRF fusion → Exact-citation priority
+      → Matched sub-chunk(s) → Parent resolution → Full canonical provision(s)
+      → Generation context
 ```
+
+**[IMPLEMENTED in Phase 1]** Sub-chunking rule: a provision whose canonical text
+fits in 800 characters (~200 tokens) is one chunk; a longer one is split at legal
+boundaries only — sentence ends and enumerator starts such as "(ii)" — and packed
+greedily up to the budget. A sentence longer than the budget is kept whole rather
+than cut. Chunks rejoin losslessly to the canonical text (tested). The bound is set
+by the embedding model: Article 26(10), the longest provision at 2,726 characters,
+overruns bge-base's 512-token window and would otherwise lose its closing sentences
+— including the deployer's annual-reporting duty — to silent truncation.
+
+Each chunk is indexed with a contextual header, `"<citation> - <heading>"` (e.g.
+`Article 26(7) - Obligations of deployers of high-risk AI systems`), because a
+provision's body text never names itself. Both the semantic and BM25 sides see the
+same header, so the vector-only vs hybrid comparison stays fair.
+
+**[VERIFIED against Article 5(1)(h)]** The split is not hypothetical: one chunk of
+5(1)(h) holds exception (iii) and the savings clause without the prohibition
+sentence. A match on that chunk resolves to the full provision, prohibition
+included — tested by name.
 
 ### 7.3 Context expansion is conservative, not automatic
 
@@ -337,6 +361,51 @@ flooding generation context with adjacent-but-irrelevant provisions.
    (siblings not retrieved by default)
 ```
 
+### 7.4 Fusion, exact-citation priority, and reranking (Phase 1 decisions)
+
+**Fusion: reciprocal rank fusion (RRF, k = 60).** BM25 scores are unbounded and
+corpus-dependent; cosine similarities sit in a narrow band. Adding them needs a
+calibration that drifts with every corpus change. RRF uses ranks only. The
+constant is the published default (Cormack et al., 2009), not tuned.
+
+**Exact-citation priority. [ADOPTED on measured evidence, 2026-10-02]** When a
+query names a provision *below* article/annex level — "Article 26(7)", "Article
+5(1)(h)(iii)", "Annex III point 4(a)" — the date-eligible chunks whose own
+structural citation matches are moved ahead of the fused ranking. Rules:
+
+- Article- or annex-level references ("Article 6", "Annex III") do not trigger it;
+  they name dozens of provisions.
+- Of nested query citations, only the deepest counts.
+- A citation matches its provision, any descendant ("Article 25(3)" → 25(3)(a),
+  25(3)(b)), and its containing canonical provision when it names a unit inside
+  one ("Article 5(1)(h)(iii)" → 5(1)(h), since (iii) is not its own provision).
+- It is a lookup among *eligible* versions only: the §13.2 hard filter still
+  applies, so a citation cannot surface a version not in force on
+  `relevant_date`.
+- It matches the provision's *own identity*, not mentions of it in other text.
+
+Why it exists: plain RRF dilutes an exact match. On bare-citation queries BM25
+alone reached Recall@5 0.962, but fusing it with a vector ranking that cannot read
+"26(7)" dropped hybrid to 0.865. BM25 also has the opposite failure — all 25 Annex
+III items contain the words "pursuant to Article 6(2)", so BM25 cannot tell a
+provision *citing* 6(2) from the provision that *is* 6(2). Citation priority fixed
+both: Recall@5 1.000 on the bare-citation set, and no change at all on queries that
+cite nothing (identical numbers on the pre-registered set; tested).
+
+It was introduced as a separate experimental arm, with its matching rule fixed
+before its first run, rather than tuned against the result. See §18 for the
+post-hoc status of the queries it was measured on.
+
+**Known limit, deliberately not fixed:** citation styles the tokenizer was not
+written for — "Art. 26(6)", "Annex III, point 4(a)", "point (h) of Article 5(1)" —
+get no citation priority (Recall@5 0.857 on that set vs 1.000 for bare citations).
+The tokenizer was not changed to fit queries already seen. A broader citation
+grammar is a candidate improvement, to be judged on queries written before it.
+
+**Reranker: off by default, kept as an eval arm.** A cross-encoder
+(bge-reranker-base) over the fused head lowered hybrid Recall@5 on use-case queries
+from 0.946 to 0.875 and on bare citations from 0.865 to 0.769. A larger reranker is
+not adopted speculatively; it would be evaluated as an arm first.
 ---
 
 ## 8. Cross-Reference Representation and Resolution
@@ -584,13 +653,55 @@ problem as a recall-tuning problem.
 component. Rejected because it would let a legally invalid version outrank a valid one
 — temporal validity is a hard eligibility gate, never traded off against relevance.
 
-**[ASSUMPTION — requires empirical verification against the chosen vector DB]**
-Logical pre-filtering does not guarantee efficient *physical* pre-filtering. Many ANN
-indexes (e.g. HNSW-based) were built for the unfiltered vector space; filtered search
-under a highly selective metadata filter can still degrade recall depending on the
-engine (Qdrant/Weaviate have specific pre-filtering support; behavior varies elsewhere).
-This must be verified empirically against the selected vector store under realistic
-filter selectivity — not assumed from documentation.
+**[MEASURED in Phase 1 — candidate starvation]** On a fixture giving 8 provisions a
+second text version (synthetic, eval-only, §18), with queries phrased in the amended
+wording and dated before the amendment:
+
+| arm | R@1 | R@5 | invalid versions in top-1 / top-5 |
+|---|---|---|---|
+| pre-filter (vector) | 1.000 | 1.000 | 0 / 0 |
+| post-filter (vector) | **0.500** | 1.000 | 0 / 0 |
+| no filter (vector) | 0.500 | 1.000 | 9 / 28 |
+
+Post-filtering loses the correct version from the top-1 on half the queries; the
+effect washes out by k = 5 only because the fixture adds one extra version per
+provision — real corpora with longer amendment histories have no such ceiling. With
+no filter, a query dated before entry into force returns provisions that did not yet
+exist. Pre-filtering is applied to *both* retrievers: the vector side as a payload
+filter, and the BM25 side by building the index over exactly the eligible chunks, so
+an ineligible version cannot even shape IDF.
+
+**[VERIFIED in Phase 1 — physical pre-filtering on Qdrant; was an ASSUMPTION]**
+Logical pre-filtering does not guarantee *physical* pre-filtering. Measured on a
+Qdrant 1.19.1 server (`eu-ai-check bench-filter --qdrant-url ...`;
+`data/eval/results/filter_bench_qdrant_1.19.1.txt`), HNSW forced on, Recall@10 against
+exact search under the same `eligibility_filter`, 20k seeded random vectors:
+
+| filter admits | 10% | 1% | 0.1% |
+|---|---|---|---|
+| with date payload indexes | 0.898 | 1.000 | 0.904 |
+| **without** date payload indexes | 0.224 | **0.007** (100/100 queries short) | 0.041 |
+
+Without payload indexes the graph is traversed blind to the filter and returns
+almost nothing eligible — the physical counterpart of candidate starvation. Qdrant
+builds filter-aware extra graph links only for fields indexed when the graph is
+built, so this is a **hard index requirement**:
+
+> **The `valid_from` / `valid_to` payload indexes must exist before HNSW
+> construction.** The vector store creates them immediately after the collection and
+> before any point is inserted.
+
+Qdrant's default query planner additionally switches to an exact payload-index scan
+below its full-scan threshold (recall 1.000 at ≤10% selectivity in every
+configuration), which is a second safety net, not a substitute for the indexes.
+
+Caveats, stated rather than hidden: random 768-dimensional vectors are a structure-
+free worst case (unfiltered HNSW recall on them is only ~0.33), so the absolute
+numbers bound behaviour rather than predict production; the with/without-index
+contrast is the finding. On the real corpus (96–104 points) Qdrant builds no graph
+by default and searches exactly; with a graph forced, filtered recall was 1.000 and
+embedded mode matched server exact search on 98/98 eval queries. Embedded local mode
+is exact scan only — it proves the filter is logically right and nothing about HNSW.
 
 ### 13.3 Current and historical queries share one mechanism
 
@@ -791,18 +902,25 @@ state.
 Query + relevant_date + case facts
         │
         ▼
-Temporal eligibility filter (hard constraint, pre-retrieval)
+Temporal eligibility filter (hard constraint, pre-retrieval; date payload
+indexes built before HNSW, §13.2)
         │
    ┌────┴────┐
    ▼         ▼
-Semantic    BM25
-   │         │
+Semantic    BM25        (bge-base-en-v1.5 / citation-aware Okapi BM25,
+   │         │           both over eligible chunks only)
    └────┬────┘
         ▼
-   Candidate sub-chunks → Reranking → Matched sub-chunk(s)
+   Reciprocal rank fusion (k = 60)
         │
         ▼
-   Parent resolution → Full canonical provision(s)
+   Exact-citation priority (provision-level citations only, §7.4)
+        │            [cross-encoder rerank: off by default, eval arm only]
+        ▼
+   Matched sub-chunk(s)
+        │
+        ▼
+   Parent resolution → Full canonical provision(s), each once
         │
    ┌────┴─────────────┐
    ▼                   ▼
@@ -837,6 +955,56 @@ target values are not.
   absolute numbers, is the point (§13.2's candidate-starvation claim is only
   demonstrated if hybrid+temporal-filter measurably beats vector-only+no-filter)
 - With vs. without reranking, same metrics
+
+**Retrieval — Phase 1 measured results and locked thresholds (2026-10-02).**
+Harness: `eu-ai-check eval-retrieval`; set: `data/eval/retrieval_queries.json`.
+Relevance is scored at `versioned_provision_id` level, so the right article in the
+wrong version is a miss.
+
+> **Post-hoc queries — read this before any number below.** The original set had
+> 65 queries (20 `terminology`, 28 `use_case`, 17 `temporal`), written before any
+> run and frozen with its results in `data/eval/results/baseline_v1_65q*`. Its
+> terminology queries carried topical words, so every arm — vector-only included —
+> scored Recall@5 = 1.0 and the hybrid-vs-vector comparison was untestable. **33
+> citation queries were therefore added *after* the first run had been seen**:
+> `terminology_bare` (26 bare citations such as "Article 26(7)") and
+> `terminology_variant` (7 other citation styles such as "Art. 26(6)"). Every one
+> is flagged `post_hoc` in the file. Ten of them (B01–B10, `seen_in_probe`) were
+> also run in an informal probe before being added; the other 23 were written
+> without being run. The harness always reports the 48 pre-registered real-corpus
+> queries as their own slice, so a post-hoc gain cannot be read as planned.
+
+Measured (rerank off unless named; full tables in
+`data/eval/results/expanded_v2_98q.txt`):
+
+| slice | vector | BM25 | hybrid (RRF) | **hybrid + citation priority (design)** |
+|---|---|---|---|---|
+| bare citations, R@5 (n=26, post-hoc) | 0.731 | 0.962 | 0.865 | **1.000** |
+| bare citations, P@5 | 0.146 | 0.208 | 0.177 | **0.215** |
+| — of which never run before (n=16), R@5 | 0.750 | 0.938 | 0.781 | **1.000** |
+| other citation styles, R@5 (n=7, post-hoc) | 0.571 | 1.000 | 0.857 | 0.857 |
+| use case, R@5 (n=28, pre-registered) | 0.929 | 0.857 | 0.946 | **0.946** |
+| all pre-registered, R@5 (n=48) | 0.958 | 0.917 | 0.969 | **0.969** |
+
+Precision@k is reported but is the weaker signal here: most queries have exactly
+one relevant provision, so P@5 is capped near 0.2 and P@10 near 0.1.
+
+**Locked Phase 1 thresholds — regression guards, NOT pre-registered acceptance
+criteria.** These were set *after* the measurements above were seen, on queries
+that were themselves added post-hoc. They guard against the design regressing; they
+are not evidence that a pre-planned hypothesis was confirmed, and must not be
+presented as such.
+
+- On `terminology_bare`: design Recall@5 ≥ vector-only + **0.15** (measured
+  +0.269), and Precision@5 ≥ vector-only + **0.03** (measured +0.069).
+- On `use_case` (pre-registered): design Recall@5 ≥ vector-only (measured 0.946
+  vs 0.929) — citation handling must not cost natural-language retrieval.
+- On `temporal`: pre-filter returns zero ineligible versions at every k, and an
+  empty result before entry into force (hard, not a threshold).
+
+A genuinely pre-registered test of the citation design needs citation queries
+written *before* the next run; new query sets should be committed before they are
+evaluated.
 
 **Extraction:**
 - Field-level accuracy (semantic match for free-text fields: purpose, functionality)
@@ -930,6 +1098,18 @@ to a specific stage, not just logged as "wrong answer."
     (invariant 10) — the two remain separately modeled and separately checked. See
     §12.1.
 
+**Updated (Phase 1 retrieval) additions:**
+
+18. **Date payload indexes precede the vector graph.** `valid_from`/`valid_to` are
+    indexed before any point is inserted, so HNSW builds filter-aware links;
+    without them filtered recall collapses under selective date filters (§13.2).
+19. **An explicit provision-level citation is a lookup, not a relevance guess** —
+    it is promoted ahead of fused ranking, but only among date-eligible versions
+    (§7.4).
+20. **No retrieval component is adopted on expectation.** Reranking, fusion
+    variants and citation handling each enter as a measured eval arm first; the
+    reranker stayed off because it lost (§7.4, §18).
+
 ---
 
 ## 20. Rejected Alternatives
@@ -945,15 +1125,30 @@ to a specific stage, not just logged as "wrong answer."
 | First-class `Obligation` entity distinct from `Provision`, introduced speculatively | Not justified by Article 16 (already atomic per point) or by the Article 5(1)(h) bundled-exception case (canonical-provision boundary sufficed). Deferred until corpus evidence of frequent unsplittable multi-obligation provisions. |
 | Returning sibling provisions automatically alongside a matched parent | Floods generation context with structurally-adjacent-but-not-necessarily-relevant text; siblings are only pulled in via an explicit cross-reference dependency. |
 | Free-text-only extraction with no structured intermediate representation | Would make hybrid retrieval's metadata/temporal filtering impossible; structured fields are required as enrichment even though free text remains available to semantic/BM25 search. |
+| Plain RRF hybrid with no citation handling (Phase 1) | Measured: fusion with a vector ranking that cannot read "26(7)" dilutes BM25's exact match (bare-citation Recall@5 0.865 vs BM25 0.962). Replaced by exact-citation priority after RRF (§7.4). |
+| Cross-encoder reranking by default (Phase 1) | Measured: bge-reranker-base lowered hybrid Recall@5 (use case 0.946 → 0.875; bare citations 0.865 → 0.769). Kept as an eval arm; a larger reranker must win as an arm before adoption. |
+| Embedding whole provisions regardless of length (Phase 1) | Article 26(10) exceeds bge-base's 512-token window; its closing sentences would be silently truncated out of the embedding. |
 | Extraction step directly outputting legal conclusions (risk_tier, prohibited_practice, actor_roles, substantial_modification) | Leakage risk — the model would silently guess conclusions from surface pattern-matching before any retrieval or grounding occurs, defeating the point of a grounded, citable determination. |
 
 ---
 
 ## 21. Open Questions and Stretch Goals
 
+**Resolved in Phase 1:**
+- ~~Physical pre-filtering behavior of the chosen vector DB under realistic
+  date-filter selectivity (§13.2).~~ **Answered for Qdrant 1.19.1 HNSW**: filtered
+  recall holds (0.90–1.00 at 10%–0.1% selectivity) *only* with date payload indexes
+  built before the graph; without them it collapses (0.007 at 1%). That requirement
+  is now in §13.2. Embedded local mode (exact scan) and server HNSW are reported as
+  separate results; the first proves logical correctness only. Residual caveat: the
+  selectivity sweep used random vectors, so absolute production recall on a large
+  real multi-version corpus is still to be measured once one exists.
+
 **Open / requires empirical verification during implementation:**
-- Physical pre-filtering behavior of the chosen vector DB under realistic date-filter
-  selectivity (§13.2) — must be benchmarked, not assumed from documentation.
+- Whether physical vector storage is deduplicated across
+  `IndexDocument`s sharing a `content_id` (§15) — not measured in Phase 1; V1 does
+  not depend on it. Compute-time dedup *is* verified (104 encodings for 200 index
+  documents across the real and versioned indexes).
 - Whether `ApplicabilityRule.legal_provision_id` referencing `logical_provision_id`
   (rather than `versioned_provision_id`) holds cleanly once real phase-in-date data is
   ingested for high-risk obligations and Article 5 prohibited practices — flagged here

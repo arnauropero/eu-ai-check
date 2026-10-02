@@ -13,8 +13,10 @@ collapsed (§10):
 
 from __future__ import annotations
 
+import json
 from datetime import date
 from enum import StrEnum
+from pathlib import Path
 from typing import Annotated, Any
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -222,6 +224,17 @@ class Corpus(BaseModel):
     source_reference: str
     provisions: list[Provision]
     applicability_rules: list[ApplicabilityRule]
+
+    @classmethod
+    def load(cls, directory: Path, source_reference: str = "") -> Corpus:
+        """Load a corpus written by `eu-ai-check ingest`."""
+        provisions = json.loads((directory / "provisions.json").read_text(encoding="utf-8"))
+        rules = json.loads((directory / "applicability_rules.json").read_text(encoding="utf-8"))
+        return cls(
+            source_reference=source_reference or str(directory),
+            provisions=[Provision.model_validate(p) for p in provisions],
+            applicability_rules=[ApplicabilityRule.model_validate(r) for r in rules],
+        )
 
     def rules_for(self, logical_provision_id: str) -> list[ApplicabilityRule]:
         return [

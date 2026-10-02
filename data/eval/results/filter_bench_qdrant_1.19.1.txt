@@ -1,0 +1,32 @@
+SYSTEM_SPEC.md §21 -- physical filtered search on a Qdrant server
+================================================================================================
+
+A. Real corpus, eval queries on their own relevant_date (HNSW vs exact, same server)
+  arm                                                  points  indexed    R@10    R@30  minR@10  emb==exact
+  real: server default config                              96        0   1.000   1.000     1.00     81/81
+  real: server HNSW forced                                 96       96   1.000   1.000     1.00     81/81
+  versioned: server default config                        104        0   1.000   1.000     1.00     17/17
+  versioned: server HNSW forced                           104      104   1.000   1.000     1.00     17/17
+
+B. Selectivity sweep: 20k seeded random unit vectors, same eligibility_filter
+  config                                 admits       n    R@10  minR@10  short
+  payload index, default planner        100.0%   20000   0.332     0.00      0
+  payload index, default planner         50.0%   10017   0.281     0.00      0
+  payload index, default planner         10.0%    2007   1.000     1.00      0
+  payload index, default planner          1.0%     228   1.000     1.00      0
+  payload index, default planner          0.1%      30   1.000     1.00      0
+  payload index, HNSW forced            100.0%   20000   0.375     0.00      0
+  payload index, HNSW forced             50.0%   10017   0.527     0.20      0
+  payload index, HNSW forced             10.0%    2007   0.898     0.60      0
+  payload index, HNSW forced              1.0%     228   1.000     1.00      0
+  payload index, HNSW forced              0.1%      30   0.904     0.70      0
+  no payload index, default planner     100.0%   20000   0.336     0.00      0
+  no payload index, default planner      50.0%   10017   0.310     0.00      0
+  no payload index, default planner      10.0%    2007   1.000     1.00      0
+  no payload index, default planner       1.0%     228   1.000     1.00      0
+  no payload index, default planner       0.1%      30   1.000     1.00      0
+  no payload index, HNSW forced         100.0%   20000   0.341     0.00      0
+  no payload index, HNSW forced          50.0%   10017   0.265     0.00      0
+  no payload index, HNSW forced          10.0%    2007   0.224     0.00      0
+  no payload index, HNSW forced           1.0%     228   0.007     0.00    100
+  no payload index, HNSW forced           0.1%      30   0.041     0.00    100

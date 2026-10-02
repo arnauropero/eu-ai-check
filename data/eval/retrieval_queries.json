@@ -1,0 +1,992 @@
+{
+  "notice": "Hand-built retrieval eval set (PROJECT_PLAN.md §10). Relevance is judged at logical_provision_id level and resolved to the versioned_provision_id valid on relevant_date in the corpus being evaluated, so the metrics are scored at version level (SYSTEM_SPEC.md §18). 'terminology' queries use precise legal references (article numbers, Annex III points and area names), where BM25 is expected to matter most. 'use_case' queries describe a situation in plain language with no article numbers. 'temporal' queries run against the synthetic multi-version fixture; they are phrased in the amended wording, so on a pre-amendment date the newer, ineligible version is the closer lexical and semantic match. POST-HOC ADDITION (2026-10-02): the 'terminology_bare' and 'terminology_variant' queries (ids B*, V*) were added AFTER the first evaluation run, because the original 'terminology' queries carry topical words and saturated every arm at Recall@5 = 1.0. They are not a pre-planned benchmark. B01-B10 ('seen_in_probe': true) were also used in an informal probe before being added, so their results were known in advance; B11-B26 and V01-V07 were written without being run. 'terminology_variant' uses citation styles the BM25 tokenizer was not written for ('Art. 26(6)', 'Annex III, point 4(a)', 'point (h) of Article 5(1)'), and the tokenizer was deliberately not changed to fit them. The original 65-query run is frozen in data/eval/results/baseline_v1_65q*.",
+  "queries": [
+    {
+      "id": "T01",
+      "category": "terminology",
+      "relevant_date": "2026-09-01",
+      "query": "Article 26(7) obligation to inform workers' representatives",
+      "relevant": [
+        "aiact:art_26:para_7"
+      ]
+    },
+    {
+      "id": "T02",
+      "category": "terminology",
+      "relevant_date": "2026-09-01",
+      "query": "What does Article 16(h) require regarding the CE marking?",
+      "relevant": [
+        "aiact:art_16:point_h"
+      ]
+    },
+    {
+      "id": "T03",
+      "category": "terminology",
+      "relevant_date": "2026-09-01",
+      "query": "Article 6(3) derogation where the AI system performs a narrow procedural task",
+      "relevant": [
+        "aiact:art_6:para_3:point_a"
+      ]
+    },
+    {
+      "id": "T04",
+      "category": "terminology",
+      "relevant_date": "2026-09-01",
+      "query": "Annex III point 5(b) creditworthiness and credit score",
+      "relevant": [
+        "aiact:anx_III:area_5:item_b"
+      ]
+    },
+    {
+      "id": "T05",
+      "category": "terminology",
+      "relevant_date": "2026-09-01",
+      "query": "Article 5(1)(e) untargeted scraping of facial images",
+      "relevant": [
+        "aiact:art_5:para_1:point_e"
+      ]
+    },
+    {
+      "id": "T06",
+      "category": "terminology",
+      "relevant_date": "2026-09-01",
+      "query": "Article 25(1)(c) modifying the intended purpose of a general-purpose AI system",
+      "relevant": [
+        "aiact:art_25:para_1:point_c"
+      ]
+    },
+    {
+      "id": "T07",
+      "category": "terminology",
+      "relevant_date": "2026-09-01",
+      "query": "registration obligation under Article 49(2) for a provider who considers an Annex III system not high-risk",
+      "relevant": [
+        "aiact:art_6:para_4"
+      ]
+    },
+    {
+      "id": "T08",
+      "category": "terminology",
+      "relevant_date": "2026-09-01",
+      "query": "Article 26(11) informing natural persons subject to decisions of a high-risk AI system",
+      "relevant": [
+        "aiact:art_26:para_11"
+      ]
+    },
+    {
+      "id": "T09",
+      "category": "terminology",
+      "relevant_date": "2026-09-01",
+      "query": "Annex III critical infrastructure safety components",
+      "relevant": [
+        "aiact:anx_III:area_2"
+      ]
+    },
+    {
+      "id": "T10",
+      "category": "terminology",
+      "relevant_date": "2026-09-01",
+      "query": "Article 16(c) quality management system complying with Article 17",
+      "relevant": [
+        "aiact:art_16:point_c"
+      ]
+    },
+    {
+      "id": "T11",
+      "category": "terminology",
+      "relevant_date": "2026-09-01",
+      "query": "Article 6(1) safety component of a product covered by Union harmonisation legislation in Annex I requiring third-party conformity assessment",
+      "relevant": [
+        "aiact:art_6:para_1:point_a",
+        "aiact:art_6:para_1:point_b"
+      ]
+    },
+    {
+      "id": "T12",
+      "category": "terminology",
+      "relevant_date": "2026-09-01",
+      "query": "Article 26(9) data protection impact assessment under Article 35 of Regulation (EU) 2016/679",
+      "relevant": [
+        "aiact:art_26:para_9"
+      ]
+    },
+    {
+      "id": "T13",
+      "category": "terminology",
+      "relevant_date": "2026-09-01",
+      "query": "Annex III point 8(b) influencing the outcome of an election or referendum",
+      "relevant": [
+        "aiact:anx_III:area_8:item_b"
+      ]
+    },
+    {
+      "id": "T14",
+      "category": "terminology",
+      "relevant_date": "2026-09-01",
+      "query": "Article 5(1)(h)(iii) localisation of a person suspected of an offence referred to in Annex II",
+      "relevant": [
+        "aiact:art_5:para_1:point_h"
+      ]
+    },
+    {
+      "id": "T15",
+      "category": "terminology",
+      "relevant_date": "2026-09-01",
+      "query": "Article 25(3) product manufacturer considered the provider under Section A of Annex I",
+      "relevant": [
+        "aiact:art_25:para_3:point_a",
+        "aiact:art_25:para_3:point_b"
+      ]
+    },
+    {
+      "id": "T16",
+      "category": "terminology",
+      "relevant_date": "2026-09-01",
+      "query": "Article 26(10) post-remote biometric identification authorisation within 48 hours",
+      "relevant": [
+        "aiact:art_26:para_10"
+      ]
+    },
+    {
+      "id": "T17",
+      "category": "terminology",
+      "relevant_date": "2026-09-01",
+      "query": "Article 16(i) registration obligations referred to in Article 49(1)",
+      "relevant": [
+        "aiact:art_16:point_i"
+      ]
+    },
+    {
+      "id": "T18",
+      "category": "terminology",
+      "relevant_date": "2026-09-01",
+      "query": "Annex III point 7(c) examination of applications for asylum, visa or residence permits",
+      "relevant": [
+        "aiact:anx_III:area_7:item_c"
+      ]
+    },
+    {
+      "id": "T19",
+      "category": "terminology",
+      "relevant_date": "2026-09-01",
+      "query": "Article 5(4) notification to the market surveillance authority and national data protection authority",
+      "relevant": [
+        "aiact:art_5:para_4"
+      ]
+    },
+    {
+      "id": "T20",
+      "category": "terminology",
+      "relevant_date": "2026-09-01",
+      "query": "Article 26(8) public authority deployers and the EU database referred to in Article 71",
+      "relevant": [
+        "aiact:art_26:para_8"
+      ]
+    },
+    {
+      "id": "U01",
+      "category": "use_case",
+      "relevant_date": "2026-09-01",
+      "query": "We use an AI tool to screen CVs and rank job applicants before interviews.",
+      "relevant": [
+        "aiact:anx_III:area_4:item_a"
+      ]
+    },
+    {
+      "id": "U02",
+      "category": "use_case",
+      "relevant_date": "2026-09-01",
+      "query": "Our software analyses employees' facial expressions during video calls to detect their mood.",
+      "relevant": [
+        "aiact:art_5:para_1:point_f",
+        "aiact:anx_III:area_1:item_c"
+      ]
+    },
+    {
+      "id": "U03",
+      "category": "use_case",
+      "relevant_date": "2026-09-01",
+      "query": "A city app scores residents on trustworthiness based on their social behaviour, which then limits their access to public services.",
+      "relevant": [
+        "aiact:art_5:para_1:point_c"
+      ]
+    },
+    {
+      "id": "U04",
+      "category": "use_case",
+      "relevant_date": "2026-09-01",
+      "query": "A bank uses a machine learning model to decide who gets a consumer loan.",
+      "relevant": [
+        "aiact:anx_III:area_5:item_b"
+      ]
+    },
+    {
+      "id": "U05",
+      "category": "use_case",
+      "relevant_date": "2026-09-01",
+      "query": "Online exam proctoring software that flags students who cheat.",
+      "relevant": [
+        "aiact:anx_III:area_3:item_d"
+      ]
+    },
+    {
+      "id": "U06",
+      "category": "use_case",
+      "relevant_date": "2026-09-01",
+      "query": "An AI that automatically grades student essays.",
+      "relevant": [
+        "aiact:anx_III:area_3:item_b"
+      ]
+    },
+    {
+      "id": "U07",
+      "category": "use_case",
+      "relevant_date": "2026-09-01",
+      "query": "A police tool predicting whether someone will commit a crime based purely on their personality profile.",
+      "relevant": [
+        "aiact:art_5:para_1:point_d",
+        "aiact:anx_III:area_6:item_d"
+      ]
+    },
+    {
+      "id": "U08",
+      "category": "use_case",
+      "relevant_date": "2026-09-01",
+      "query": "We collect photos of faces from social media to build a face recognition database.",
+      "relevant": [
+        "aiact:art_5:para_1:point_e"
+      ]
+    },
+    {
+      "id": "U09",
+      "category": "use_case",
+      "relevant_date": "2026-09-01",
+      "query": "An insurer prices life and health insurance premiums with AI.",
+      "relevant": [
+        "aiact:anx_III:area_5:item_c"
+      ]
+    },
+    {
+      "id": "U10",
+      "category": "use_case",
+      "relevant_date": "2026-09-01",
+      "query": "A system that prioritises incoming emergency calls and dispatches ambulances.",
+      "relevant": [
+        "aiact:anx_III:area_5:item_d"
+      ]
+    },
+    {
+      "id": "U11",
+      "category": "use_case",
+      "relevant_date": "2026-09-01",
+      "query": "We put our own brand name on a high-risk AI system we bought from another company.",
+      "relevant": [
+        "aiact:art_25:para_1:point_a"
+      ]
+    },
+    {
+      "id": "U12",
+      "category": "use_case",
+      "relevant_date": "2026-09-01",
+      "query": "We repurposed a general chatbot that was not high-risk so that it now makes hiring decisions.",
+      "relevant": [
+        "aiact:art_25:para_1:point_c"
+      ]
+    },
+    {
+      "id": "U13",
+      "category": "use_case",
+      "relevant_date": "2026-09-01",
+      "query": "How long does the company using a high-risk system have to keep the logs it generates?",
+      "relevant": [
+        "aiact:art_26:para_6"
+      ]
+    },
+    {
+      "id": "U14",
+      "category": "use_case",
+      "relevant_date": "2026-09-01",
+      "query": "Who in our organisation must oversee the AI system we use, and what competence do they need?",
+      "relevant": [
+        "aiact:art_26:para_2"
+      ]
+    },
+    {
+      "id": "U15",
+      "category": "use_case",
+      "relevant_date": "2026-09-01",
+      "query": "Do we have to tell people that an AI system is helping make decisions about them?",
+      "relevant": [
+        "aiact:art_26:para_11"
+      ]
+    },
+    {
+      "id": "U16",
+      "category": "use_case",
+      "relevant_date": "2026-09-01",
+      "query": "Police use live facial recognition cameras in a train station to look for a missing child.",
+      "relevant": [
+        "aiact:art_5:para_1:point_h"
+      ]
+    },
+    {
+      "id": "U17",
+      "category": "use_case",
+      "relevant_date": "2026-09-01",
+      "query": "AI that safeguards the operation of the electricity grid and the water supply.",
+      "relevant": [
+        "aiact:anx_III:area_2"
+      ]
+    },
+    {
+      "id": "U18",
+      "category": "use_case",
+      "relevant_date": "2026-09-01",
+      "query": "Lie detector AI used by border guards when interviewing travellers.",
+      "relevant": [
+        "aiact:anx_III:area_7:item_a"
+      ]
+    },
+    {
+      "id": "U19",
+      "category": "use_case",
+      "relevant_date": "2026-09-01",
+      "query": "A tool that helps judges research case law and apply the law to the facts of a case.",
+      "relevant": [
+        "aiact:anx_III:area_8:item_a"
+      ]
+    },
+    {
+      "id": "U20",
+      "category": "use_case",
+      "relevant_date": "2026-09-01",
+      "query": "Micro-targeting political messages at voters to sway a referendum.",
+      "relevant": [
+        "aiact:anx_III:area_8:item_b"
+      ]
+    },
+    {
+      "id": "U21",
+      "category": "use_case",
+      "relevant_date": "2026-09-01",
+      "query": "A game that exploits children's vulnerabilities to push them into in-app purchases.",
+      "relevant": [
+        "aiact:art_5:para_1:point_b"
+      ]
+    },
+    {
+      "id": "U22",
+      "category": "use_case",
+      "relevant_date": "2026-09-01",
+      "query": "Software that infers people's sexual orientation and religion from photos of them.",
+      "relevant": [
+        "aiact:art_5:para_1:point_g",
+        "aiact:anx_III:area_1:item_b"
+      ]
+    },
+    {
+      "id": "U23",
+      "category": "use_case",
+      "relevant_date": "2026-09-01",
+      "query": "Our system only does a preparatory step before a human makes the actual assessment. Is it still high-risk?",
+      "relevant": [
+        "aiact:art_6:para_3:point_d"
+      ]
+    },
+    {
+      "id": "U24",
+      "category": "use_case",
+      "relevant_date": "2026-09-01",
+      "query": "Someone else substantially modified the system we originally sold; are we still the provider and what must we hand over?",
+      "relevant": [
+        "aiact:art_25:para_2"
+      ]
+    },
+    {
+      "id": "U25",
+      "category": "use_case",
+      "relevant_date": "2026-09-01",
+      "query": "What must the written agreement between a high-risk AI provider and the supplier of components and tools cover?",
+      "relevant": [
+        "aiact:art_25:para_4"
+      ]
+    },
+    {
+      "id": "U26",
+      "category": "use_case",
+      "relevant_date": "2026-09-01",
+      "query": "As an employer introducing an AI system at work, do we have to tell the staff and their representatives first?",
+      "relevant": [
+        "aiact:art_26:para_7"
+      ]
+    },
+    {
+      "id": "U27",
+      "category": "use_case",
+      "relevant_date": "2026-09-01",
+      "query": "AI that monitors employee performance and allocates tasks based on their behaviour.",
+      "relevant": [
+        "aiact:anx_III:area_4:item_b"
+      ]
+    },
+    {
+      "id": "U28",
+      "category": "use_case",
+      "relevant_date": "2026-09-01",
+      "query": "We believe our system listed among the high-risk use cases is not actually high-risk. What do we have to document?",
+      "relevant": [
+        "aiact:art_6:para_4"
+      ]
+    },
+    {
+      "id": "S01a",
+      "category": "temporal",
+      "relevant_date": "2025-01-15",
+      "query": "deployers must keep logs for at least twelve months",
+      "relevant": [
+        "aiact:art_26:para_6"
+      ]
+    },
+    {
+      "id": "S01b",
+      "category": "temporal",
+      "relevant_date": "2026-01-15",
+      "query": "deployers must keep logs for at least twelve months",
+      "relevant": [
+        "aiact:art_26:para_6"
+      ]
+    },
+    {
+      "id": "S02a",
+      "category": "temporal",
+      "relevant_date": "2025-01-15",
+      "query": "emotion recognition prohibited in recruitment procedures",
+      "relevant": [
+        "aiact:art_5:para_1:point_f"
+      ]
+    },
+    {
+      "id": "S02b",
+      "category": "temporal",
+      "relevant_date": "2026-01-15",
+      "query": "emotion recognition prohibited in recruitment procedures",
+      "relevant": [
+        "aiact:art_5:para_1:point_f"
+      ]
+    },
+    {
+      "id": "S03a",
+      "category": "temporal",
+      "relevant_date": "2025-01-15",
+      "query": "AI used to conduct or score video interviews of job candidates",
+      "relevant": [
+        "aiact:anx_III:area_4:item_a"
+      ]
+    },
+    {
+      "id": "S03b",
+      "category": "temporal",
+      "relevant_date": "2026-01-15",
+      "query": "AI used to conduct or score video interviews of job candidates",
+      "relevant": [
+        "aiact:anx_III:area_4:item_a"
+      ]
+    },
+    {
+      "id": "S04a",
+      "category": "temporal",
+      "relevant_date": "2025-01-15",
+      "query": "providers must affix the physical or digital CE marking",
+      "relevant": [
+        "aiact:art_16:point_h"
+      ]
+    },
+    {
+      "id": "S04b",
+      "category": "temporal",
+      "relevant_date": "2026-01-15",
+      "query": "providers must affix the physical or digital CE marking",
+      "relevant": [
+        "aiact:art_16:point_h"
+      ]
+    },
+    {
+      "id": "S05a",
+      "category": "temporal",
+      "relevant_date": "2025-01-15",
+      "query": "employers must inform workers at least one month before using a high-risk AI system",
+      "relevant": [
+        "aiact:art_26:para_7"
+      ]
+    },
+    {
+      "id": "S05b",
+      "category": "temporal",
+      "relevant_date": "2026-01-15",
+      "query": "employers must inform workers at least one month before using a high-risk AI system",
+      "relevant": [
+        "aiact:art_26:para_7"
+      ]
+    },
+    {
+      "id": "S06a",
+      "category": "temporal",
+      "relevant_date": "2025-01-15",
+      "query": "scraping facial images or voice recordings from the internet",
+      "relevant": [
+        "aiact:art_5:para_1:point_e"
+      ]
+    },
+    {
+      "id": "S06b",
+      "category": "temporal",
+      "relevant_date": "2026-01-15",
+      "query": "scraping facial images or voice recordings from the internet",
+      "relevant": [
+        "aiact:art_5:para_1:point_e"
+      ]
+    },
+    {
+      "id": "S07a",
+      "category": "temporal",
+      "relevant_date": "2025-01-15",
+      "query": "credit scoring exception for calculating prudential capital requirements",
+      "relevant": [
+        "aiact:anx_III:area_5:item_b"
+      ]
+    },
+    {
+      "id": "S07b",
+      "category": "temporal",
+      "relevant_date": "2026-01-15",
+      "query": "credit scoring exception for calculating prudential capital requirements",
+      "relevant": [
+        "aiact:anx_III:area_5:item_b"
+      ]
+    },
+    {
+      "id": "S08a",
+      "category": "temporal",
+      "relevant_date": "2025-01-15",
+      "query": "human oversight staff need AI literacy",
+      "relevant": [
+        "aiact:art_26:para_2"
+      ]
+    },
+    {
+      "id": "S08b",
+      "category": "temporal",
+      "relevant_date": "2026-01-15",
+      "query": "human oversight staff need AI literacy",
+      "relevant": [
+        "aiact:art_26:para_2"
+      ]
+    },
+    {
+      "id": "S09",
+      "category": "temporal",
+      "relevant_date": "2024-06-01",
+      "query": "prohibited AI practices",
+      "relevant": [],
+      "note": "Before entry into force (2024-08-01) no text version is valid: the only correct result is none. A non-empty result is a provision cited from a date it did not exist."
+    },
+    {
+      "id": "B01",
+      "category": "terminology_bare",
+      "relevant_date": "2026-09-01",
+      "query": "Article 26(7)",
+      "relevant": [
+        "aiact:art_26:para_7"
+      ],
+      "post_hoc": true,
+      "added": "2026-10-02",
+      "seen_in_probe": true
+    },
+    {
+      "id": "B02",
+      "category": "terminology_bare",
+      "relevant_date": "2026-09-01",
+      "query": "Article 16(h)",
+      "relevant": [
+        "aiact:art_16:point_h"
+      ],
+      "post_hoc": true,
+      "added": "2026-10-02",
+      "seen_in_probe": true
+    },
+    {
+      "id": "B03",
+      "category": "terminology_bare",
+      "relevant_date": "2026-09-01",
+      "query": "Annex III point 5(b)",
+      "relevant": [
+        "aiact:anx_III:area_5:item_b"
+      ],
+      "post_hoc": true,
+      "added": "2026-10-02",
+      "seen_in_probe": true
+    },
+    {
+      "id": "B04",
+      "category": "terminology_bare",
+      "relevant_date": "2026-09-01",
+      "query": "Article 25(1)(c)",
+      "relevant": [
+        "aiact:art_25:para_1:point_c"
+      ],
+      "post_hoc": true,
+      "added": "2026-10-02",
+      "seen_in_probe": true
+    },
+    {
+      "id": "B05",
+      "category": "terminology_bare",
+      "relevant_date": "2026-09-01",
+      "query": "Article 26(11)",
+      "relevant": [
+        "aiact:art_26:para_11"
+      ],
+      "post_hoc": true,
+      "added": "2026-10-02",
+      "seen_in_probe": true
+    },
+    {
+      "id": "B06",
+      "category": "terminology_bare",
+      "relevant_date": "2026-09-01",
+      "query": "Article 5(1)(e)",
+      "relevant": [
+        "aiact:art_5:para_1:point_e"
+      ],
+      "post_hoc": true,
+      "added": "2026-10-02",
+      "seen_in_probe": true
+    },
+    {
+      "id": "B07",
+      "category": "terminology_bare",
+      "relevant_date": "2026-09-01",
+      "query": "Article 6(4)",
+      "relevant": [
+        "aiact:art_6:para_4"
+      ],
+      "post_hoc": true,
+      "added": "2026-10-02",
+      "seen_in_probe": true
+    },
+    {
+      "id": "B08",
+      "category": "terminology_bare",
+      "relevant_date": "2026-09-01",
+      "query": "Annex III point 7(c)",
+      "relevant": [
+        "aiact:anx_III:area_7:item_c"
+      ],
+      "post_hoc": true,
+      "added": "2026-10-02",
+      "seen_in_probe": true
+    },
+    {
+      "id": "B09",
+      "category": "terminology_bare",
+      "relevant_date": "2026-09-01",
+      "query": "Article 16(c)",
+      "relevant": [
+        "aiact:art_16:point_c"
+      ],
+      "post_hoc": true,
+      "added": "2026-10-02",
+      "seen_in_probe": true
+    },
+    {
+      "id": "B10",
+      "category": "terminology_bare",
+      "relevant_date": "2026-09-01",
+      "query": "Article 26(9)",
+      "relevant": [
+        "aiact:art_26:para_9"
+      ],
+      "post_hoc": true,
+      "added": "2026-10-02",
+      "seen_in_probe": true
+    },
+    {
+      "id": "B11",
+      "category": "terminology_bare",
+      "relevant_date": "2026-09-01",
+      "query": "Article 5(1)(a)",
+      "relevant": [
+        "aiact:art_5:para_1:point_a"
+      ],
+      "post_hoc": true,
+      "added": "2026-10-02",
+      "seen_in_probe": false
+    },
+    {
+      "id": "B12",
+      "category": "terminology_bare",
+      "relevant_date": "2026-09-01",
+      "query": "Article 5(1)(h)(ii)",
+      "relevant": [
+        "aiact:art_5:para_1:point_h"
+      ],
+      "post_hoc": true,
+      "added": "2026-10-02",
+      "seen_in_probe": false
+    },
+    {
+      "id": "B13",
+      "category": "terminology_bare",
+      "relevant_date": "2026-09-01",
+      "query": "Article 5(3)",
+      "relevant": [
+        "aiact:art_5:para_3"
+      ],
+      "post_hoc": true,
+      "added": "2026-10-02",
+      "seen_in_probe": false
+    },
+    {
+      "id": "B14",
+      "category": "terminology_bare",
+      "relevant_date": "2026-09-01",
+      "query": "Article 6(2)",
+      "relevant": [
+        "aiact:art_6:para_2"
+      ],
+      "post_hoc": true,
+      "added": "2026-10-02",
+      "seen_in_probe": false
+    },
+    {
+      "id": "B15",
+      "category": "terminology_bare",
+      "relevant_date": "2026-09-01",
+      "query": "Article 6(3)(c)",
+      "relevant": [
+        "aiact:art_6:para_3:point_c"
+      ],
+      "post_hoc": true,
+      "added": "2026-10-02",
+      "seen_in_probe": false
+    },
+    {
+      "id": "B16",
+      "category": "terminology_bare",
+      "relevant_date": "2026-09-01",
+      "query": "Article 6(1)",
+      "relevant": [
+        "aiact:art_6:para_1:point_a",
+        "aiact:art_6:para_1:point_b"
+      ],
+      "post_hoc": true,
+      "added": "2026-10-02",
+      "seen_in_probe": false
+    },
+    {
+      "id": "B17",
+      "category": "terminology_bare",
+      "relevant_date": "2026-09-01",
+      "query": "Article 16(l)",
+      "relevant": [
+        "aiact:art_16:point_l"
+      ],
+      "post_hoc": true,
+      "added": "2026-10-02",
+      "seen_in_probe": false
+    },
+    {
+      "id": "B18",
+      "category": "terminology_bare",
+      "relevant_date": "2026-09-01",
+      "query": "Article 25(2)",
+      "relevant": [
+        "aiact:art_25:para_2"
+      ],
+      "post_hoc": true,
+      "added": "2026-10-02",
+      "seen_in_probe": false
+    },
+    {
+      "id": "B19",
+      "category": "terminology_bare",
+      "relevant_date": "2026-09-01",
+      "query": "Article 25(3)",
+      "relevant": [
+        "aiact:art_25:para_3:point_a",
+        "aiact:art_25:para_3:point_b"
+      ],
+      "post_hoc": true,
+      "added": "2026-10-02",
+      "seen_in_probe": false
+    },
+    {
+      "id": "B20",
+      "category": "terminology_bare",
+      "relevant_date": "2026-09-01",
+      "query": "Article 26(1)",
+      "relevant": [
+        "aiact:art_26:para_1"
+      ],
+      "post_hoc": true,
+      "added": "2026-10-02",
+      "seen_in_probe": false
+    },
+    {
+      "id": "B21",
+      "category": "terminology_bare",
+      "relevant_date": "2026-09-01",
+      "query": "Article 26(12)",
+      "relevant": [
+        "aiact:art_26:para_12"
+      ],
+      "post_hoc": true,
+      "added": "2026-10-02",
+      "seen_in_probe": false
+    },
+    {
+      "id": "B22",
+      "category": "terminology_bare",
+      "relevant_date": "2026-09-01",
+      "query": "Annex III point 2",
+      "relevant": [
+        "aiact:anx_III:area_2"
+      ],
+      "post_hoc": true,
+      "added": "2026-10-02",
+      "seen_in_probe": false
+    },
+    {
+      "id": "B23",
+      "category": "terminology_bare",
+      "relevant_date": "2026-09-01",
+      "query": "Annex III point 1(c)",
+      "relevant": [
+        "aiact:anx_III:area_1:item_c"
+      ],
+      "post_hoc": true,
+      "added": "2026-10-02",
+      "seen_in_probe": false
+    },
+    {
+      "id": "B24",
+      "category": "terminology_bare",
+      "relevant_date": "2026-09-01",
+      "query": "Annex III point 6(e)",
+      "relevant": [
+        "aiact:anx_III:area_6:item_e"
+      ],
+      "post_hoc": true,
+      "added": "2026-10-02",
+      "seen_in_probe": false
+    },
+    {
+      "id": "B25",
+      "category": "terminology_bare",
+      "relevant_date": "2026-09-01",
+      "query": "Annex III point 8(a)",
+      "relevant": [
+        "aiact:anx_III:area_8:item_a"
+      ],
+      "post_hoc": true,
+      "added": "2026-10-02",
+      "seen_in_probe": false
+    },
+    {
+      "id": "B26",
+      "category": "terminology_bare",
+      "relevant_date": "2026-09-01",
+      "query": "What does Article 26(5) require?",
+      "relevant": [
+        "aiact:art_26:para_5"
+      ],
+      "post_hoc": true,
+      "added": "2026-10-02",
+      "seen_in_probe": false
+    },
+    {
+      "id": "V01",
+      "category": "terminology_variant",
+      "relevant_date": "2026-09-01",
+      "query": "Art. 26(6)",
+      "relevant": [
+        "aiact:art_26:para_6"
+      ],
+      "post_hoc": true,
+      "added": "2026-10-02",
+      "seen_in_probe": false
+    },
+    {
+      "id": "V02",
+      "category": "terminology_variant",
+      "relevant_date": "2026-09-01",
+      "query": "Annex III, point 4(a)",
+      "relevant": [
+        "aiact:anx_III:area_4:item_a"
+      ],
+      "post_hoc": true,
+      "added": "2026-10-02",
+      "seen_in_probe": false
+    },
+    {
+      "id": "V03",
+      "category": "terminology_variant",
+      "relevant_date": "2026-09-01",
+      "query": "point (h) of Article 5(1)",
+      "relevant": [
+        "aiact:art_5:para_1:point_h"
+      ],
+      "post_hoc": true,
+      "added": "2026-10-02",
+      "seen_in_probe": false
+    },
+    {
+      "id": "V04",
+      "category": "terminology_variant",
+      "relevant_date": "2026-09-01",
+      "query": "Article 16, point (e)",
+      "relevant": [
+        "aiact:art_16:point_e"
+      ],
+      "post_hoc": true,
+      "added": "2026-10-02",
+      "seen_in_probe": false
+    },
+    {
+      "id": "V05",
+      "category": "terminology_variant",
+      "relevant_date": "2026-09-01",
+      "query": "Art 25(1)(a)",
+      "relevant": [
+        "aiact:art_25:para_1:point_a"
+      ],
+      "post_hoc": true,
+      "added": "2026-10-02",
+      "seen_in_probe": false
+    },
+    {
+      "id": "V06",
+      "category": "terminology_variant",
+      "relevant_date": "2026-09-01",
+      "query": "paragraph 10 of Article 26",
+      "relevant": [
+        "aiact:art_26:para_10"
+      ],
+      "post_hoc": true,
+      "added": "2026-10-02",
+      "seen_in_probe": false
+    },
+    {
+      "id": "V07",
+      "category": "terminology_variant",
+      "relevant_date": "2026-09-01",
+      "query": "Annex III(5)(d)",
+      "relevant": [
+        "aiact:anx_III:area_5:item_d"
+      ],
+      "post_hoc": true,
+      "added": "2026-10-02",
+      "seen_in_probe": false
+    }
+  ]
+}
