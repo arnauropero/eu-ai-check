@@ -140,20 +140,59 @@ one rule-matching engine → cited, fail-closed output.
   each deferred §18 category with the phase component that unblocks it, rather than
   inventing a number for it. Phase 1 input worth noting: canonical text runs 90 / 418
   / 2726 chars (min/median/max) and exactly one provision exceeds 2000 chars — Article
-  5(1)(h), the very provision whose sub-chunking makes parent resolution mandatory.
+  26(10), which would overrun a 512-token embedding window if embedded whole.
+  **[Corrected in Phase 1, 2026-10-02]** This note originally named Article 5(1)(h)
+  as the longest provision. It is 1,191 chars. Parent resolution is still mandatory
+  for 5(1)(h), but the reason is structural, not length: one of its sub-chunks
+  states exception (iii) without the prohibition it excepts from. A test now pins
+  the longest provision so the claim cannot silently drift again.
 
-**Phase 1 — Retrieval layer**
+**Phase 1 — Retrieval layer (COMPLETE, 2026-10-02)**
 - Deliverable: hybrid search (semantic + BM25) over ingested provisions, with hard
   pre-retrieval temporal filtering and reranking.
+  **Delivered** (`src/eu_ai_check/retrieval/`, `eu-ai-check search`): temporal
+  pre-filter on both retrievers → bge-base-en-v1.5 in Qdrant + citation-aware BM25 →
+  reciprocal rank fusion → exact-citation priority → parent resolution. Reranking
+  is implemented (bge-reranker-base) but **off by default**: it lost in eval, so it
+  is kept as a measured arm only (SYSTEM_SPEC.md §7.4). Exact-citation priority was
+  *not* in the original plan; it entered as an experimental arm with its matching
+  rule fixed before its first run, and was adopted on the measured result.
 - Deliverable: parent-document resolution from matched sub-chunk to canonical
   provision.
+  **Delivered.** Provisions over 800 characters are split at sentence/enumerator
+  boundaries (lossless, tested). The Article 5(1)(h) case is real: one chunk holds
+  exception (iii) without the prohibition, and a match on it returns the whole
+  provision (tested by name).
 - Deliverable: retrieval evaluation harness (hand-built query set with known-correct
   provisions) comparing vector-only vs. hybrid, with vs. without temporal filtering.
+  **Delivered** (`eu-ai-check eval-retrieval`): 98 queries scored at
+  `versioned_provision_id` level; vector / BM25 / hybrid / hybrid+citation, each
+  with and without reranking; pre-filter / post-filter / no filter on an eval-only
+  **synthetic** version fixture (the real corpus still has one version per
+  provision, so the temporal arms would tie there by construction). Candidate
+  starvation shows at k = 1 (post-filter R@1 0.500 vs pre-filter 1.000) and is
+  reported at k = 1 and k = 5.
+- Deliverable (from §11 risk table): vector-DB filtered-search benchmark.
+  **Delivered** (`eu-ai-check bench-filter`, Qdrant 1.19.1 server): HNSW filtered
+  recall holds only with date payload indexes built before the graph (0.007 →
+  1.000 at 1% selectivity). Now a hard index requirement, SYSTEM_SPEC.md §13.2.
 - Acceptance: hybrid retrieval beats vector-only on Recall@k and Precision@k
   (SYSTEM_SPEC.md §18) by a margin locked as part of this phase's baseline-setting
   work, not assumed in advance; the comparison must be demonstrated specifically on
   queries using precise legal terminology (article numbers, Annex III category names)
   where BM25 is expected to matter most.
+  **Met — with a stated caveat.** The pre-registered terminology queries could not
+  test this: they carry topical words and every arm scored Recall@5 = 1.0. Bare-
+  citation queries were therefore **added after the first run had been seen**
+  (flagged `post_hoc`; the original 65-query run is frozen in
+  `data/eval/results/baseline_v1_65q*`). On them the design beats vector-only by
+  Recall@5 +0.269 (1.000 vs 0.731) and Precision@5 +0.069; on the 16 never run
+  before adding, +0.250. Locked thresholds: Recall@5 +0.15 and Precision@5 +0.03
+  over vector-only on bare citations, and no use-case regression. **Because both the
+  queries and the thresholds were fixed after seeing results, these are regression
+  guards, not pre-registered acceptance criteria**, and are presented that way
+  (SYSTEM_SPEC.md §18). Known limit: other citation styles ("Art. 26(6)") get no
+  citation priority; left unfixed rather than tuned to seen queries.
 
 **Phase 2 — Extraction stage**
 - Deliverable: schema-constrained extraction from free text to the `Case` schema
@@ -254,6 +293,10 @@ deliverable (§10), not an afterthought.
 - Retrieval eval query set with known-correct `versioned_provision_id` ground truth,
   including cases specifically designed to surface candidate starvation without
   temporal pre-filtering.
+  **Delivered in Phase 1:** `data/eval/retrieval_queries.json` (98 queries, 33 of them
+  flagged `post_hoc`) plus the synthetic version fixture
+  `data/eval/synthetic_versions.json`. Lesson recorded for Phases 2–5: commit an eval
+  set before running it, so its results can count as pre-registered.
 - Extraction eval set: free-text case descriptions with hand-labeled expected
   structured fields.
 - Determination eval set covering all four applicability outcomes, including at least
@@ -266,7 +309,7 @@ deliverable (§10), not an afterthought.
 
 | Risk | Mitigation |
 |---|---|
-| Vector DB's physical filtered-search behavior doesn't match the logical pre-filtering design under realistic selectivity | Benchmark early (Phase 1), before committing to a specific DB; flagged as an open question in SYSTEM_SPEC.md §21. |
+| Vector DB's physical filtered-search behavior doesn't match the logical pre-filtering design under realistic selectivity | Benchmark early (Phase 1), before committing to a specific DB; flagged as an open question in SYSTEM_SPEC.md §21. **Done (Phase 1):** on Qdrant 1.19.1, filtered HNSW recall collapses without date payload indexes (0.007 at 1% selectivity) and holds with them; indexes-before-graph is now a hard requirement (SYSTEM_SPEC.md §13.2). |
 | Corpus ingestion reveals structural irregularities beyond what Phase 0 validation caught | Phase 0 is explicitly a validation phase before Phase 1 retrieval work begins, precisely to surface this early. |
 | Scope creep toward multi-regulation or full role coverage | Non-goals (§4) are documented explicitly and referenced at each phase boundary. |
 | `ApplicabilityRule` referencing `logical_provision_id` proves insufficient once real Article 113 phase-in dates are ingested | Flagged as an open question (SYSTEM_SPEC.md §21); revisit during Phase 0 ingestion of applicability data, not deferred silently. |

@@ -1,0 +1,38 @@
+{
+  "notice": "SYNTHETIC - NOT LEGAL TEXT. These amendments do not exist. They are an evaluation-only fixture that gives eight provisions a second text version, so the with/without temporal-filtering comparison (SYSTEM_SPEC.md §13.2, §18) has something to measure on a corpus where every real provision still has exactly one version. They are never written to data/corpus/. Each edit is a plausible wording change to the real text, so the old and new versions are near-duplicates. That is the condition under which candidate starvation happens.",
+  "amendment_date": "2025-06-01",
+  "amendments": [
+    {
+      "logical_provision_id": "aiact:art_26:para_6",
+      "replace": ["of at least six months", "of at least twelve months"]
+    },
+    {
+      "logical_provision_id": "aiact:art_5:para_1:point_f",
+      "replace": ["in the areas of workplace and education institutions", "in the areas of workplace, recruitment procedures and education institutions"]
+    },
+    {
+      "logical_provision_id": "aiact:anx_III:area_4:item_a",
+      "replace": ["and to evaluate candidates;", "to conduct or score video interviews, and to evaluate candidates;"]
+    },
+    {
+      "logical_provision_id": "aiact:art_16:point_h",
+      "replace": ["affix the CE marking to", "affix the physical or digital CE marking to"]
+    },
+    {
+      "logical_provision_id": "aiact:art_26:para_7",
+      "replace": ["Before putting into service or using", "At least one month before putting into service or using"]
+    },
+    {
+      "logical_provision_id": "aiact:art_5:para_1:point_e",
+      "replace": ["untargeted scraping of facial images from the internet or CCTV footage", "untargeted scraping of facial images or voice recordings from the internet or CCTV footage"]
+    },
+    {
+      "logical_provision_id": "aiact:anx_III:area_5:item_b",
+      "replace": ["for the purpose of detecting financial fraud", "for the purpose of detecting financial fraud or calculating prudential capital requirements"]
+    },
+    {
+      "logical_provision_id": "aiact:art_26:para_2",
+      "replace": ["competence, training and authority", "competence, training, AI literacy and authority"]
+    }
+  ]
+}
