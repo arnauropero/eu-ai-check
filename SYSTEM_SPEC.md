@@ -1246,6 +1246,58 @@ results file.
   judge accepted it (`followup.posthoc_affected_persons`). It uses no API calls and
   never replaces the frozen scoring rules.
 
+**Extraction — follow-up `role-null-v1` result (2026-10-02): the decision rule was
+NOT met.** The run used the pre-registered design: 360 calls, all succeeded, 0 leaks.
+Results are in `data/eval/results/extraction_v2_role_null.{txt,json,runs.jsonl}`,
+and the decision report, with every value per case and per repeat, is in
+`extraction_v2_role_null_decision.{txt,json}`. The prompt was **not adopted**. The
+default prompt (`baseline`), the default effort and the official v1 evaluation are
+unchanged.
+
+| check | `low` | `medium` |
+|---|---|---|
+| 1 false fills down, E09+E14 not up | pass (5→2; 0→0) | pass (9→2; 3→0) |
+| 2 guard: ≤ 1 new miss | pass (0→1) | **fail** (0→3) |
+| 3 other fields within re-run noise | **fail** | **fail** |
+| 4 zero leaks | pass | pass |
+
+- **Improved:** E09 and E14 were clean in all 12 `role-null-v1` runs. The baseline
+  re-run showed both errors also occur intermittently at `low`. Values that only
+  say "not described" fell to 0.
+- **Key regression, E27** (a guard case with role label "assists judges, who
+  decide"). The new prompt left the role null for "helps judges by summarising case
+  law": 3/3 runs at `medium` and 1/3 at `low`. It read the description as a task
+  description alone.
+- **Over-correction, E06.** The role became null in 6/6 runs. That matches the
+  label, but the pre-registration named this in advance as an over-correction
+  signal, since the description says border guards use the kiosk to confirm identity.
+- **E20** stays mostly filled ("the model is used to set individual premiums"), now
+  without the absence clause.
+- **Check 3** compares each field's movement with the baseline re-run's gap, which
+  was 0.000 on every failing field, so any single change fails. Three of the four
+  failing moves were improvements: `low` ai_functionality +0.011 and affected_persons
+  +0.022; `medium` intended_purpose +0.022. The fourth was a regression: `medium`
+  relevant_date −0.011 (E27, assessment date given where the label is null). The
+  rule is applied as written.
+
+**POST-HOC (not pre-registered, not part of the official evaluation):
+`affected_persons` re-score of the frozen v1 run.** A value also counts as correct
+when the secondary judge accepted it. This raises the apparent score from 0.833 to
+0.878 at `low` and from 0.811 to 0.889 at `medium`. Every remaining miss is an empty
+answer where the label infers the group (E16, E26, E28, and partly E10/E11). The
+**official v1 scores stay 0.833 / 0.811**, and this re-score does not change them
+(`data/eval/results/posthoc_affected_persons_v1_30c.txt`).
+
+**Reporting incident and known bug (maintenance, not yet fixed).**
+`followup.py --out` builds file names with `Path.with_suffix`. A dotted output name
+(`extraction_v2_role_null.decision`) therefore became `extraction_v2_role_null.txt`
+and `.json`, and overwrote the harness summaries. The raw `.runs.jsonl` (360 records)
+was never affected. Both summaries were rebuilt offline from it. Rebuilding v1 the
+same way reproduced the committed `extraction_v1_30c.json` exactly, and
+`extraction_v1_30c.txt` identically apart from line endings. The decision report was
+regenerated under the undotted name `extraction_v2_role_null_decision`. Until it is
+fixed, pass `--out` an undotted name.
+
 **Determination:**
 - Correctness against the four-state contract (§14): `applicable` /
   `not_applicable` / `unresolved` / `not_in_force`, scored per state, not just overall
