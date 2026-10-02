@@ -194,7 +194,7 @@ one rule-matching engine → cited, fail-closed output.
   (SYSTEM_SPEC.md §18). Known limit: other citation styles ("Art. 26(6)") get no
   citation priority; left unfixed rather than tuned to seen queries.
 
-**Phase 2 — Extraction stage (IN PROGRESS — eval set pre-registered 2026-10-02)**
+**Phase 2 — Extraction stage (COMPLETE, 2026-10-02)**
 - LLM evaluation stack: **OpenAI only, needing only `OPENAI_API_KEY`**. The extractor
   is **GPT-6.1 Sol (`gpt-6.1-sol`)**, with effort arms `low`/`medium` and strict
   Structured Outputs. The optional secondary judge is **GPT-6 Astra (`gpt-6-astra`)**
@@ -212,20 +212,40 @@ one rule-matching engine → cited, fail-closed output.
 - First pre-registered run (2026-10-02): overall field accuracy 0.967 (`low`) and
   0.959 (`medium`), with 0 leakage hits. Results are frozen in
   `data/eval/results/extraction_v1_30c*` and summarised in SYSTEM_SPEC.md §18. The
-  accuracy target is **not yet locked**, pending error analysis of `affected_persons`
-  and `role_in_decision_making`.
+  accuracy target was locked afterwards, following error analysis of
+  `affected_persons` and `role_in_decision_making` (see Acceptance).
 - Follow-up experiment `role-null-v1` (pre-registered 2026-10-02): a prompt-only
   clarification of `role_in_decision_making` null discipline. It runs 4 arms
   ({baseline, role-null-v1} × {low, medium}, 360 calls) under a fixed decision rule
   (SYSTEM_SPEC.md §18). The frozen v1 baseline is unchanged. Adopting the prompt and
-  changing the default effort are decided separately.
+  changing the default effort are decided separately. **Result: the decision rule was
+  not met, and the prompt was not adopted.** E09/E14 improved, but E27 regressed (a
+  guard case) and E06 was over-corrected (SYSTEM_SPEC.md §18).
+- Accepted configuration: `gpt-6.1-sol`, baseline prompt, `low` effort. This is an
+  engineering choice on observed results and output-token cost, not a claim that
+  `low` is more accurate. The judge is evaluation-only.
 - Deliverable: schema-constrained extraction from free text to the `Case` schema
   (SYSTEM_SPEC.md §3.2).
+  **Delivered** (`src/eu_ai_check/extraction/`, `eu-ai-check extract`): strict
+  Structured Outputs over `CaseFacts`, pydantic validation as fail-closed final
+  enforcement, and `Case.from_facts`. All 540 evaluation runs returned schema-valid
+  output.
 - Deliverable: extraction eval set (hand-labeled free-text → expected fields).
+  **Delivered:** `data/eval/extraction_cases.json`, 30 cases, user-reviewed and
+  committed before any API call (`fe0b0f6`); its content is SHA-pinned in tests.
 - Acceptance: field-level accuracy meets the target locked during this phase against
   the Phase 0 baseline (SYSTEM_SPEC.md §18); extraction **never** outputs a value for
   an excluded (conclusion-level) field — this is a zero-tolerance check, not a
   threshold.
+  **Met.**
+  - *Accuracy:* target overall field accuracy ≥ 0.95, scored by the pre-registered
+    concept-group scorer at `low` effort. Result 0.967 on the frozen v1 run
+    (`82467bb`). Phase 0 had no extraction measurement, so the v1 run is the
+    baseline. **The target was locked after the first results were seen**, as the
+    Phase 2 pre-registration allows. It is a regression guard, not a pre-registered
+    criterion.
+  - *Zero tolerance:* 0 leaks in 180 v1 runs, and 0 in 360 v2 runs.
+  - The post-hoc affected-persons re-score is not used for acceptance.
 
 **Phase 3 — Grounded determination stages**
 - Deliverable: `GroundedDetermination` component implemented once, parameterized for

@@ -1,8 +1,9 @@
 # SYSTEM_SPEC.md — EU AI Act Compliance Determination System
 
 Status: V1 architecture locked. **Phase 0 (corpus ingestion and validation) is
-implemented as of 2026-10-01; Phase 1 (retrieval) as of 2026-10-02**; Phase 2
-(extraction) is next. Phase 1 changed the retrieval design in three measured
+implemented as of 2026-10-01; Phase 1 (retrieval) and Phase 2 (extraction) as of
+2026-10-02**. Phase 2 accepted `gpt-6.1-sol` with the baseline prompt at `low` effort
+against a target locked after the first run (§18). Phase 1 changed the retrieval design in three measured
 places — exact-citation priority (§7.4), reranker off by default (§7.4), and date
 payload indexes as a hard index requirement (§13.2) — and closed the §21
 filtered-HNSW open question. This document is the
@@ -204,6 +205,10 @@ It has two roles, kept deliberately separate:
 |---|---|---|---|
 | **Extractor**, the system under test | GPT-6.1 Sol, `gpt-6.1-sol` | `reasoning.effort` = `low` / `medium` (the two arms) | required |
 | **Judge**, a secondary signal | GPT-6 Astra, `gpt-6-astra` | `reasoning.effort` = `low` | optional (`--no-judge`) |
+
+**Accepted configuration (Phase 2 closure, 2026-10-02):** extractor `gpt-6.1-sol`,
+`baseline` prompt, `reasoning.effort = low`. The judge is evaluation-only and is not
+part of the production extraction path. See §18 for the acceptance result.
 
 ### 3.5.1 Extractor
 
@@ -1182,8 +1187,9 @@ than `low` (8 fewer correct field scores out of 990) and used about 60% more out
 tokens. No significance test was pre-registered, so this difference is reported as
 observed, not as a finding. The weakest field in both arms is `affected_persons`
 (0.833 / 0.811). Secondary judge agreement with the primary score was 268/298
-(`low`) and 263/299 (`medium`). **No accuracy target has been locked yet**, and any
-later label or scoring change will be flagged as post-hoc.
+(`low`) and 263/299 (`medium`). **No accuracy target had been locked at this point**
+(it was locked later; see "Phase 2 acceptance" below), and any later label or scoring
+change will be flagged as post-hoc.
 
 **Extraction — follow-up experiment `role-null-v1` (pre-registered 2026-10-02, before
 any follow-up API call).** This experiment is separate from the frozen first run.
@@ -1297,6 +1303,37 @@ same way reproduced the committed `extraction_v1_30c.json` exactly, and
 `extraction_v1_30c.txt` identically apart from line endings. The decision report was
 regenerated under the undotted name `extraction_v2_role_null_decision`. Until it is
 fixed, pass `--out` an undotted name.
+
+**Extraction — Phase 2 acceptance (2026-10-02): MET.**
+
+- *Accepted configuration.* `gpt-6.1-sol`, `baseline` prompt, `reasoning.effort =
+  low`. This is an engineering choice based on the observed results and lower output
+  token use: `low` used 11.5k output tokens vs 18.5k for `medium` in v1. It is **not**
+  a claim that `low` is more accurate: the baseline re-run scored 0.967 at both
+  efforts. The judge is evaluation-only and is not part of the production extraction
+  path.
+- *Baseline.* Phase 0 contained **no extraction accuracy measurement**; it deferred
+  the number to Phase 2 (`src/eu_ai_check/corpus/baseline.py`). The "Phase 0
+  baseline" in the acceptance criterion is therefore the frozen v1 run (`82467bb`),
+  the committed Phase 2 baseline used for this target check.
+- *Locked target.* Overall field-level accuracy **≥ 0.95**, measured with the
+  pre-registered primary concept-group scorer on the frozen 30-case v1 eval set, in
+  the accepted `low` configuration. **This target was locked after the first
+  evaluation results were seen**, which the Phase 2 pre-registration permits ("locked
+  only after the first run is seen, and labelled accordingly"). It is **not** a
+  pre-registered target. Like Phase 1's locked thresholds, it serves as a regression
+  guard and does not independently confirm the result.
+- *Zero tolerance.* No excluded field and no legal-conclusion term in any value.
+
+| criterion | committed result | outcome |
+|---|---|---|
+| overall field accuracy ≥ 0.95 (`low`, v1 `82467bb`) | 0.967 | met |
+| zero leaks | 0 in v1 (180 runs); also 0 in all 360 v2 runs | met |
+
+The post-hoc `affected_persons` re-score is **not** used for acceptance. The official
+v1 scores are unchanged. The code's default effort (`extract --effort`,
+`create_extractor`, `OpenAIExtractor`) is still `medium`; aligning it with the
+accepted configuration is a separate change.
 
 **Determination:**
 - Correctness against the four-state contract (§14): `applicable` /
