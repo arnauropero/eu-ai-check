@@ -16,10 +16,18 @@ Each case runs `repeats` times per arm, because the model is not deterministic:
 a field that is right on one run and wrong on the next is reported as unstable
 rather than averaged into a flattering mean.
 
-**Models.** The extraction model under test is OpenAI GPT-6.1 Sol (see
-`providers.py`). The secondary judge is unchanged from the pre-registered
-methodology: Claude Opus 5.5 (`JUDGE_MODEL`). Keeping the judge on a different
-provider from the extractor also means the extractor is never graded by itself.
+**Models -- the whole LLM evaluation stack is OpenAI; only `OPENAI_API_KEY` is
+needed.** Two roles, deliberately kept apart:
+
+  * extractor (the system under test): GPT-6.1 Sol, `gpt-6.1-sol` (`providers.py`);
+  * judge (secondary, optional): GPT-6 Astra, `gpt-6-astra`, reasoning effort
+    `low`. A *different* model from the extractor, so no output is graded by the
+    model that produced it.
+
+The judge never defines or changes the ground truth. It is shown the label's
+reference sentence and the extracted value, read-only, and its verdict is stored
+next to the primary score -- it never alters `Run.correct`, any accuracy figure,
+or the labels. `--no-judge` runs the primary evaluation with the extractor alone.
 """
 
 
@@ -35,14 +43,18 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
-from .extractor import ANTHROPIC_MODEL, FALLBACK_BETA, ExtractionResult
+from .extractor import ExtractionResult
 from .schema import BOOL_FIELDS, DATE_FIELDS, SHORT_TEXT_FIELDS, TEXT_FIELDS
 
 CONCEPT_FIELDS = (*TEXT_FIELDS, *SHORT_TEXT_FIELDS)
 ALL_SCORED = (*CONCEPT_FIELDS, *BOOL_FIELDS, *DATE_FIELDS)
 
-#: Secondary judge model -- unchanged from the pre-registration (fe0b0f6).
-JUDGE_MODEL = ANTHROPIC_MODEL
+#: Secondary judge. Migrated from Claude Opus 5.5 (pre-registration fe0b0f6) to
+#: OpenAI on 2026-10-02, before any API call. Same role, same prompt, same verdict
+#: schema, same effort level (`low`); a different model from the extractor.
+JUDGE_MODEL = "gpt-6-astra"
+JUDGE_EFFORT = "low"
+JUDGE_SCHEMA_NAME = "judge_verdicts"
 
 
 @dataclass(frozen=True)
@@ -118,31 +130,65 @@ _JUDGE_SCHEMA = {
 }
 
 
-def judge(client: Any, case: EvalCase, values: dict[str, str]) -> dict[str, tuple[bool, str]]:
-    """One call per extraction, judging every text field that has both a label
-    and a predicted value. Fields with an expected null are not judged: null
-    discipline is scored exactly by the primary metric."""
+def judge_request(case: EvalCase, values: dict[str, str]) -> dict[str, Any]:
+    """The judge's Responses API request. It receives the label's reference
+    sentence and the extracted value -- never the other labels, and nothing it
+    returns is written back into the case."""
     items = [
         f"- field: {f}\n  reference: {case.expected[f]['reference']}\n  extracted: {values[f]}"
         for f in values
     ]
-    if not items:
-        return {}
-    response = client.beta.messages.create(
-        model=JUDGE_MODEL,
-        max_tokens=4000,
-        betas=[FALLBACK_BETA],
-        fallbacks="default",
-        system=JUDGE_SYSTEM,
-        messages=[{"role": "user", "content": "\n".join(items)}],
-        output_config={
-            "effort": "low",
-            "format": {"type": "json_schema", "schema": _JUDGE_SCHEMA},
+    return {
+        "model": JUDGE_MODEL,
+        "input": [
+            {"role": "system", "content": JUDGE_SYSTEM},
+            {"role": "user", "content": "\n".join(items)},
+        ],
+        "reasoning": {"effort": JUDGE_EFFORT},
+        "max_output_tokens": 4000,
+        "text": {
+            "format": {
+                "type": "json_schema",
+                "name": JUDGE_SCHEMA_NAME,
+                "schema": _JUDGE_SCHEMA,
+                "strict": True,
+            }
         },
-    )
-    text = next((b.text for b in response.content if b.type == "text"), "{}")
-    verdicts = json.loads(text).get("verdicts", [])
-    return {v["field"]: (v["same_fact"], v["reason"]) for v in verdicts if v["field"] in values}
+    }
+
+
+def judge(client: Any, case: EvalCase, values: dict[str, str]) -> tuple[dict[str, tuple[bool, str]], str | None]:
+    """One call per extraction, judging every text field that has both a label
+    and a predicted value. Fields with an expected null are not judged: null
+    discipline is scored exactly by the primary metric.
+
+    Returns (verdicts, error). A judge refusal, truncation or malformed output
+    is recorded as an error and yields no verdicts: the judge is optional, so its
+    failure must never touch the primary score. API errors (e.g. a missing key)
+    are not swallowed -- they should fail the run loudly, not silently drop the
+    secondary signal."""
+    if not values:
+        return {}, None
+    response = client.responses.create(**judge_request(case, values))
+    text = refusal = None
+    for item in getattr(response, "output", None) or []:
+        if getattr(item, "type", None) != "message":
+            continue
+        for part in getattr(item, "content", None) or []:
+            if part.type == "refusal":
+                refusal = part.refusal
+            elif part.type == "output_text":
+                text = part.text
+    if refusal is not None:
+        return {}, f"judge refusal: {refusal[:80]}"
+    if getattr(response, "status", None) != "completed" or text is None:
+        reason = getattr(getattr(response, "incomplete_details", None), "reason", None)
+        return {}, f"judge output unusable (status={response.status}, reason={reason})"
+    try:
+        verdicts = json.loads(text)["verdicts"]
+    except (json.JSONDecodeError, KeyError, TypeError) as e:
+        return {}, f"judge output invalid: {e}"
+    return {v["field"]: (v["same_fact"], v["reason"]) for v in verdicts if v["field"] in values}, None
 
 
 # ---------------------------------------------------------------------------
@@ -156,6 +202,7 @@ class Run:
     result: ExtractionResult
     correct: dict[str, bool] = field(default_factory=dict)
     judged: dict[str, tuple[bool, str]] = field(default_factory=dict)
+    judge_error: str | None = None
 
     def predicted(self, name: str) -> Any:
         return getattr(self.result.facts, name) if self.result.facts else None
@@ -246,7 +293,7 @@ def run_arm(
                     f: run.predicted(f) for f in TEXT_FIELDS
                     if case.expected[f] is not None and run.predicted(f) is not None
                 }
-                run.judged = judge(judge_client, case, values)
+                run.judged, run.judge_error = judge(judge_client, case, values)
         return run
 
     with ThreadPoolExecutor(max_workers=workers) as pool:
@@ -295,8 +342,13 @@ def render(arms: Sequence[ArmReport], *, show_errors: bool = True) -> str:
         for cid, f in unstable:
             lines.append(f"    {cid} {f}")
         agree, total, dis = arm.judge_agreement()
-        if total:
-            lines.append(f"  judge agreement with concept groups: {agree}/{total}")
+        judge_errors = [(r.case.id, r.repeat, r.judge_error) for r in arm.runs if r.judge_error]
+        if total or judge_errors:
+            lines.append(f"  SECONDARY judge ({JUDGE_MODEL}, effort={JUDGE_EFFORT}) agreement "
+                         f"with the primary concept-group score: {agree}/{total} "
+                         f"(informational only; never changes the score)")
+            for cid, rep_, err in judge_errors:
+                lines.append(f"    judge error {cid}#{rep_}: {err}")
             for cid, rep, f, primary, same, reason, value in dis:
                 lines.append(f"    {cid}#{rep} {f}: concepts={'ok' if primary else 'miss'} "
                              f"judge={'same' if same else 'diff'}  value={value!r}  ({reason})")
@@ -363,7 +415,9 @@ def run_records(arms: Sequence[ArmReport]) -> list[dict[str, Any]]:
                 "raw_output": r.result.raw,
                 "correct": r.correct,
                 "leaks": [{"field": l.field, "kind": l.kind, "excerpt": l.excerpt} for l in r.result.leaks],
+                "judge_model": JUDGE_MODEL if (r.judged or r.judge_error) else None,
                 "judge": {f: {"same_fact": s, "reason": why} for f, (s, why) in r.judged.items()},
+                "judge_error": r.judge_error,
                 "input_tokens": r.result.input_tokens,
                 "output_tokens": r.result.output_tokens,
             })

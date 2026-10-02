@@ -1,10 +1,12 @@
-"""Phase 2 extraction on OpenAI GPT-6.1 Sol -- offline tests with a fake client.
+"""Phase 2 LLM evaluation stack on OpenAI -- offline tests with fake clients.
 
-These pin the provider switch (2026-10-02): the request shape, the exact model and
-reasoning-effort settings, the strict Structured Outputs schema and its equivalence
-to the pre-registered `CaseFacts` schema, fail-closed handling, per-result
-recording, and -- most importantly -- that the pre-registered evaluation itself did
-not change.
+These pin the switch to OpenAI (2026-10-02): extractor GPT-6.1 Sol and judge
+GPT-6 Astra; the exact models and reasoning-effort settings; the strict
+Structured Outputs schemas and their equivalence to the pre-registered ones;
+fail-closed handling; per-result recording; that the judge never touches the
+ground truth or the primary score; that the evaluation workflow needs only
+OPENAI_API_KEY; and -- most importantly -- that the pre-registered evaluation
+itself did not change. No test here makes a network call.
 """
 
 from __future__ import annotations
@@ -17,7 +19,17 @@ from types import SimpleNamespace
 
 import pytest
 
-from eu_ai_check.extraction.evaluation import JUDGE_MODEL, load_cases, run_arm, run_records
+from eu_ai_check.extraction.evaluation import (
+    _JUDGE_SCHEMA,
+    JUDGE_EFFORT,
+    JUDGE_MODEL,
+    JUDGE_SYSTEM,
+    judge,
+    judge_request,
+    load_cases,
+    run_arm,
+    run_records,
+)
 from eu_ai_check.extraction.extractor import FIELD_RULES, system_prompt, user_message
 from eu_ai_check.extraction.openai_extractor import (
     EFFORT_MAP,
@@ -219,9 +231,141 @@ def test_run_records_carry_provider_model_and_effort() -> None:
         assert r["effort"] == "low"
 
 
-def test_judge_methodology_unchanged() -> None:
-    """The secondary judge stays Claude Opus 5.5, as pre-registered."""
-    assert JUDGE_MODEL == "claude-opus-5-5"
+# --------------------------------------------------------------------------
+# Judge: OpenAI, secondary, never touches the ground truth
+# --------------------------------------------------------------------------
+
+def judge_response(verdicts=None, *, refusal=None, status="completed"):
+    text = None if verdicts is None else json.dumps({"verdicts": verdicts})
+    return openai_response(text, refusal=refusal, status=status, model=JUDGE_MODEL)
+
+
+def test_judge_is_gpt_6_astra_and_not_the_extractor() -> None:
+    assert JUDGE_MODEL == "gpt-6-astra"
+    assert JUDGE_EFFORT == "low"
+    assert JUDGE_MODEL != OPENAI_MODEL  # no output is graded by the model that produced it
+
+
+#: SHA-256 of the judge prompt and verdict schema as pre-registered (fe0b0f6).
+#: Migrating the judge changed the provider and model, not the method.
+PRE_REGISTERED_JUDGE_PROMPT = "1c5db014d50a24ba3bedc7a16c32392fc3a5b3a7a960b68b9ec759d42135cc7b"
+PRE_REGISTERED_JUDGE_SCHEMA = "08467002c705533788a410f456983bedefed286589ee519f8290ed84c83e0518"
+
+
+def test_judge_prompt_and_verdict_schema_are_unchanged() -> None:
+    assert hashlib.sha256(JUDGE_SYSTEM.encode()).hexdigest() == PRE_REGISTERED_JUDGE_PROMPT
+    schema_digest = hashlib.sha256(json.dumps(_JUDGE_SCHEMA, sort_keys=True).encode()).hexdigest()
+    assert schema_digest == PRE_REGISTERED_JUDGE_SCHEMA
+
+
+def test_judge_request_shape() -> None:
+    case = load_cases(CASES)[0]
+    req = judge_request(case, {"intended_purpose": "hiring warehouse staff"})
+    assert req["model"] == "gpt-6-astra"
+    assert req["reasoning"] == {"effort": "low"}
+    assert req["text"]["format"] == {"type": "json_schema", "name": "judge_verdicts",
+                                     "schema": _JUDGE_SCHEMA, "strict": True}
+    system, user = req["input"]
+    assert system == {"role": "system", "content": JUDGE_SYSTEM}
+    assert case.expected["intended_purpose"]["reference"] in user["content"]
+    assert "hiring warehouse staff" in user["content"]
+
+
+def test_judge_parses_verdicts() -> None:
+    case = load_cases(CASES)[0]
+    client = fake_openai(judge_response([{"field": "intended_purpose", "same_fact": True, "reason": "ok"}]))
+    verdicts, error = judge(client, case, {"intended_purpose": "x"})
+    assert verdicts == {"intended_purpose": (True, "ok")} and error is None
+
+
+@pytest.mark.parametrize("response, fragment", [
+    (judge_response(refusal="no"), "refusal"),
+    (judge_response(None, status="incomplete"), "unusable"),
+    (openai_response("not json", model=JUDGE_MODEL), "invalid"),
+])
+def test_judge_failure_is_recorded_not_fatal(response, fragment) -> None:
+    verdicts, error = judge(fake_openai(response), load_cases(CASES)[0], {"intended_purpose": "x"})
+    assert verdicts == {} and fragment in error
+
+
+class RoutingResponses:
+    """One fake OpenAI client serving both roles, routed by model -- the shape of
+    the real workflow, where one OPENAI_API_KEY client runs extractor and judge."""
+
+    def __init__(self, extraction, judgement):
+        self.extraction, self.judgement = extraction, judgement
+        self.models: list[str] = []
+
+    def create(self, **kwargs):
+        self.models.append(kwargs["model"])
+        return self.extraction if kwargs["model"] == OPENAI_MODEL else self.judgement
+
+
+def test_judge_never_changes_ground_truth_or_primary_score() -> None:
+    """A judge that disagrees with everything leaves labels, correctness and every
+    accuracy figure exactly as without a judge."""
+    cases = load_cases(CASES)
+    before = json.dumps([c.expected for c in cases], sort_keys=True)
+    extraction = openai_response(json.dumps(GOOD))
+    hostile = judge_response([{"field": f, "same_fact": False, "reason": "disagree"}
+                              for f in ("intended_purpose", "ai_functionality",
+                                        "role_in_decision_making", "affected_persons")])
+
+    plain = run_arm("plain", OpenAIExtractor(fake_openai(extraction)), cases, 1, workers=1)
+    routed = SimpleNamespace(responses=RoutingResponses(extraction, hostile))
+    judged = run_arm("judged", OpenAIExtractor(routed), cases, 1, judge_client=routed, workers=1)
+
+    assert JUDGE_MODEL in routed.responses.models  # the judge really ran
+    assert [r.correct for r in judged.runs] == [r.correct for r in plain.runs]
+    assert judged.overall_accuracy() == plain.overall_accuracy()
+    assert json.dumps([c.expected for c in cases], sort_keys=True) == before
+
+
+def test_no_judge_means_only_the_extractor_is_called() -> None:
+    routed = SimpleNamespace(responses=RoutingResponses(openai_response(json.dumps(GOOD)), None))
+    run_arm("no judge", OpenAIExtractor(routed), load_cases(CASES)[:3], 2, judge_client=None, workers=1)
+    assert set(routed.responses.models) == {OPENAI_MODEL}
+
+
+# --------------------------------------------------------------------------
+# The evaluation workflow needs OPENAI_API_KEY only
+# --------------------------------------------------------------------------
+
+@pytest.mark.parametrize("no_judge", [False, True])
+def test_eval_workflow_runs_on_openai_alone(monkeypatch, tmp_path, no_judge) -> None:
+    """Runs the real `eval-extraction` command end to end against a fake OpenAI
+    client, with ANTHROPIC_API_KEY unset and the anthropic package made
+    unimportable: any hidden Anthropic dependency would fail here."""
+    import sys
+
+    import openai
+
+    from eu_ai_check import cli
+
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.setitem(sys.modules, "anthropic", None)  # `import anthropic` now raises
+    routes = RoutingResponses(
+        openai_response(json.dumps(GOOD)),
+        judge_response([{"field": "intended_purpose", "same_fact": True, "reason": "ok"}]),
+    )
+    monkeypatch.setattr(openai, "OpenAI", lambda *a, **k: SimpleNamespace(responses=routes))
+
+    out = tmp_path / "run"
+    argv = ["eval-extraction", "--repeats", "1", "--out", str(out)]
+    if no_judge:
+        argv.append("--no-judge")
+    cli.main(argv)
+
+    assert set(routes.models) == ({OPENAI_MODEL} if no_judge else {OPENAI_MODEL, JUDGE_MODEL})
+    lines = out.with_suffix(".runs.jsonl").read_text("utf-8").splitlines()
+    records = [json.loads(line) for line in lines]
+    assert len(records) == 30 * 2  # 30 cases x 1 repeat x 2 effort arms
+    assert {r["effort"] for r in records} == {"low", "medium"}
+    assert {(r["provider"], r["requested_model"]) for r in records} == {("openai", "gpt-6.1-sol")}
+    # Every case labels intended_purpose and the fake fills every text field, so
+    # with the judge on, every record was judged -- by gpt-6-astra and nothing else.
+    judge_models = {r["judge_model"] for r in records}
+    assert judge_models == ({None} if no_judge else {"gpt-6-astra"})
 
 
 # --------------------------------------------------------------------------
@@ -261,4 +405,4 @@ def test_still_thirty_cases_three_repeats_two_arms(monkeypatch: pytest.MonkeyPat
     cli.main(["eval-extraction"])
     assert seen["repeats"] == 3
     assert seen["efforts"] == "low,medium"
-    assert seen["provider"] == "openai"
+    assert seen["no_judge"] is False  # judge on by default; --no-judge skips it

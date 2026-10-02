@@ -195,7 +195,17 @@ checking the labels against them:
 | L8 | Null discipline: `role_in_decision_making` and `affected_persons` are `null` unless described; they are not filled in from what such systems usually do. | 15 cases, listed in the eval file |
 | L9 | A legal conclusion asserted without supporting facts ("we are the provider") yields no actor facts. | E24, E27 |
 
-### 3.5 Extraction model (Phase 2)
+### 3.5 The LLM evaluation stack: OpenAI only (Phase 2)
+
+The whole LLM evaluation workflow runs on OpenAI and needs only `OPENAI_API_KEY`.
+It has two roles, kept deliberately separate:
+
+| Role | Model | Setting | Status |
+|---|---|---|---|
+| **Extractor**, the system under test | GPT-6.1 Sol, `gpt-6.1-sol` | `reasoning.effort` = `low` / `medium` (the two arms) | required |
+| **Judge**, a secondary signal | GPT-6 Astra, `gpt-6-astra` | `reasoning.effort` = `low` | optional (`--no-judge`) |
+
+### 3.5.1 Extractor
 
 **The extraction model is OpenAI GPT-6.1 Sol, `gpt-6.1-sol`**, called through the
 Responses API (`src/eu_ai_check/extraction/openai_extractor.py`; the default in
@@ -225,17 +235,44 @@ Responses API (`src/eu_ai_check/extraction/openai_extractor.py`; the default in
 - **Fail-closed.** A refusal content item, an incomplete response, invalid JSON or a
   schema mismatch gives `facts = None` with the reason. There is no server-side
   fallback on this path.
-- **Judge unchanged.** The secondary LLM judge stays Claude Opus 5.5, as
-  pre-registered. It also means the extractor is never graded by itself.
+### 3.5.2 Judge
 
-**Provenance of the switch.** The extraction model changed from Claude Opus 5.5 to
-GPT-6.1 Sol on 2026-10-02: *after* the eval set was pre-registered (`fe0b0f6`) and
-*before* any extraction API call. Eval set, labels, labelling rules, null discipline,
-leakage check, scoring, categories, repeats (3) and effort arms are unchanged, and a
-test pins a SHA-256 fingerprint of the pre-registered eval content. The system under
-test changed; the pre-registered evaluation did not, and no result had been seen when
-it changed. The Claude Opus 5.5 extractor remains available as
-`--provider anthropic`.
+**The secondary judge is OpenAI GPT-6 Astra, `gpt-6-astra`**, at `reasoning.effort:
+"low"`, through the Responses API with strict Structured Outputs
+(`text.format = {type: "json_schema", name: "judge_verdicts", strict: true}`).
+
+- **Why GPT-6 Astra.** It's OpenAI's most capable model, and it is a *different*
+  model from the extractor, so no output is graded by the model that produced it.
+  `low` effort matches the effort the pre-registered judge used.
+- **Method unchanged.** The judge's system prompt and verdict schema are identical
+  to the pre-registration (`fe0b0f6`); tests pin their SHA-256. Only the provider and
+  model changed.
+- **It never defines or changes the ground truth.** The judge sees the label's
+  reference sentence and the extracted value, read-only, and only for text fields
+  with a non-null label and a non-null prediction. Its verdict is stored next to the
+  primary concept-group score and reported as agreement / disagreement. It never
+  alters per-field correctness, any accuracy figure or any label. A test runs a
+  judge that disagrees with everything and checks that correctness and accuracy
+  are identical to a run without a judge.
+- **Optional.** `--no-judge` runs the primary evaluation with the extractor alone. A
+  judge refusal or malformed verdict is recorded as a judge error and yields no
+  verdicts, without touching the primary score. API errors are not swallowed.
+
+### 3.5.3 Provenance
+
+Both changes were made on 2026-10-02: *after* the eval set was pre-registered
+(`fe0b0f6`) and *before* any API call.
+
+1. **Extractor:** Claude Opus 5.5 → GPT-6.1 Sol (commit `7434d4d`).
+2. **Judge:** Claude Opus 5.5 → GPT-6 Astra, making the stack OpenAI-only.
+
+Unchanged by either: eval set, labels, labelling rules, null discipline, leakage
+check, scoring, categories, 3 repeats, effort arms, extractor prompt and judge
+prompt. Tests pin SHA-256 fingerprints of the pre-registered eval content and judge
+method. The models under test changed; the pre-registered evaluation did not, and no
+result had been seen. The Claude Opus 5.5 extractor remains available as an optional,
+non-evaluated `extract --provider anthropic`, behind the `anthropic` package extra.
+Nothing in the evaluation workflow imports it.
 
 **Review record.** The user reviewed all 30 labels before pre-registration. One
 label changed during that review, E18 `puts_own_name_or_trademark` false → null
@@ -1113,19 +1150,22 @@ first API run**, so the first results count as pre-registered. Scoring, as commi
 - booleans and dates: exact match, `null` included (`null` ≠ `false`);
 - free text, **primary**: hand-written concept groups (every group matched by at least
   one stem; an expected `null` must be predicted `null`);
-- free text, **secondary**: an LLM judge (Claude Opus 5.5) compares each value with
-  the label's reference sentence. It never overrides the primary metric, and every
-  disagreement is listed;
+- free text, **secondary**: an LLM judge compares each value with the label's
+  reference sentence. It never overrides the primary metric, and every disagreement
+  is listed. The pre-registered judge was Claude Opus 5.5; it was migrated to OpenAI
+  GPT-6 Astra before any API call, with the same prompt and verdict schema (§3.5.2);
 - zero tolerance: no excluded field *and* no conclusion term
   (`src/eu_ai_check/extraction/leakage.py`) in any free-text value. Structured
   outputs prevent the first; the second is the realistic failure, and 5 adversarial
   cases assert conclusions outright to provoke it.
 
 Each case runs three times per effort arm (`low`, `medium`), and fields whose
-correctness changes between repeats are reported as unstable. **Extraction model:
-OpenAI GPT-6.1 Sol** (`gpt-6.1-sol`), switched from Claude Opus 5.5 after
-pre-registration and before any API call. The evaluation is unchanged (§3.5). The numerical accuracy
-target is locked only after the first run is seen, and is labelled accordingly.
+correctness changes between repeats are reported as unstable. **LLM stack: OpenAI
+only** — extractor GPT-6.1 Sol (`gpt-6.1-sol`), optional judge GPT-6 Astra
+(`gpt-6-astra`); only `OPENAI_API_KEY` is needed. Both were switched from Claude
+Opus 5.5 after pre-registration and before any API call; the evaluation is unchanged
+(§3.5). The numerical accuracy target is locked only after the first run is seen,
+and is labelled accordingly.
 
 **Determination:**
 - Correctness against the four-state contract (§14): `applicable` /
