@@ -6,6 +6,8 @@
     eu-ai-check search QUERY    hybrid retrieval as of --date (Phase 1)
     eu-ai-check eval-retrieval  run the Phase 1 retrieval evaluation harness
     eu-ai-check bench-filter    §21 filtered-HNSW benchmark (needs --qdrant-url)
+    eu-ai-check extract TEXT    extract case facts from a description (Phase 2)
+    eu-ai-check eval-extraction run the Phase 2 extraction evaluation harness
 
 Ingestion exits non-zero when an invariant is broken. A broken invariant is not a
 warning to scroll past: per SYSTEM_SPEC.md §12.1 it would resurface later as a
@@ -26,11 +28,13 @@ from .corpus.models import Corpus
 from .corpus.parser import parse_document
 from .corpus.rules import build_rules
 from .corpus.validation import Severity, validate_corpus
+from .extraction.extractor import DEFAULT_EFFORT
 
 DEFAULT_SOURCE = Path("data/raw/ai_act_32024R1689.xhtml")
 DEFAULT_OUT = Path("data/corpus")
 DEFAULT_QUERIES = Path("data/eval/retrieval_queries.json")
 DEFAULT_SYNTHETIC = Path("data/eval/synthetic_versions.json")
+DEFAULT_EXTRACTION_CASES = Path("data/eval/extraction_cases.json")
 SOURCE_REFERENCE = (
     "Regulation (EU) 2024/1689 (Artificial Intelligence Act), consolidated XHTML "
     "from the EU Publications Office (CELEX 32024R1689)"
@@ -253,6 +257,72 @@ def cmd_bench_filter(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_extract(args: argparse.Namespace) -> int:
+    from .extraction.providers import create_extractor
+    from .extraction.schema import Case
+
+    result = create_extractor(args.provider, effort=args.effort).extract(args.text, args.date)
+    print(f"provider={result.provider} model={result.requested_model} effort={result.effort}  "
+          f"served by {result.served_model}  fallback={result.fell_back}  "
+          f"stop={result.stop_reason}  tokens in/out={result.input_tokens}/{result.output_tokens}")
+    for leak in result.leaks:
+        print(f"CONCLUSION LEAK in {leak.field}: [{leak.kind}] {leak.excerpt}")
+    if not result.ok:
+        print(f"extraction failed: {result.error}", file=sys.stderr)
+        return 1
+    case = Case.from_facts(result.facts, args.text, args.date)
+    print(case.model_dump_json(indent=2))
+    return 1 if result.leaks else 0
+
+
+def cmd_eval_extraction(args: argparse.Namespace) -> int:
+    import openai
+
+    from .extraction.evaluation import (
+        JUDGE_EFFORT,
+        JUDGE_MODEL,
+        load_cases,
+        render,
+        run_arm,
+        run_records,
+        summary_json,
+    )
+    from .extraction.openai_extractor import OPENAI_MODEL, OpenAIExtractor
+
+    # The whole LLM evaluation stack is OpenAI: one client, OPENAI_API_KEY only.
+    # Extractor (system under test): gpt-6.1-sol. Judge (secondary, optional):
+    # gpt-6-astra. --no-judge runs the primary evaluation with the extractor alone.
+    cases = load_cases(args.cases)
+    client = openai.OpenAI()
+    judge_client = None if args.no_judge else client
+    print(f"extractor: {OPENAI_MODEL}; judge: "
+          f"{'disabled' if args.no_judge else f'{JUDGE_MODEL} (effort={JUDGE_EFFORT})'}",
+          file=sys.stderr)
+    variants = args.prompt_variants.split(",")
+    arms = []
+    for variant in variants:
+        for effort in args.efforts.split(","):
+            extractor = OpenAIExtractor(client, effort=effort, prompt_variant=variant)
+            # The default run (baseline prompt only) keeps the first run's labels.
+            label = (f"{OPENAI_MODEL} effort={extractor.effort}" if variants == ["baseline"]
+                     else f"{OPENAI_MODEL} prompt={variant} effort={extractor.effort}")
+            print(f"running {label}: {len(cases)} cases x {args.repeats} repeats", file=sys.stderr)
+            arms.append(run_arm(label, extractor, cases, args.repeats, judge_client=judge_client))
+    report = render(arms)
+    print(report)
+    if args.out:
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+        args.out.with_suffix(".txt").write_text(report + "\n", encoding="utf-8")
+        args.out.with_suffix(".json").write_text(json.dumps(summary_json(arms), indent=2), encoding="utf-8")
+        runs_path = args.out.with_suffix(".runs.jsonl")
+        runs_path.write_text(
+            "".join(json.dumps(r, ensure_ascii=False, default=str) + "\n" for r in run_records(arms)),
+            encoding="utf-8",
+        )
+        print(f"wrote {args.out.with_suffix('.txt')}, .json and {runs_path.name}", file=sys.stderr)
+    return 1 if any(a.leaks() for a in arms) else 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="eu-ai-check", description=__doc__)
     parser.add_argument(
@@ -311,6 +381,33 @@ def main(argv: list[str] | None = None) -> int:
     p_bench.add_argument("--skip-sweep", action="store_true")
     p_bench.add_argument("--out", type=Path, default=None)
     p_bench.set_defaults(func=cmd_bench_filter)
+
+    p_extract = sub.add_parser("extract", help="extract case facts from a description (Phase 2)")
+    p_extract.add_argument("text")
+    p_extract.add_argument("--date", type=date.fromisoformat, default=date.today(),
+                           help="assessment date (default: today)")
+    p_extract.add_argument("--effort", default=DEFAULT_EFFORT, choices=["low", "medium"],
+                           help=f"reasoning effort (default: {DEFAULT_EFFORT}, the accepted Phase 2 "
+                                "configuration)")
+    p_extract.add_argument("--provider", default="openai", choices=["openai", "anthropic"],
+                           help="extraction provider (default: openai, gpt-6.1-sol). "
+                                "'anthropic' is an optional, non-evaluated alternative "
+                                "and needs the 'anthropic' extra and ANTHROPIC_API_KEY")
+    p_extract.set_defaults(func=cmd_extract)
+
+    p_eval_x = sub.add_parser("eval-extraction", help="run the Phase 2 extraction eval harness")
+    p_eval_x.add_argument("--cases", type=Path, default=DEFAULT_EXTRACTION_CASES)
+    p_eval_x.add_argument("--repeats", type=int, default=3)
+    p_eval_x.add_argument("--efforts", default="low,medium", help="comma-separated effort arms")
+    p_eval_x.add_argument("--prompt-variants", default="baseline",
+                          help="comma-separated prompt variants (default: baseline, the "
+                               "frozen prompt; others are follow-up experiments only)")
+    p_eval_x.add_argument("--no-judge", action="store_true",
+                          help="skip the secondary LLM judge (gpt-6-astra); the primary "
+                               "evaluation then uses only the extractor (gpt-6.1-sol)")
+    p_eval_x.add_argument("--out", type=Path, default=None,
+                          help="write <out>.txt, <out>.json and <out>.runs.jsonl")
+    p_eval_x.set_defaults(func=cmd_eval_extraction)
 
     args = parser.parse_args(argv)
     return args.func(args)

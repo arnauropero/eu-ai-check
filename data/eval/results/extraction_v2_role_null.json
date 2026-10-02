@@ -1,0 +1,138 @@
+{
+  "gpt-6.1-sol prompt=baseline effort=low": {
+    "requested": [
+      "openai:gpt-6.1-sol:effort=low"
+    ],
+    "served_models": {
+      "gpt-6.1-sol": 90
+    },
+    "runs": 90,
+    "ok": 90,
+    "leaks": 0,
+    "overall": 0.9666666666666667,
+    "booleans": 0.9888888888888889,
+    "dates": 1.0,
+    "free_text": 0.9377777777777778,
+    "null_kept_null": 0.9823399558498896,
+    "value_filled": 0.9720670391061452,
+    "per_field": {
+      "intended_purpose": 0.9777777777777777,
+      "ai_functionality": 0.9666666666666667,
+      "role_in_decision_making": 0.9111111111111111,
+      "affected_persons": 0.8333333333333334,
+      "jurisdiction": 1.0,
+      "develops_system": 0.9666666666666667,
+      "uses_system": 1.0,
+      "puts_own_name_or_trademark": 0.9777777777777777,
+      "modifies_intended_purpose": 1.0,
+      "modifies_safety_relevant_components": 1.0,
+      "relevant_date": 1.0
+    },
+    "unstable": 4,
+    "fallbacks": 0,
+    "input_tokens": 107835,
+    "output_tokens": 11790
+  },
+  "gpt-6.1-sol prompt=baseline effort=medium": {
+    "requested": [
+      "openai:gpt-6.1-sol:effort=medium"
+    ],
+    "served_models": {
+      "gpt-6.1-sol": 90
+    },
+    "runs": 90,
+    "ok": 90,
+    "leaks": 0,
+    "overall": 0.9666666666666667,
+    "booleans": 0.9844444444444445,
+    "dates": 1.0,
+    "free_text": 0.9422222222222222,
+    "null_kept_null": 0.9867549668874173,
+    "value_filled": 0.9702048417132216,
+    "per_field": {
+      "intended_purpose": 0.9666666666666667,
+      "ai_functionality": 0.9555555555555556,
+      "role_in_decision_making": 0.9333333333333333,
+      "affected_persons": 0.8555555555555555,
+      "jurisdiction": 1.0,
+      "develops_system": 0.9666666666666667,
+      "uses_system": 1.0,
+      "puts_own_name_or_trademark": 0.9555555555555556,
+      "modifies_intended_purpose": 1.0,
+      "modifies_safety_relevant_components": 1.0,
+      "relevant_date": 1.0
+    },
+    "unstable": 3,
+    "fallbacks": 0,
+    "input_tokens": 107835,
+    "output_tokens": 18154
+  },
+  "gpt-6.1-sol prompt=role-null-v1 effort=low": {
+    "requested": [
+      "openai:gpt-6.1-sol:effort=low"
+    ],
+    "served_models": {
+      "gpt-6.1-sol": 90
+    },
+    "runs": 90,
+    "ok": 90,
+    "leaks": 0,
+    "overall": 0.9696969696969697,
+    "booleans": 0.98,
+    "dates": 1.0,
+    "free_text": 0.9533333333333334,
+    "null_kept_null": 0.9933774834437086,
+    "value_filled": 0.9664804469273743,
+    "per_field": {
+      "intended_purpose": 0.9666666666666667,
+      "ai_functionality": 0.9777777777777777,
+      "role_in_decision_making": 0.9666666666666667,
+      "affected_persons": 0.8555555555555555,
+      "jurisdiction": 1.0,
+      "develops_system": 0.9666666666666667,
+      "uses_system": 1.0,
+      "puts_own_name_or_trademark": 0.9555555555555556,
+      "modifies_intended_purpose": 0.9777777777777777,
+      "modifies_safety_relevant_components": 1.0,
+      "relevant_date": 1.0
+    },
+    "unstable": 6,
+    "fallbacks": 0,
+    "input_tokens": 118815,
+    "output_tokens": 11932
+  },
+  "gpt-6.1-sol prompt=role-null-v1 effort=medium": {
+    "requested": [
+      "openai:gpt-6.1-sol:effort=medium"
+    ],
+    "served_models": {
+      "gpt-6.1-sol": 90
+    },
+    "runs": 90,
+    "ok": 90,
+    "leaks": 0,
+    "overall": 0.9676767676767677,
+    "booleans": 0.9844444444444445,
+    "dates": 0.9888888888888889,
+    "free_text": 0.9466666666666667,
+    "null_kept_null": 0.9933774834437086,
+    "value_filled": 0.9646182495344506,
+    "per_field": {
+      "intended_purpose": 0.9888888888888889,
+      "ai_functionality": 0.9555555555555556,
+      "role_in_decision_making": 0.9444444444444444,
+      "affected_persons": 0.8444444444444444,
+      "jurisdiction": 1.0,
+      "develops_system": 0.9666666666666667,
+      "uses_system": 1.0,
+      "puts_own_name_or_trademark": 0.9555555555555556,
+      "modifies_intended_purpose": 1.0,
+      "modifies_safety_relevant_components": 1.0,
+      "relevant_date": 0.9888888888888889
+    },
+    "unstable": 8,
+    "fallbacks": 0,
+    "input_tokens": 118815,
+    "output_tokens": 18622
+  }
+}

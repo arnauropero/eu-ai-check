@@ -12,10 +12,16 @@ dependencies = [
     "lxml>=5.3",
     "sentence-transformers>=6.1.0",
     "qdrant-client>=1.19.1",
+    "openai>=3.23.0",
 ]
 
 [project.scripts]
 eu-ai-check = "eu_ai_check.cli:main"
+
+[project.optional-dependencies]
+anthropic = [
+    "anthropic>=1.11.0",
+]
 
 [dependency-groups]
 dev = [

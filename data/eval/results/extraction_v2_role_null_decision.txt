@@ -1,0 +1,190 @@
+Phase 2 follow-up `role-null-v1` -- pre-registered metrics and decision rule
+================================================================================================
+
+## effort=low
+  metric                                           frozen     re-run  role-null
+  runs ok                                           90/90      90/90      90/90
+  role false fills (null-label cases)                5/39       8/39       2/39
+    of which E09+E14 (clear errors)                     0          2          0
+    of which E06+E20 (ambiguous labels)                 5          6          2
+    absence-only fills (descriptive)                    2          3          0
+  guard misses (role label non-null)                 0/51       0/51       1/51
+  affected_persons empty answers (descr.)           23/90      22/90      21/90
+  runs with leaks                                    0/90       0/90       0/90
+  field accuracy:
+    intended_purpose                              0.967      0.978      0.967  ok
+    ai_functionality                              0.967      0.967      0.978  MOVED 0.011 > noise 0.000
+    role_in_decision_making                       0.944      0.911      0.967
+    affected_persons                              0.833      0.833      0.856  MOVED 0.022 > noise 0.000
+    jurisdiction                                  1.000      1.000      1.000  ok
+    develops_system                               0.967      0.967      0.967  ok
+    uses_system                                   1.000      1.000      1.000  ok
+    puts_own_name_or_trademark                    0.967      0.978      0.956  ok
+    modifies_intended_purpose                     0.989      1.000      0.978  ok
+    modifies_safety_relevant_components           1.000      1.000      1.000  ok
+    relevant_date                                 1.000      1.000      1.000  ok
+  decision rule checks:
+    1_false_fills_down                 PASS
+    2_guard                            PASS
+    3_other_fields_within_noise        FAIL
+    4_zero_leaks                       PASS
+  effort=low: NOT PASSED
+
+## effort=medium
+  metric                                           frozen     re-run  role-null
+  runs ok                                           90/90      90/90      90/90
+  role false fills (null-label cases)                9/39       6/39       2/39
+    of which E09+E14 (clear errors)                     3          0          0
+    of which E06+E20 (ambiguous labels)                 6          6          2
+    absence-only fills (descriptive)                    4          1          0
+  guard misses (role label non-null)                 0/51       0/51       3/51
+  affected_persons empty answers (descr.)           22/90      21/90      21/90
+  runs with leaks                                    0/90       0/90       0/90
+  field accuracy:
+    intended_purpose                              0.967      0.967      0.989  MOVED 0.022 > noise 0.000
+    ai_functionality                              0.956      0.956      0.956  ok
+    role_in_decision_making                       0.900      0.933      0.944
+    affected_persons                              0.811      0.856      0.844  ok
+    jurisdiction                                  1.000      1.000      1.000  ok
+    develops_system                               0.967      0.967      0.967  ok
+    uses_system                                   1.000      1.000      1.000  ok
+    puts_own_name_or_trademark                    0.944      0.956      0.956  ok
+    modifies_intended_purpose                     1.000      1.000      1.000  ok
+    modifies_safety_relevant_components           1.000      1.000      1.000  ok
+    relevant_date                                 1.000      1.000      0.989  MOVED 0.011 > noise 0.000
+  decision rule checks:
+    1_false_fills_down                 PASS
+    2_guard                            FAIL
+    3_other_fields_within_noise        FAIL
+    4_zero_leaks                       PASS
+  effort=medium: NOT PASSED
+
+PRE-REGISTERED VERDICT: role-null-v1 DID NOT MEET the decision rule
+
+## role_in_decision_making per case and repeat
+  marks per arm = repeats 0,1,2 ('.' correct, 'x' miss, 'E' failed run)
+  arms: [0] frozen low | [1] frozen medium | [2] re-run low | [3] re-run medium | [4] role-null-v1 low | [5] role-null-v1 medium
+  -- clear extractor errors in the baseline (label null)
+    E09  [0]...  [1]xx.  [2]..x  [3]...  [4]...  [5]...
+        [0]#0 . None
+        [0]#1 . None
+        [0]#2 . None
+        [1]#0 x "Answers customers' questions directly through the webshop chatbot."
+        [1]#1 x "Directly answers customers' questions on the webshop."
+        [1]#2 . None
+        [2]#0 . None
+        [2]#1 . None
+        [2]#2 x 'Directly answers questions through the webshop chatbot.'
+        [3]#0 . None
+        [3]#1 . None
+        [3]#2 . None
+        [4]#0 . None
+        [4]#1 . None
+        [4]#2 . None
+        [5]#0 . None
+        [5]#1 . None
+        [5]#2 . None
+    E14  [0]...  [1]..x  [2]x..  [3]...  [4]...  [5]...
+        [0]#0 . None
+        [0]#1 . None
+        [0]#2 . None
+        [1]#0 . None
+        [1]#1 . None
+        [1]#2 x "Banks integrate the SDK to verify callers' claimed identities; no further decision process is described."
+        [2]#0 x "Banks integrate the SDK to verify callers' claimed identities; whether verification informs a human decision or acts automatically is not stated."
+        [2]#1 . None
+        [2]#2 . None
+        [3]#0 . None
+        [3]#1 . None
+        [3]#2 . None
+        [4]#0 . None
+        [4]#1 . None
+        [4]#2 . None
+        [5]#0 . None
+        [5]#1 . None
+        [5]#2 . None
+  -- possibly ambiguous labels (label null)
+    E06  [0]xxx  [1]xxx  [2]xxx  [3]xxx  [4]...  [5]...
+        [0]#0 x "Border guards use the kiosk's facial comparison to confirm travellers' identities."
+        [0]#1 x "Border guards use the kiosk's facial comparison to confirm travellers' identities."
+        [0]#2 x "Border guards use the kiosk's face comparison to confirm travellers' identities."
+        [1]#0 x "Border guards use the kiosk's face comparison to confirm travellers' identities."
+        [1]#1 x "Border guards use the kiosk's facial comparison to confirm travellers' identities."
+        [1]#2 x "Border guards use the kiosk's facial comparison to confirm travellers' identities."
+        [2]#0 x "Border guards use the kiosk's facial comparison to confirm travellers' identities."
+        [2]#1 x "Border guards use the kiosk's face comparison to confirm travellers' identities."
+        [2]#2 x "Border guards use the kiosk's facial comparison to confirm travellers' identities; the description does not specify who makes the final decision."
+        [3]#0 x "Border guards use the kiosk's facial comparison to confirm travellers' identities."
+        [3]#1 x "Border guards use the kiosk's face comparison to confirm travellers' identities."
+        [3]#2 x "Border guards use the kiosk's comparison to confirm travellers' identities."
+        [4]#0 . None
+        [4]#1 . None
+        [4]#2 . None
+        [5]#0 . None
+        [5]#1 . None
+        [5]#2 . None
+    E20  [0]x.x  [1]xxx  [2]xxx  [3]xxx  [4].xx  [5]x.x
+        [0]#0 x 'The AI model is used to set individual car-insurance premiums; any human involvement is not described.'
+        [0]#1 . None
+        [0]#2 x 'The AI model is used to set individual car-insurance premiums; no human decision-making role is described.'
+        [1]#0 x 'The model is used to set individual premiums; human involvement is not described.'
+        [1]#1 x 'The AI model sets individual car-insurance premiums; no human decision-making role is described.'
+        [1]#2 x "The model's output is used to set individual car-insurance premiums; any human involvement is not described."
+        [2]#0 x 'The model is used to set individual car-insurance premiums; whether a human reviews or approves them is not stated.'
+        [2]#1 x 'The model sets individual car-insurance premiums.'
+        [2]#2 x 'The AI model is used to set individual car-insurance premiums; any human involvement is not described.'
+        [3]#0 x 'The model is used to set individual car-insurance premiums.'
+        [3]#1 x 'The model is used to set premiums; no human review or final decision-maker is described.'
+        [3]#2 x 'The model is used to set individual car-insurance premiums; no human decision-making role is described.'
+        [4]#0 . None
+        [4]#1 x "The model's output is used to set individual car-insurance premiums."
+        [4]#2 x 'The model is used to set individual car-insurance premiums.'
+        [5]#0 x "The model's output is used to set individual car-insurance premiums."
+        [5]#1 . None
+        [5]#2 x 'The model is used to set individual car-insurance premiums.'
+  -- other null-label cases
+    E08  [0]...  [1]...  [2]...  [3]...  [4]...  [5]...
+    E10  [0]...  [1]...  [2]...  [3]...  [4]...  [5]...
+    E16  [0]...  [1]...  [2]...  [3]...  [4]...  [5]...
+    E19  [0]...  [1]...  [2]...  [3]...  [4]...  [5]...
+    E21  [0]...  [1]...  [2]...  [3]...  [4]...  [5]...
+    E22  [0]...  [1]...  [2]...  [3]...  [4]...  [5]...
+    E24  [0]...  [1]...  [2]...  [3]...  [4]...  [5]...
+    E28  [0]...  [1]...  [2]...  [3]...  [4]...  [5]...
+    E30  [0]...  [1]...  [2]...  [3]...  [4]...  [5]...
+  -- guard: role label non-null
+    E01  [0]...  [1]...  [2]...  [3]...  [4]...  [5]...
+    E02  [0]...  [1]...  [2]...  [3]...  [4]...  [5]...
+    E03  [0]...  [1]...  [2]...  [3]...  [4]...  [5]...
+    E04  [0]...  [1]...  [2]...  [3]...  [4]...  [5]...
+    E05  [0]...  [1]...  [2]...  [3]...  [4]...  [5]...
+    E07  [0]...  [1]...  [2]...  [3]...  [4]...  [5]...
+    E11  [0]...  [1]...  [2]...  [3]...  [4]...  [5]...
+    E12  [0]...  [1]...  [2]...  [3]...  [4]...  [5]...
+    E13  [0]...  [1]...  [2]...  [3]...  [4]...  [5]...
+    E15  [0]...  [1]...  [2]...  [3]...  [4]...  [5]...
+    E17  [0]...  [1]...  [2]...  [3]...  [4]...  [5]...
+    E18  [0]...  [1]...  [2]...  [3]...  [4]...  [5]...
+    E23  [0]...  [1]...  [2]...  [3]...  [4]...  [5]...
+    E25  [0]...  [1]...  [2]...  [3]...  [4]...  [5]...
+    E26  [0]...  [1]...  [2]...  [3]...  [4]...  [5]...
+    E27  [0]...  [1]...  [2]...  [3]...  [4]..x  [5]xxx
+        [0]#0 . 'Provides relevant case-law summaries to assist judges considering a case.'
+        [0]#1 . 'Provides relevant case-law summaries to assist judges considering a case.'
+        [0]#2 . 'Provides relevant case-law summaries to assist judges considering a case.'
+        [1]#0 . 'Provides relevant case-law summaries to assist judges.'
+        [1]#1 . 'Provides summaries of relevant case law to assist judges considering a case.'
+        [1]#2 . 'Provides relevant case-law summaries to assist judges considering a case.'
+        [2]#0 . 'Provides relevant case-law summaries to assist judges handling a case.'
+        [2]#1 . 'Provides relevant case-law summaries to assist judges considering a case.'
+        [2]#2 . 'Provides judges with summaries of relevant case law to assist them in considering a case.'
+        [3]#0 . 'Provides summaries of relevant case law to assist judges considering a case.'
+        [3]#1 . 'Provides relevant case-law summaries to assist judges considering a case.'
+        [3]#2 . 'Provides relevant case-law summaries to assist judges considering a case.'
+        [4]#0 . 'Provides relevant case-law summaries to assist judges handling a case.'
+        [4]#1 . 'Provides judges with summaries of relevant case law to assist them in considering the case before them.'
+        [4]#2 x None
+        [5]#0 x None
+        [5]#1 x None
+        [5]#2 x None
+    E29  [0]...  [1]...  [2]...  [3]...  [4]...  [5]...
