@@ -28,6 +28,7 @@ from .corpus.models import Corpus
 from .corpus.parser import parse_document
 from .corpus.rules import build_rules
 from .corpus.validation import Severity, validate_corpus
+from .extraction.extractor import DEFAULT_EFFORT
 
 DEFAULT_SOURCE = Path("data/raw/ai_act_32024R1689.xhtml")
 DEFAULT_OUT = Path("data/corpus")
@@ -385,7 +386,9 @@ def main(argv: list[str] | None = None) -> int:
     p_extract.add_argument("text")
     p_extract.add_argument("--date", type=date.fromisoformat, default=date.today(),
                            help="assessment date (default: today)")
-    p_extract.add_argument("--effort", default="medium", choices=["low", "medium"])
+    p_extract.add_argument("--effort", default=DEFAULT_EFFORT, choices=["low", "medium"],
+                           help=f"reasoning effort (default: {DEFAULT_EFFORT}, the accepted Phase 2 "
+                                "configuration)")
     p_extract.add_argument("--provider", default="openai", choices=["openai", "anthropic"],
                            help="extraction provider (default: openai, gpt-6.1-sol). "
                                 "'anthropic' is an optional, non-evaluated alternative "

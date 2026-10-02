@@ -27,6 +27,7 @@ from datetime import date
 from typing import Any
 
 from .extractor import (
+    DEFAULT_EFFORT,
     DEFAULT_PROMPT_VARIANT,
     PROMPT_VARIANTS,
     ExtractionResult,
@@ -46,7 +47,7 @@ SCHEMA_NAME = "case_facts"
 class OpenAIExtractor:
     provider = "openai"
 
-    def __init__(self, client: Any = None, *, model: str = OPENAI_MODEL, effort: str = "medium",
+    def __init__(self, client: Any = None, *, model: str = OPENAI_MODEL, effort: str = DEFAULT_EFFORT,
                  prompt_variant: str = DEFAULT_PROMPT_VARIANT):
         if effort not in EFFORT_MAP:
             raise ValueError(f"effort {effort!r} is not a pre-registered arm ({sorted(EFFORT_MAP)})")

@@ -1331,9 +1331,10 @@ fixed, pass `--out` an undotted name.
 | zero leaks | 0 in v1 (180 runs); also 0 in all 360 v2 runs | met |
 
 The post-hoc `affected_persons` re-score is **not** used for acceptance. The official
-v1 scores are unchanged. The code's default effort (`extract --effort`,
-`create_extractor`, `OpenAIExtractor`) is still `medium`; aligning it with the
-accepted configuration is a separate change.
+v1 scores are unchanged. The implementation default now matches the accepted
+configuration. `DEFAULT_EFFORT = "low"` drives `extract --effort`,
+`create_extractor` and `OpenAIExtractor`, and tests pin it. `--effort medium`
+remains available. The eval harness still runs both pre-registered arms by default.
 
 **Determination:**
 - Correctness against the four-state contract (§14): `applicable` /
