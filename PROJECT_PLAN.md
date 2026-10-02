@@ -194,7 +194,13 @@ one rule-matching engine → cited, fail-closed output.
   (SYSTEM_SPEC.md §18). Known limit: other citation styles ("Art. 26(6)") get no
   citation priority; left unfixed rather than tuned to seen queries.
 
-**Phase 2 — Extraction stage**
+**Phase 2 — Extraction stage (IN PROGRESS — eval set pre-registered 2026-10-02)**
+- Status: extractor (Claude Opus 5.5, structured outputs, refusal fallbacks), harness
+  (`eu-ai-check eval-extraction`), conclusion-leakage check and a 30-case labelled eval
+  set were committed **before the first API run**. The labels were reviewed by the user
+  first, and one changed in that review (E18, documented as pre-registration, not
+  post-hoc). Field rules and labelling decisions L1–L9 are in SYSTEM_SPEC.md §3.4. The
+  accuracy target is locked after the first run.
 - Deliverable: schema-constrained extraction from free text to the `Case` schema
   (SYSTEM_SPEC.md §3.2).
 - Deliverable: extraction eval set (hand-labeled free-text → expected fields).

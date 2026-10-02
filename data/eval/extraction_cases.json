@@ -1,0 +1,1854 @@
+{
+  "notice": "Hand-labelled extraction eval set (PROJECT_PLAN.md §10, Phase 2). PRE-REGISTERED: committed before the extractor was run on any of these descriptions. Any case or label added or changed after the first run must be flagged post_hoc, following the Phase 1 precedent. Labels follow the field rules in src/eu_ai_check/extraction/extractor.py (FIELD_RULES), which the extractor also receives, so the model is held to the definitions the labels were written against.",
+  "scoring": {
+    "boolean_and_date_fields": "exact match, null included: a null where a value is expected (or a value where null is expected) is wrong.",
+    "free_text_fields": "expected null -> prediction must be null. Otherwise a value must be present and must satisfy every concept group: a group is a list of accepted stems/synonyms, matched case-insensitively as substrings, and is satisfied if any one of them appears. 'reference' is a plain-language statement of the fact, used only by the secondary LLM judge.",
+    "zero_tolerance": "no excluded (conclusion-level) field and no conclusion term (src/eu_ai_check/extraction/leakage.py) in any value, in any case. Any occurrence is a hard failure, not a score."
+  },
+  "labelling_rules": {
+    "field_rules_verbatim": [
+      "- develops_system: true if the organisation built the system or had it built for itself; false if it obtained an existing system from someone else (bought, licensed, a built-in feature of another product). A separate legal entity in the same group, such as a sister company, counts as someone else. Adapting or fine-tuning a system obtained from someone else is recorded under the modifies_* fields, not here. null if the origin is not stated.",
+      "- uses_system: true if the organisation operates the system in its own activities, now or as planned; false if it only builds, sells or supplies it for others to use. null if not stated.",
+      "- puts_own_name_or_trademark: true if the organisation offers or markets the system under its own name or brand; false if the system is offered or used under another party's name (including a named third-party product used without rebranding). null if branding cannot be determined.",
+      "- modifies_intended_purpose: true if the organisation uses the system for a different purpose than the one it was supplied for; false only if the description says it is used as supplied or unchanged. null otherwise, including for systems the organisation built itself.",
+      "- modifies_safety_relevant_components: true if the organisation retrained, fine-tuned or changed the model or its components after obtaining it; false only if the description says it is used as supplied or unchanged. null otherwise.",
+      "- relevant_date: if the description describes a future launch or start of use with a date, use that date; if it asks for the situation at a specific date, use that date; if it says the assessment is about the present (\"as of today\"), use the assessment date. Resolve relative expressions against the assessment date; a month-level expression (\"next month\") means the first day of that month. If the system is already in use and no assessment date is asked for, or the timing is vague (\"sometime next year\"), use null.",
+      "- role_in_decision_making and affected_persons: null unless the description says how the output is used or whom it concerns. Do not fill them in from what systems of this kind usually do.",
+      "- jurisdiction: the country or region where the system is used, if stated."
+    ],
+    "field_rules_note": "Identical to FIELD_RULES in src/eu_ai_check/extraction/extractor.py, which the extractor receives in its system prompt; tests/test_extraction.py fails if the two drift apart.",
+    "labelling_decisions": [
+      {
+        "id": "L1",
+        "rule": "Fine-tuning or retraining a system obtained from someone else is a modification (modifies_safety_relevant_components = true), not development (develops_system = false).",
+        "cases": [
+          "E11",
+          "E26"
+        ]
+      },
+      {
+        "id": "L2",
+        "rule": "A separate legal entity in the same group (e.g. a sister company) counts as 'someone else': a system it built was obtained, not developed (develops_system = false).",
+        "cases": [
+          "E25"
+        ]
+      },
+      {
+        "id": "L3",
+        "rule": "puts_own_name_or_trademark = false only when the system is used or offered under another party's name, including a NAMED third-party product used without rebranding. If the product is unnamed or branding is not described, null. Selling under one's own brand = true.",
+        "cases_false": [
+          "E01",
+          "E08",
+          "E13",
+          "E15",
+          "E28",
+          "E30"
+        ],
+        "cases_null": [
+          "E18"
+        ],
+        "cases_true": [
+          "E03",
+          "E10",
+          "E14",
+          "E17"
+        ]
+      },
+      {
+        "id": "L4",
+        "rule": "uses_system covers current and planned use (true). An organisation that only builds, sells or supplies the system for others to use gets false.",
+        "cases_planned_use": [
+          "E05",
+          "E21",
+          "E23"
+        ],
+        "cases_supplier_only": [
+          "E03",
+          "E10",
+          "E14",
+          "E17"
+        ]
+      },
+      {
+        "id": "L5",
+        "rule": "Development may be inferred when the organisation describes the system as its own product that it makes or sells ('we make', 'our startup sells X').",
+        "cases": [
+          "E03",
+          "E14"
+        ]
+      },
+      {
+        "id": "L6",
+        "rule": "Repurposing a general-purpose system for a specific use counts as modifies_intended_purpose = true.",
+        "cases": [
+          "E11"
+        ]
+      },
+      {
+        "id": "L7",
+        "rule": "relevant_date: explicit future launch or start date -> that date; 'where we stood on <date>' -> that date; 'as of today' -> the assessment date; month-level relative ('next month') -> first day of that month; a system already in use with no date asked for ('since January'), or vague timing ('sometime next year') -> null.",
+        "cases": [
+          "E17",
+          "E19",
+          "E20",
+          "E18",
+          "E13",
+          "E29",
+          "E21"
+        ]
+      },
+      {
+        "id": "L8",
+        "rule": "Null discipline for descriptive text: role_in_decision_making and affected_persons are null unless the description says how the output is used or whom it concerns; they are not filled in from what such systems usually do.",
+        "cases_null": [
+          "E06",
+          "E07",
+          "E08",
+          "E09",
+          "E10",
+          "E14",
+          "E16",
+          "E19",
+          "E20",
+          "E21",
+          "E22",
+          "E24",
+          "E27",
+          "E28",
+          "E30"
+        ]
+      },
+      {
+        "id": "L9",
+        "rule": "A legal conclusion asserted without supporting facts ('we are the provider', 'is my system high-risk?') yields no actor facts: the actor fields stay null.",
+        "cases": [
+          "E24",
+          "E27"
+        ]
+      }
+    ],
+    "review_record": [
+      {
+        "date": "2026-10-02",
+        "change": "E18 puts_own_name_or_trademark false -> null (the payroll provider's tool is not a named product, so L3 gives null)",
+        "status": "made during the user's label review, BEFORE pre-registration and before any API run; not post-hoc"
+      }
+    ]
+  },
+  "categories": {
+    "standard": "clear description of a use case",
+    "actor": "actor facts are the point: build vs buy, use vs sell, own brand, modifications",
+    "date": "relevant_date handling: future launch, relative date, past assessment date, present, vague",
+    "missing": "little information; most fields must be null",
+    "adversarial": "the description asserts legal conclusions; the extractor must record facts only",
+    "non_high_risk": "ordinary low-stakes uses",
+    "multilingual": "description not in English; values must still be English"
+  },
+  "cases": [
+    {
+      "id": "E01",
+      "category": "standard",
+      "assessment_date": "2026-10-02",
+      "description": "We're a mid-size logistics company. We bought an off-the-shelf tool from HireSmart that scores incoming CVs against our job descriptions and shows our recruiters a ranked shortlist. Recruiters decide who to interview. We use it as-is for all warehouse roles in Germany.",
+      "expected": {
+        "intended_purpose": {
+          "concepts": [
+            [
+              "recruit",
+              "hiring",
+              "hire",
+              "job applica",
+              "candidate",
+              "shortlist"
+            ]
+          ],
+          "reference": "recruiting staff for warehouse roles"
+        },
+        "ai_functionality": {
+          "concepts": [
+            [
+              "scor",
+              "rank"
+            ],
+            [
+              "cv",
+              "résumé",
+              "resume",
+              "applica"
+            ]
+          ],
+          "reference": "scores CVs against job descriptions and ranks them"
+        },
+        "relevant_date": null,
+        "role_in_decision_making": {
+          "concepts": [
+            [
+              "recruiter"
+            ]
+          ],
+          "reference": "produces a ranked shortlist; recruiters decide who to interview"
+        },
+        "develops_system": false,
+        "uses_system": true,
+        "puts_own_name_or_trademark": false,
+        "modifies_intended_purpose": false,
+        "modifies_safety_relevant_components": false,
+        "jurisdiction": {
+          "concepts": [
+            [
+              "germany",
+              "german"
+            ]
+          ],
+          "reference": "Germany"
+        },
+        "affected_persons": {
+          "concepts": [
+            [
+              "applicant",
+              "candidate",
+              "job seeker"
+            ]
+          ],
+          "reference": "job applicants"
+        }
+      }
+    },
+    {
+      "id": "E02",
+      "category": "standard",
+      "assessment_date": "2026-10-02",
+      "description": "FinPlus, a consumer lender in Portugal, built its own machine-learning model that predicts the probability that a loan applicant will default. Loan officers see the score, but applications scoring under 400 points are rejected automatically.",
+      "expected": {
+        "intended_purpose": {
+          "concepts": [
+            [
+              "credit",
+              "loan",
+              "lend"
+            ]
+          ],
+          "reference": "assessing consumer loan applications"
+        },
+        "ai_functionality": {
+          "concepts": [
+            [
+              "predict",
+              "estimat",
+              "scor"
+            ],
+            [
+              "default",
+              "repay",
+              "credit risk"
+            ]
+          ],
+          "reference": "predicts the probability of loan default"
+        },
+        "relevant_date": null,
+        "role_in_decision_making": {
+          "concepts": [
+            [
+              "reject",
+              "automatic"
+            ]
+          ],
+          "reference": "low scores are rejected automatically; loan officers see the score otherwise"
+        },
+        "develops_system": true,
+        "uses_system": true,
+        "puts_own_name_or_trademark": null,
+        "modifies_intended_purpose": null,
+        "modifies_safety_relevant_components": null,
+        "jurisdiction": {
+          "concepts": [
+            [
+              "portugal",
+              "portuguese"
+            ]
+          ],
+          "reference": "Portugal"
+        },
+        "affected_persons": {
+          "concepts": [
+            [
+              "applicant",
+              "borrower",
+              "customer",
+              "consumer"
+            ]
+          ],
+          "reference": "loan applicants"
+        }
+      }
+    },
+    {
+      "id": "E03",
+      "category": "actor",
+      "assessment_date": "2026-10-02",
+      "description": "Our edtech startup sells EssayGrade, a tool that schools use to automatically mark secondary-school essays. Teachers can override the mark.",
+      "expected": {
+        "intended_purpose": {
+          "concepts": [
+            [
+              "school",
+              "education",
+              "student",
+              "essay"
+            ]
+          ],
+          "reference": "marking students' essays in secondary schools"
+        },
+        "ai_functionality": {
+          "concepts": [
+            [
+              "grad",
+              "mark",
+              "scor",
+              "assess"
+            ],
+            [
+              "essay"
+            ]
+          ],
+          "reference": "automatically marks essays"
+        },
+        "relevant_date": null,
+        "role_in_decision_making": {
+          "concepts": [
+            [
+              "teacher"
+            ]
+          ],
+          "reference": "marks automatically; teachers can override"
+        },
+        "develops_system": true,
+        "uses_system": false,
+        "puts_own_name_or_trademark": true,
+        "modifies_intended_purpose": null,
+        "modifies_safety_relevant_components": null,
+        "jurisdiction": null,
+        "affected_persons": {
+          "concepts": [
+            [
+              "student",
+              "pupil"
+            ]
+          ],
+          "reference": "secondary-school students"
+        }
+      }
+    },
+    {
+      "id": "E04",
+      "category": "standard",
+      "assessment_date": "2026-10-02",
+      "description": "The regional health service in Catalonia uses an AI system to classify incoming 112 emergency calls by urgency and suggest which ambulance to send. Dispatchers make the final decision.",
+      "expected": {
+        "intended_purpose": {
+          "concepts": [
+            [
+              "emergenc"
+            ]
+          ],
+          "reference": "handling emergency calls and ambulance dispatch"
+        },
+        "ai_functionality": {
+          "concepts": [
+            [
+              "classif",
+              "prioriti",
+              "triage",
+              "urgen",
+              "rank"
+            ]
+          ],
+          "reference": "classifies emergency calls by urgency and suggests an ambulance"
+        },
+        "relevant_date": null,
+        "role_in_decision_making": {
+          "concepts": [
+            [
+              "dispatcher"
+            ]
+          ],
+          "reference": "suggests; dispatchers make the final decision"
+        },
+        "develops_system": null,
+        "uses_system": true,
+        "puts_own_name_or_trademark": null,
+        "modifies_intended_purpose": null,
+        "modifies_safety_relevant_components": null,
+        "jurisdiction": {
+          "concepts": [
+            [
+              "catalonia",
+              "catalan",
+              "spain"
+            ]
+          ],
+          "reference": "Catalonia, Spain"
+        },
+        "affected_persons": {
+          "concepts": [
+            [
+              "caller",
+              "patient",
+              "people",
+              "person",
+              "public"
+            ]
+          ],
+          "reference": "people making emergency calls"
+        }
+      }
+    },
+    {
+      "id": "E05",
+      "category": "standard",
+      "assessment_date": "2026-10-02",
+      "description": "A police force wants to start using software that estimates how likely a released offender is to reoffend, based on criminal record and age, to prioritise probation supervision.",
+      "expected": {
+        "intended_purpose": {
+          "concepts": [
+            [
+              "probation",
+              "reoffend",
+              "re-offend",
+              "recidiv",
+              "supervis"
+            ]
+          ],
+          "reference": "prioritising probation supervision of released offenders"
+        },
+        "ai_functionality": {
+          "concepts": [
+            [
+              "estimat",
+              "predict",
+              "assess",
+              "scor"
+            ],
+            [
+              "reoffend",
+              "re-offend",
+              "recidiv"
+            ]
+          ],
+          "reference": "estimates likelihood of reoffending"
+        },
+        "relevant_date": null,
+        "role_in_decision_making": {
+          "concepts": [
+            [
+              "priorit",
+              "supervis",
+              "allocat"
+            ]
+          ],
+          "reference": "used to prioritise probation supervision"
+        },
+        "develops_system": null,
+        "uses_system": true,
+        "puts_own_name_or_trademark": null,
+        "modifies_intended_purpose": null,
+        "modifies_safety_relevant_components": null,
+        "jurisdiction": null,
+        "affected_persons": {
+          "concepts": [
+            [
+              "offender",
+              "convict",
+              "prisoner",
+              "parolee",
+              "probationer"
+            ]
+          ],
+          "reference": "released offenders"
+        }
+      }
+    },
+    {
+      "id": "E06",
+      "category": "standard",
+      "assessment_date": "2026-10-02",
+      "description": "Border guards at a Schengen airport use a kiosk that compares each traveller's face with their passport photo to confirm their identity.",
+      "expected": {
+        "intended_purpose": {
+          "concepts": [
+            [
+              "border",
+              "passport",
+              "travel",
+              "identity"
+            ]
+          ],
+          "reference": "identity checks at airport border control"
+        },
+        "ai_functionality": {
+          "concepts": [
+            [
+              "compar",
+              "match",
+              "verif"
+            ],
+            [
+              "face",
+              "facial",
+              "photo"
+            ]
+          ],
+          "reference": "compares a traveller's face with their passport photo"
+        },
+        "relevant_date": null,
+        "role_in_decision_making": null,
+        "develops_system": null,
+        "uses_system": true,
+        "puts_own_name_or_trademark": null,
+        "modifies_intended_purpose": null,
+        "modifies_safety_relevant_components": null,
+        "jurisdiction": {
+          "concepts": [
+            [
+              "schengen",
+              "eu",
+              "europe"
+            ]
+          ],
+          "reference": "a Schengen-area airport"
+        },
+        "affected_persons": {
+          "concepts": [
+            [
+              "traveller",
+              "traveler",
+              "passenger"
+            ]
+          ],
+          "reference": "travellers"
+        }
+      }
+    },
+    {
+      "id": "E07",
+      "category": "standard",
+      "assessment_date": "2026-10-02",
+      "description": "Our utility trained a model that predicts pressure anomalies in the city's water network and automatically closes valves when it detects a likely burst.",
+      "expected": {
+        "intended_purpose": {
+          "concepts": [
+            [
+              "water"
+            ]
+          ],
+          "reference": "operating the city water network"
+        },
+        "ai_functionality": {
+          "concepts": [
+            [
+              "predict",
+              "detect"
+            ],
+            [
+              "anomal",
+              "burst",
+              "leak",
+              "pressure"
+            ]
+          ],
+          "reference": "predicts pressure anomalies and detects likely bursts"
+        },
+        "relevant_date": null,
+        "role_in_decision_making": {
+          "concepts": [
+            [
+              "automatic",
+              "without human",
+              "autonomous"
+            ]
+          ],
+          "reference": "closes valves automatically"
+        },
+        "develops_system": true,
+        "uses_system": true,
+        "puts_own_name_or_trademark": null,
+        "modifies_intended_purpose": null,
+        "modifies_safety_relevant_components": null,
+        "jurisdiction": null,
+        "affected_persons": null
+      }
+    },
+    {
+      "id": "E08",
+      "category": "non_high_risk",
+      "assessment_date": "2026-10-02",
+      "description": "We use Gmail's built-in spam filter for our company email.",
+      "expected": {
+        "intended_purpose": {
+          "concepts": [
+            [
+              "spam",
+              "email",
+              "e-mail"
+            ]
+          ],
+          "reference": "filtering spam in company email"
+        },
+        "ai_functionality": {
+          "concepts": [
+            [
+              "filter",
+              "classif",
+              "detect",
+              "identif"
+            ],
+            [
+              "spam",
+              "junk"
+            ]
+          ],
+          "reference": "filters spam"
+        },
+        "relevant_date": null,
+        "role_in_decision_making": null,
+        "develops_system": false,
+        "uses_system": true,
+        "puts_own_name_or_trademark": false,
+        "modifies_intended_purpose": null,
+        "modifies_safety_relevant_components": null,
+        "jurisdiction": null,
+        "affected_persons": null
+      }
+    },
+    {
+      "id": "E09",
+      "category": "non_high_risk",
+      "assessment_date": "2026-10-02",
+      "description": "Customer-service chatbot on our webshop that answers questions about delivery times. Built in-house on top of a licensed LLM.",
+      "expected": {
+        "intended_purpose": {
+          "concepts": [
+            [
+              "customer",
+              "support",
+              "service",
+              "question"
+            ]
+          ],
+          "reference": "customer service on a webshop"
+        },
+        "ai_functionality": {
+          "concepts": [
+            [
+              "answer",
+              "chat",
+              "respond",
+              "convers"
+            ]
+          ],
+          "reference": "answers questions about delivery times"
+        },
+        "relevant_date": null,
+        "role_in_decision_making": null,
+        "develops_system": true,
+        "uses_system": true,
+        "puts_own_name_or_trademark": null,
+        "modifies_intended_purpose": null,
+        "modifies_safety_relevant_components": null,
+        "jurisdiction": null,
+        "affected_persons": {
+          "concepts": [
+            [
+              "customer",
+              "shopper",
+              "visitor",
+              "user"
+            ]
+          ],
+          "reference": "webshop customers"
+        }
+      }
+    },
+    {
+      "id": "E10",
+      "category": "actor",
+      "assessment_date": "2026-10-02",
+      "description": "We license a CV-screening engine from TalentAI and sell it to our HR-software clients as 'RecruitPro by Nordic HR', part of our own product line.",
+      "expected": {
+        "intended_purpose": {
+          "concepts": [
+            [
+              "recruit",
+              "hiring",
+              "cv",
+              "applicant",
+              "candidate",
+              "hr"
+            ]
+          ],
+          "reference": "screening job applicants for HR clients"
+        },
+        "ai_functionality": {
+          "concepts": [
+            [
+              "screen",
+              "filter",
+              "rank",
+              "scor",
+              "assess"
+            ],
+            [
+              "cv",
+              "résumé",
+              "resume",
+              "applica",
+              "candidate"
+            ]
+          ],
+          "reference": "screens CVs"
+        },
+        "relevant_date": null,
+        "role_in_decision_making": null,
+        "develops_system": false,
+        "uses_system": false,
+        "puts_own_name_or_trademark": true,
+        "modifies_intended_purpose": null,
+        "modifies_safety_relevant_components": null,
+        "jurisdiction": null,
+        "affected_persons": {
+          "concepts": [
+            [
+              "applicant",
+              "candidate",
+              "job seeker"
+            ]
+          ],
+          "reference": "job applicants"
+        }
+      }
+    },
+    {
+      "id": "E11",
+      "category": "actor",
+      "assessment_date": "2026-10-02",
+      "description": "We bought a general-purpose image classifier and fine-tuned it on our own X-ray dataset. We now use it in our clinic to flag possible fractures for the radiologist to review.",
+      "expected": {
+        "intended_purpose": {
+          "concepts": [
+            [
+              "fracture",
+              "x-ray",
+              "radiolog",
+              "medical",
+              "clinic",
+              "diagnos"
+            ]
+          ],
+          "reference": "detecting fractures in X-rays at a clinic"
+        },
+        "ai_functionality": {
+          "concepts": [
+            [
+              "flag",
+              "detect",
+              "classif",
+              "identif"
+            ],
+            [
+              "fracture"
+            ]
+          ],
+          "reference": "flags possible fractures on X-rays"
+        },
+        "relevant_date": null,
+        "role_in_decision_making": {
+          "concepts": [
+            [
+              "radiologist"
+            ]
+          ],
+          "reference": "flags; the radiologist reviews"
+        },
+        "develops_system": false,
+        "uses_system": true,
+        "puts_own_name_or_trademark": null,
+        "modifies_intended_purpose": true,
+        "modifies_safety_relevant_components": true,
+        "jurisdiction": null,
+        "affected_persons": {
+          "concepts": [
+            [
+              "patient"
+            ]
+          ],
+          "reference": "clinic patients"
+        }
+      }
+    },
+    {
+      "id": "E12",
+      "category": "actor",
+      "assessment_date": "2026-10-02",
+      "description": "We developed an in-house scheduling AI that assigns delivery routes and shifts to our 300 couriers based on their past performance, and we use it every day.",
+      "expected": {
+        "intended_purpose": {
+          "concepts": [
+            [
+              "assign",
+              "allocat",
+              "schedul",
+              "plan"
+            ],
+            [
+              "courier",
+              "work",
+              "shift",
+              "route",
+              "deliver"
+            ]
+          ],
+          "reference": "allocating routes and shifts to couriers"
+        },
+        "ai_functionality": {
+          "concepts": [
+            [
+              "assign",
+              "allocat",
+              "schedul"
+            ],
+            [
+              "route",
+              "shift"
+            ]
+          ],
+          "reference": "assigns routes and shifts based on past performance"
+        },
+        "relevant_date": null,
+        "role_in_decision_making": {
+          "concepts": [
+            [
+              "assign",
+              "allocat",
+              "determin",
+              "automatic"
+            ]
+          ],
+          "reference": "assigns routes and shifts directly"
+        },
+        "develops_system": true,
+        "uses_system": true,
+        "puts_own_name_or_trademark": null,
+        "modifies_intended_purpose": null,
+        "modifies_safety_relevant_components": null,
+        "jurisdiction": null,
+        "affected_persons": {
+          "concepts": [
+            [
+              "courier",
+              "worker",
+              "driver",
+              "employee",
+              "staff"
+            ]
+          ],
+          "reference": "couriers"
+        }
+      }
+    },
+    {
+      "id": "E13",
+      "category": "actor",
+      "assessment_date": "2026-10-02",
+      "description": "We originally bought SentimentScope to analyse product reviews. Since January we also run it on recordings of our call-centre staff's calls to rate each agent's friendliness for their annual appraisal.",
+      "expected": {
+        "intended_purpose": {
+          "concepts": [
+            [
+              "apprais",
+              "performance",
+              "evaluat",
+              "rating",
+              "rate"
+            ]
+          ],
+          "reference": "rating call-centre agents for annual appraisals"
+        },
+        "ai_functionality": {
+          "concepts": [
+            [
+              "sentiment",
+              "friendl",
+              "tone",
+              "emotion"
+            ],
+            [
+              "call",
+              "recording",
+              "voice",
+              "audio"
+            ]
+          ],
+          "reference": "rates agents' friendliness from call recordings"
+        },
+        "relevant_date": null,
+        "role_in_decision_making": {
+          "concepts": [
+            [
+              "apprais",
+              "performance review",
+              "evaluation",
+              "review"
+            ]
+          ],
+          "reference": "ratings feed the annual appraisal"
+        },
+        "develops_system": false,
+        "uses_system": true,
+        "puts_own_name_or_trademark": false,
+        "modifies_intended_purpose": true,
+        "modifies_safety_relevant_components": null,
+        "jurisdiction": null,
+        "affected_persons": {
+          "concepts": [
+            [
+              "staff",
+              "employee",
+              "agent",
+              "worker"
+            ]
+          ],
+          "reference": "call-centre agents"
+        }
+      }
+    },
+    {
+      "id": "E14",
+      "category": "actor",
+      "assessment_date": "2026-10-02",
+      "description": "Hello, I'm the CTO of VoxID. We make a voice-biometrics SDK that banks integrate to verify that callers are who they claim to be. We sell it under the VoxID brand.",
+      "expected": {
+        "intended_purpose": {
+          "concepts": [
+            [
+              "verif",
+              "authenticat",
+              "identit"
+            ]
+          ],
+          "reference": "verifying the identity of bank callers"
+        },
+        "ai_functionality": {
+          "concepts": [
+            [
+              "voice",
+              "speaker"
+            ],
+            [
+              "verif",
+              "match",
+              "authenticat",
+              "recogni"
+            ]
+          ],
+          "reference": "verifies callers by voice"
+        },
+        "relevant_date": null,
+        "role_in_decision_making": null,
+        "develops_system": true,
+        "uses_system": false,
+        "puts_own_name_or_trademark": true,
+        "modifies_intended_purpose": null,
+        "modifies_safety_relevant_components": null,
+        "jurisdiction": null,
+        "affected_persons": {
+          "concepts": [
+            [
+              "caller",
+              "customer"
+            ]
+          ],
+          "reference": "bank callers / customers"
+        }
+      }
+    },
+    {
+      "id": "E15",
+      "category": "actor",
+      "assessment_date": "2026-10-02",
+      "description": "Our hospital uses DermaCheck, a CE-marked skin-lesion analyser, exactly as supplied by the manufacturer, to prioritise dermatology referrals.",
+      "expected": {
+        "intended_purpose": {
+          "concepts": [
+            [
+              "dermatolog",
+              "skin",
+              "referral"
+            ]
+          ],
+          "reference": "prioritising dermatology referrals"
+        },
+        "ai_functionality": {
+          "concepts": [
+            [
+              "analy",
+              "classif",
+              "assess",
+              "evaluat"
+            ],
+            [
+              "skin",
+              "lesion"
+            ]
+          ],
+          "reference": "analyses skin lesions"
+        },
+        "relevant_date": null,
+        "role_in_decision_making": {
+          "concepts": [
+            [
+              "priorit",
+              "referral"
+            ]
+          ],
+          "reference": "used to prioritise referrals"
+        },
+        "develops_system": false,
+        "uses_system": true,
+        "puts_own_name_or_trademark": false,
+        "modifies_intended_purpose": false,
+        "modifies_safety_relevant_components": false,
+        "jurisdiction": null,
+        "affected_persons": {
+          "concepts": [
+            [
+              "patient"
+            ]
+          ],
+          "reference": "patients referred to dermatology"
+        }
+      }
+    },
+    {
+      "id": "E16",
+      "category": "missing",
+      "assessment_date": "2026-10-02",
+      "description": "An AI system that detects hate speech in comments on a newspaper website.",
+      "expected": {
+        "intended_purpose": {
+          "concepts": [
+            [
+              "moderat",
+              "comment",
+              "hate"
+            ]
+          ],
+          "reference": "moderating comments on a newspaper website"
+        },
+        "ai_functionality": {
+          "concepts": [
+            [
+              "detect",
+              "classif",
+              "flag",
+              "identif"
+            ],
+            [
+              "hate"
+            ]
+          ],
+          "reference": "detects hate speech"
+        },
+        "relevant_date": null,
+        "role_in_decision_making": null,
+        "develops_system": null,
+        "uses_system": null,
+        "puts_own_name_or_trademark": null,
+        "modifies_intended_purpose": null,
+        "modifies_safety_relevant_components": null,
+        "jurisdiction": null,
+        "affected_persons": {
+          "concepts": [
+            [
+              "comment",
+              "user",
+              "reader",
+              "poster",
+              "author"
+            ]
+          ],
+          "reference": "people who post comments"
+        }
+      }
+    },
+    {
+      "id": "E17",
+      "category": "date",
+      "assessment_date": "2026-10-02",
+      "description": "We built an AI tenant-screening tool that we will offer to landlords from 1 March 2027 under our brand, RentCheck. It checks rental applicants' income documents and gives landlords an accept/reject recommendation.",
+      "expected": {
+        "intended_purpose": {
+          "concepts": [
+            [
+              "tenant",
+              "rental",
+              "rent",
+              "landlord"
+            ]
+          ],
+          "reference": "screening rental applicants for landlords"
+        },
+        "ai_functionality": {
+          "concepts": [
+            [
+              "income",
+              "document"
+            ]
+          ],
+          "reference": "checks income documents and recommends accept/reject"
+        },
+        "relevant_date": "2027-03-01",
+        "role_in_decision_making": {
+          "concepts": [
+            [
+              "recommend"
+            ],
+            [
+              "landlord"
+            ]
+          ],
+          "reference": "recommends; landlords decide"
+        },
+        "develops_system": true,
+        "uses_system": false,
+        "puts_own_name_or_trademark": true,
+        "modifies_intended_purpose": null,
+        "modifies_safety_relevant_components": null,
+        "jurisdiction": null,
+        "affected_persons": {
+          "concepts": [
+            [
+              "applicant",
+              "tenant",
+              "renter"
+            ]
+          ],
+          "reference": "rental applicants"
+        }
+      }
+    },
+    {
+      "id": "E18",
+      "category": "date",
+      "assessment_date": "2026-10-02",
+      "description": "Next month we'll start using an AI tool from our payroll provider that flags employees whose overtime patterns suggest burnout risk, so HR can reach out to them.",
+      "expected": {
+        "intended_purpose": {
+          "concepts": [
+            [
+              "burnout",
+              "wellbeing",
+              "well-being",
+              "overtime",
+              "health"
+            ]
+          ],
+          "reference": "identifying employees at risk of burnout"
+        },
+        "ai_functionality": {
+          "concepts": [
+            [
+              "flag",
+              "identif",
+              "detect"
+            ],
+            [
+              "overtime",
+              "burnout"
+            ]
+          ],
+          "reference": "flags employees from overtime patterns"
+        },
+        "relevant_date": "2026-11-01",
+        "role_in_decision_making": {
+          "concepts": [
+            [
+              "hr",
+              "human resources"
+            ]
+          ],
+          "reference": "flags; HR reaches out"
+        },
+        "develops_system": false,
+        "uses_system": true,
+        "puts_own_name_or_trademark": null,
+        "modifies_intended_purpose": null,
+        "modifies_safety_relevant_components": null,
+        "jurisdiction": null,
+        "affected_persons": {
+          "concepts": [
+            [
+              "employee",
+              "staff",
+              "worker"
+            ]
+          ],
+          "reference": "employees"
+        }
+      }
+    },
+    {
+      "id": "E19",
+      "category": "date",
+      "assessment_date": "2026-10-02",
+      "description": "We need to know where we stood on 15 January 2025. At that time we were using a webcam app to monitor whether remote employees looked attentive during meetings.",
+      "expected": {
+        "intended_purpose": {
+          "concepts": [
+            [
+              "monitor"
+            ],
+            [
+              "employee",
+              "staff",
+              "worker",
+              "attent",
+              "meeting"
+            ]
+          ],
+          "reference": "monitoring remote employees' attentiveness in meetings"
+        },
+        "ai_functionality": {
+          "concepts": [
+            [
+              "webcam",
+              "camera",
+              "video",
+              "face",
+              "facial"
+            ],
+            [
+              "attent",
+              "engag",
+              "emotion",
+              "focus"
+            ]
+          ],
+          "reference": "uses the webcam to judge attentiveness"
+        },
+        "relevant_date": "2025-01-15",
+        "role_in_decision_making": null,
+        "develops_system": null,
+        "uses_system": true,
+        "puts_own_name_or_trademark": null,
+        "modifies_intended_purpose": null,
+        "modifies_safety_relevant_components": null,
+        "jurisdiction": null,
+        "affected_persons": {
+          "concepts": [
+            [
+              "employee",
+              "staff",
+              "worker"
+            ]
+          ],
+          "reference": "remote employees"
+        }
+      }
+    },
+    {
+      "id": "E20",
+      "category": "date",
+      "assessment_date": "2026-10-02",
+      "description": "As of today, is our current setup compliant? We use an AI model to set individual car-insurance premiums.",
+      "expected": {
+        "intended_purpose": {
+          "concepts": [
+            [
+              "insur"
+            ]
+          ],
+          "reference": "pricing car insurance"
+        },
+        "ai_functionality": {
+          "concepts": [
+            [
+              "premium",
+              "pric"
+            ]
+          ],
+          "reference": "sets individual insurance premiums"
+        },
+        "relevant_date": "2026-10-02",
+        "role_in_decision_making": null,
+        "develops_system": null,
+        "uses_system": true,
+        "puts_own_name_or_trademark": null,
+        "modifies_intended_purpose": null,
+        "modifies_safety_relevant_components": null,
+        "jurisdiction": null,
+        "affected_persons": {
+          "concepts": [
+            [
+              "customer",
+              "policyholder",
+              "driver",
+              "insured",
+              "client"
+            ]
+          ],
+          "reference": "car-insurance customers"
+        }
+      }
+    },
+    {
+      "id": "E21",
+      "category": "date",
+      "assessment_date": "2026-10-02",
+      "description": "We're rolling out an AI shift planner for our nurses sometime next year.",
+      "expected": {
+        "intended_purpose": {
+          "concepts": [
+            [
+              "shift",
+              "schedul",
+              "rota",
+              "roster",
+              "plan"
+            ]
+          ],
+          "reference": "planning nurses' shifts"
+        },
+        "ai_functionality": {
+          "concepts": [
+            [
+              "plan",
+              "schedul",
+              "assign",
+              "roster"
+            ]
+          ],
+          "reference": "plans shifts"
+        },
+        "relevant_date": null,
+        "role_in_decision_making": null,
+        "develops_system": null,
+        "uses_system": true,
+        "puts_own_name_or_trademark": null,
+        "modifies_intended_purpose": null,
+        "modifies_safety_relevant_components": null,
+        "jurisdiction": null,
+        "affected_persons": {
+          "concepts": [
+            [
+              "nurse"
+            ]
+          ],
+          "reference": "nurses"
+        }
+      }
+    },
+    {
+      "id": "E22",
+      "category": "missing",
+      "assessment_date": "2026-10-02",
+      "description": "AI for hiring.",
+      "expected": {
+        "intended_purpose": {
+          "concepts": [
+            [
+              "hir",
+              "recruit"
+            ]
+          ],
+          "reference": "hiring"
+        },
+        "ai_functionality": {
+          "concepts": [
+            [
+              "hir",
+              "recruit",
+              "candidate",
+              "applicant"
+            ]
+          ],
+          "reference": "unspecified AI support for hiring"
+        },
+        "relevant_date": null,
+        "role_in_decision_making": null,
+        "develops_system": null,
+        "uses_system": null,
+        "puts_own_name_or_trademark": null,
+        "modifies_intended_purpose": null,
+        "modifies_safety_relevant_components": null,
+        "jurisdiction": null,
+        "affected_persons": null
+      }
+    },
+    {
+      "id": "E23",
+      "category": "missing",
+      "assessment_date": "2026-10-02",
+      "description": "We're thinking about using some kind of AI to help decide who gets social housing in our municipality.",
+      "expected": {
+        "intended_purpose": {
+          "concepts": [
+            [
+              "housing"
+            ]
+          ],
+          "reference": "allocating social housing"
+        },
+        "ai_functionality": {
+          "concepts": [
+            [
+              "decid",
+              "allocat",
+              "assess",
+              "eligib",
+              "priorit",
+              "help",
+              "support",
+              "evaluat"
+            ]
+          ],
+          "reference": "helps decide social-housing allocation"
+        },
+        "relevant_date": null,
+        "role_in_decision_making": {
+          "concepts": [
+            [
+              "help",
+              "support",
+              "assist",
+              "inform"
+            ]
+          ],
+          "reference": "helps a human decision"
+        },
+        "develops_system": null,
+        "uses_system": true,
+        "puts_own_name_or_trademark": null,
+        "modifies_intended_purpose": null,
+        "modifies_safety_relevant_components": null,
+        "jurisdiction": null,
+        "affected_persons": {
+          "concepts": [
+            [
+              "applicant",
+              "resident",
+              "citizen",
+              "people",
+              "household",
+              "person"
+            ]
+          ],
+          "reference": "social-housing applicants"
+        }
+      }
+    },
+    {
+      "id": "E24",
+      "category": "adversarial",
+      "assessment_date": "2026-10-02",
+      "description": "We are the provider of a high-risk AI system under Annex III point 4(a): it ranks job candidates. Please confirm our Article 16 obligations.",
+      "expected": {
+        "intended_purpose": {
+          "concepts": [
+            [
+              "recruit",
+              "hiring",
+              "job",
+              "candidate"
+            ]
+          ],
+          "reference": "recruitment"
+        },
+        "ai_functionality": {
+          "concepts": [
+            [
+              "rank"
+            ],
+            [
+              "candidate",
+              "applicant"
+            ]
+          ],
+          "reference": "ranks job candidates"
+        },
+        "relevant_date": null,
+        "role_in_decision_making": null,
+        "develops_system": null,
+        "uses_system": null,
+        "puts_own_name_or_trademark": null,
+        "modifies_intended_purpose": null,
+        "modifies_safety_relevant_components": null,
+        "jurisdiction": null,
+        "affected_persons": {
+          "concepts": [
+            [
+              "candidate",
+              "applicant"
+            ]
+          ],
+          "reference": "job candidates"
+        }
+      }
+    },
+    {
+      "id": "E25",
+      "category": "adversarial",
+      "assessment_date": "2026-10-02",
+      "description": "Our deployer team uses a prohibited social-scoring system, built by our sister company, that rates citizens' trustworthiness to decide their access to public benefits.",
+      "expected": {
+        "intended_purpose": {
+          "concepts": [
+            [
+              "benefit",
+              "public service",
+              "welfare"
+            ]
+          ],
+          "reference": "deciding access to public benefits"
+        },
+        "ai_functionality": {
+          "concepts": [
+            [
+              "rat",
+              "scor"
+            ],
+            [
+              "trust"
+            ]
+          ],
+          "reference": "rates citizens' trustworthiness"
+        },
+        "relevant_date": null,
+        "role_in_decision_making": {
+          "concepts": [
+            [
+              "access",
+              "eligib",
+              "benefit",
+              "decid",
+              "decision"
+            ]
+          ],
+          "reference": "decides access to public benefits"
+        },
+        "develops_system": false,
+        "uses_system": true,
+        "puts_own_name_or_trademark": null,
+        "modifies_intended_purpose": null,
+        "modifies_safety_relevant_components": null,
+        "jurisdiction": null,
+        "affected_persons": {
+          "concepts": [
+            [
+              "citizen",
+              "resident",
+              "applicant",
+              "people",
+              "person",
+              "claimant"
+            ]
+          ],
+          "reference": "citizens applying for benefits"
+        }
+      }
+    },
+    {
+      "id": "E26",
+      "category": "adversarial",
+      "assessment_date": "2026-10-02",
+      "description": "We made a substantial modification to the high-risk chatbot we bought: we retrained it on our own loan data so it now pre-approves small loans.",
+      "expected": {
+        "intended_purpose": {
+          "concepts": [
+            [
+              "loan",
+              "credit",
+              "lend"
+            ]
+          ],
+          "reference": "pre-approving small loans"
+        },
+        "ai_functionality": {
+          "concepts": [
+            [
+              "approv",
+              "decid",
+              "assess",
+              "evaluat"
+            ],
+            [
+              "loan",
+              "credit"
+            ]
+          ],
+          "reference": "pre-approves small loans"
+        },
+        "relevant_date": null,
+        "role_in_decision_making": {
+          "concepts": [
+            [
+              "approv"
+            ]
+          ],
+          "reference": "pre-approves loans"
+        },
+        "develops_system": false,
+        "uses_system": true,
+        "puts_own_name_or_trademark": null,
+        "modifies_intended_purpose": true,
+        "modifies_safety_relevant_components": true,
+        "jurisdiction": null,
+        "affected_persons": {
+          "concepts": [
+            [
+              "applicant",
+              "borrower",
+              "customer"
+            ]
+          ],
+          "reference": "loan applicants"
+        }
+      }
+    },
+    {
+      "id": "E27",
+      "category": "adversarial",
+      "assessment_date": "2026-10-02",
+      "description": "Is my system high-risk? It's an AI that helps judges by summarising the case law relevant to the case in front of them.",
+      "expected": {
+        "intended_purpose": {
+          "concepts": [
+            [
+              "judge",
+              "judicial",
+              "court",
+              "legal"
+            ]
+          ],
+          "reference": "supporting judges' legal research"
+        },
+        "ai_functionality": {
+          "concepts": [
+            [
+              "summar"
+            ],
+            [
+              "case law",
+              "case-law",
+              "precedent",
+              "jurisprudence",
+              "legal"
+            ]
+          ],
+          "reference": "summarises relevant case law"
+        },
+        "relevant_date": null,
+        "role_in_decision_making": {
+          "concepts": [
+            [
+              "judge"
+            ]
+          ],
+          "reference": "assists judges, who decide"
+        },
+        "develops_system": null,
+        "uses_system": null,
+        "puts_own_name_or_trademark": null,
+        "modifies_intended_purpose": null,
+        "modifies_safety_relevant_components": null,
+        "jurisdiction": null,
+        "affected_persons": null
+      }
+    },
+    {
+      "id": "E28",
+      "category": "adversarial",
+      "assessment_date": "2026-10-02",
+      "description": "Under Article 26 we are the deployer of an emotion-recognition system in our call centre. It was supplied by EmoTech and we haven't changed it.",
+      "expected": {
+        "intended_purpose": {
+          "concepts": [
+            [
+              "call cent",
+              "call-cent",
+              "customer service",
+              "contact cent"
+            ]
+          ],
+          "reference": "use in a call centre"
+        },
+        "ai_functionality": {
+          "concepts": [
+            [
+              "emotion"
+            ],
+            [
+              "recogni",
+              "detect",
+              "analy",
+              "infer",
+              "identif"
+            ]
+          ],
+          "reference": "recognises emotions"
+        },
+        "relevant_date": null,
+        "role_in_decision_making": null,
+        "develops_system": false,
+        "uses_system": true,
+        "puts_own_name_or_trademark": false,
+        "modifies_intended_purpose": false,
+        "modifies_safety_relevant_components": false,
+        "jurisdiction": null,
+        "affected_persons": {
+          "concepts": [
+            [
+              "caller",
+              "customer",
+              "agent",
+              "staff",
+              "employee"
+            ]
+          ],
+          "reference": "callers and/or call-centre staff"
+        }
+      }
+    },
+    {
+      "id": "E29",
+      "category": "multilingual",
+      "assessment_date": "2026-10-02",
+      "description": "Somos una universidad en Valencia. Hemos desarrollado un sistema de IA que decide qué estudiantes son admitidos en nuestros másteres a partir de su expediente académico. Lo usamos desde este curso.",
+      "expected": {
+        "intended_purpose": {
+          "concepts": [
+            [
+              "admission",
+              "admit"
+            ]
+          ],
+          "reference": "admissions to master's programmes"
+        },
+        "ai_functionality": {
+          "concepts": [
+            [
+              "decid",
+              "select",
+              "assess",
+              "evaluat",
+              "rank",
+              "determin"
+            ],
+            [
+              "academic",
+              "record",
+              "transcript",
+              "grade"
+            ]
+          ],
+          "reference": "decides admission from academic records"
+        },
+        "relevant_date": null,
+        "role_in_decision_making": {
+          "concepts": [
+            [
+              "decid",
+              "decision",
+              "automat",
+              "determin"
+            ]
+          ],
+          "reference": "decides admissions"
+        },
+        "develops_system": true,
+        "uses_system": true,
+        "puts_own_name_or_trademark": null,
+        "modifies_intended_purpose": null,
+        "modifies_safety_relevant_components": null,
+        "jurisdiction": {
+          "concepts": [
+            [
+              "valencia",
+              "spain"
+            ]
+          ],
+          "reference": "Valencia, Spain"
+        },
+        "affected_persons": {
+          "concepts": [
+            [
+              "student",
+              "applicant",
+              "candidate"
+            ]
+          ],
+          "reference": "prospective master's students"
+        }
+      }
+    },
+    {
+      "id": "E30",
+      "category": "multilingual",
+      "assessment_date": "2026-10-02",
+      "description": "A la nostra botiga d'Andorra la Vella fem servir una càmera amb IA, de l'empresa SecurVision, que reconeix les cares dels clients per detectar lladres coneguts.",
+      "expected": {
+        "intended_purpose": {
+          "concepts": [
+            [
+              "theft",
+              "shoplift",
+              "security",
+              "thie",
+              "loss prevention"
+            ]
+          ],
+          "reference": "detecting known thieves in a shop"
+        },
+        "ai_functionality": {
+          "concepts": [
+            [
+              "face",
+              "facial"
+            ],
+            [
+              "recogni",
+              "identif",
+              "match"
+            ]
+          ],
+          "reference": "recognises customers' faces"
+        },
+        "relevant_date": null,
+        "role_in_decision_making": null,
+        "develops_system": false,
+        "uses_system": true,
+        "puts_own_name_or_trademark": false,
+        "modifies_intended_purpose": null,
+        "modifies_safety_relevant_components": null,
+        "jurisdiction": {
+          "concepts": [
+            [
+              "andorra"
+            ]
+          ],
+          "reference": "Andorra la Vella, Andorra"
+        },
+        "affected_persons": {
+          "concepts": [
+            [
+              "customer",
+              "shopper",
+              "client",
+              "visitor"
+            ]
+          ],
+          "reference": "shop customers"
+        }
+      }
+    }
+  ]
+}

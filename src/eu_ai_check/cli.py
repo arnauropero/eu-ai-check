@@ -6,6 +6,8 @@
     eu-ai-check search QUERY    hybrid retrieval as of --date (Phase 1)
     eu-ai-check eval-retrieval  run the Phase 1 retrieval evaluation harness
     eu-ai-check bench-filter    §21 filtered-HNSW benchmark (needs --qdrant-url)
+    eu-ai-check extract TEXT    extract case facts from a description (Phase 2)
+    eu-ai-check eval-extraction run the Phase 2 extraction evaluation harness
 
 Ingestion exits non-zero when an invariant is broken. A broken invariant is not a
 warning to scroll past: per SYSTEM_SPEC.md §12.1 it would resurface later as a
@@ -31,6 +33,7 @@ DEFAULT_SOURCE = Path("data/raw/ai_act_32024R1689.xhtml")
 DEFAULT_OUT = Path("data/corpus")
 DEFAULT_QUERIES = Path("data/eval/retrieval_queries.json")
 DEFAULT_SYNTHETIC = Path("data/eval/synthetic_versions.json")
+DEFAULT_EXTRACTION_CASES = Path("data/eval/extraction_cases.json")
 SOURCE_REFERENCE = (
     "Regulation (EU) 2024/1689 (Artificial Intelligence Act), consolidated XHTML "
     "from the EU Publications Office (CELEX 32024R1689)"
@@ -253,6 +256,47 @@ def cmd_bench_filter(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_extract(args: argparse.Namespace) -> int:
+    from .extraction.extractor import Extractor
+    from .extraction.schema import Case
+
+    result = Extractor(effort=args.effort).extract(args.text, args.date)
+    print(f"served by {result.served_model}  fallback={result.fell_back}  "
+          f"stop={result.stop_reason}  tokens in/out={result.input_tokens}/{result.output_tokens}")
+    for leak in result.leaks:
+        print(f"CONCLUSION LEAK in {leak.field}: [{leak.kind}] {leak.excerpt}")
+    if not result.ok:
+        print(f"extraction failed: {result.error}", file=sys.stderr)
+        return 1
+    case = Case.from_facts(result.facts, args.text, args.date)
+    print(case.model_dump_json(indent=2))
+    return 1 if result.leaks else 0
+
+
+def cmd_eval_extraction(args: argparse.Namespace) -> int:
+    import anthropic
+
+    from .extraction.evaluation import load_cases, render, run_arm, summary_json
+    from .extraction.extractor import Extractor
+
+    cases = load_cases(args.cases)
+    client = anthropic.Anthropic()
+    arms = []
+    for effort in args.efforts.split(","):
+        label = f"opus-5-5 effort={effort}"
+        print(f"running {label}: {len(cases)} cases x {args.repeats} repeats", file=sys.stderr)
+        arms.append(run_arm(label, Extractor(client, effort=effort), cases, args.repeats,
+                            judge_client=None if args.no_judge else client))
+    report = render(arms)
+    print(report)
+    if args.out:
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+        args.out.with_suffix(".txt").write_text(report + "\n", encoding="utf-8")
+        args.out.with_suffix(".json").write_text(json.dumps(summary_json(arms), indent=2), encoding="utf-8")
+        print(f"wrote {args.out.with_suffix('.txt')} and .json", file=sys.stderr)
+    return 1 if any(a.leaks() for a in arms) else 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="eu-ai-check", description=__doc__)
     parser.add_argument(
@@ -311,6 +355,22 @@ def main(argv: list[str] | None = None) -> int:
     p_bench.add_argument("--skip-sweep", action="store_true")
     p_bench.add_argument("--out", type=Path, default=None)
     p_bench.set_defaults(func=cmd_bench_filter)
+
+    p_extract = sub.add_parser("extract", help="extract case facts from a description (Phase 2)")
+    p_extract.add_argument("text")
+    p_extract.add_argument("--date", type=date.fromisoformat, default=date.today(),
+                           help="assessment date (default: today)")
+    p_extract.add_argument("--effort", default="medium", choices=["low", "medium", "high"])
+    p_extract.set_defaults(func=cmd_extract)
+
+    p_eval_x = sub.add_parser("eval-extraction", help="run the Phase 2 extraction eval harness")
+    p_eval_x.add_argument("--cases", type=Path, default=DEFAULT_EXTRACTION_CASES)
+    p_eval_x.add_argument("--repeats", type=int, default=3)
+    p_eval_x.add_argument("--efforts", default="low,medium", help="comma-separated effort arms")
+    p_eval_x.add_argument("--no-judge", action="store_true", help="skip the secondary LLM judge")
+    p_eval_x.add_argument("--out", type=Path, default=None,
+                          help="write <out>.txt and <out>.json")
+    p_eval_x.set_defaults(func=cmd_eval_extraction)
 
     args = parser.parse_args(argv)
     return args.func(args)
