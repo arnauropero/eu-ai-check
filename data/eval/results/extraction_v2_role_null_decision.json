@@ -1,0 +1,287 @@
+{
+  "per_effort": {
+    "low": {
+      "frozen": {
+        "runs": 90,
+        "ok": 90,
+        "false_fills": 5,
+        "false_fill_slots": 39,
+        "false_fills_clear": 0,
+        "false_fills_ambiguous": 5,
+        "absence_only_fills": 2,
+        "guard_misses": 0,
+        "guard_slots": 51,
+        "field_accuracy": {
+          "intended_purpose": 0.9666666666666667,
+          "ai_functionality": 0.9666666666666667,
+          "role_in_decision_making": 0.9444444444444444,
+          "affected_persons": 0.8333333333333334,
+          "jurisdiction": 1.0,
+          "develops_system": 0.9666666666666667,
+          "uses_system": 1.0,
+          "puts_own_name_or_trademark": 0.9666666666666667,
+          "modifies_intended_purpose": 0.9888888888888889,
+          "modifies_safety_relevant_components": 1.0,
+          "relevant_date": 1.0
+        },
+        "affected_empty": 23,
+        "leaks": 0
+      },
+      "replicate": {
+        "runs": 90,
+        "ok": 90,
+        "false_fills": 8,
+        "false_fill_slots": 39,
+        "false_fills_clear": 2,
+        "false_fills_ambiguous": 6,
+        "absence_only_fills": 3,
+        "guard_misses": 0,
+        "guard_slots": 51,
+        "field_accuracy": {
+          "intended_purpose": 0.9777777777777777,
+          "ai_functionality": 0.9666666666666667,
+          "role_in_decision_making": 0.9111111111111111,
+          "affected_persons": 0.8333333333333334,
+          "jurisdiction": 1.0,
+          "develops_system": 0.9666666666666667,
+          "uses_system": 1.0,
+          "puts_own_name_or_trademark": 0.9777777777777777,
+          "modifies_intended_purpose": 1.0,
+          "modifies_safety_relevant_components": 1.0,
+          "relevant_date": 1.0
+        },
+        "affected_empty": 22,
+        "leaks": 0
+      },
+      "new": {
+        "runs": 90,
+        "ok": 90,
+        "false_fills": 2,
+        "false_fill_slots": 39,
+        "false_fills_clear": 0,
+        "false_fills_ambiguous": 2,
+        "absence_only_fills": 0,
+        "guard_misses": 1,
+        "guard_slots": 51,
+        "field_accuracy": {
+          "intended_purpose": 0.9666666666666667,
+          "ai_functionality": 0.9777777777777777,
+          "role_in_decision_making": 0.9666666666666667,
+          "affected_persons": 0.8555555555555555,
+          "jurisdiction": 1.0,
+          "develops_system": 0.9666666666666667,
+          "uses_system": 1.0,
+          "puts_own_name_or_trademark": 0.9555555555555556,
+          "modifies_intended_purpose": 0.9777777777777777,
+          "modifies_safety_relevant_components": 1.0,
+          "relevant_date": 1.0
+        },
+        "affected_empty": 21,
+        "leaks": 0
+      },
+      "decision": {
+        "checks": {
+          "1_false_fills_down": true,
+          "2_guard": true,
+          "3_other_fields_within_noise": false,
+          "4_zero_leaks": true
+        },
+        "field_moves": {
+          "intended_purpose": {
+            "moved": 0.0,
+            "noise": 0.011111111111111072,
+            "ok": true
+          },
+          "ai_functionality": {
+            "moved": 0.011111111111111072,
+            "noise": 0.0,
+            "ok": false
+          },
+          "affected_persons": {
+            "moved": 0.022222222222222143,
+            "noise": 0.0,
+            "ok": false
+          },
+          "jurisdiction": {
+            "moved": 0.0,
+            "noise": 0.0,
+            "ok": true
+          },
+          "develops_system": {
+            "moved": 0.0,
+            "noise": 0.0,
+            "ok": true
+          },
+          "uses_system": {
+            "moved": 0.0,
+            "noise": 0.0,
+            "ok": true
+          },
+          "puts_own_name_or_trademark": {
+            "moved": 0.011111111111111072,
+            "noise": 0.011111111111111072,
+            "ok": true
+          },
+          "modifies_intended_purpose": {
+            "moved": 0.011111111111111183,
+            "noise": 0.011111111111111072,
+            "ok": true
+          },
+          "modifies_safety_relevant_components": {
+            "moved": 0.0,
+            "noise": 0.0,
+            "ok": true
+          },
+          "relevant_date": {
+            "moved": 0.0,
+            "noise": 0.0,
+            "ok": true
+          }
+        },
+        "passed": false
+      }
+    },
+    "medium": {
+      "frozen": {
+        "runs": 90,
+        "ok": 90,
+        "false_fills": 9,
+        "false_fill_slots": 39,
+        "false_fills_clear": 3,
+        "false_fills_ambiguous": 6,
+        "absence_only_fills": 4,
+        "guard_misses": 0,
+        "guard_slots": 51,
+        "field_accuracy": {
+          "intended_purpose": 0.9666666666666667,
+          "ai_functionality": 0.9555555555555556,
+          "role_in_decision_making": 0.9,
+          "affected_persons": 0.8111111111111111,
+          "jurisdiction": 1.0,
+          "develops_system": 0.9666666666666667,
+          "uses_system": 1.0,
+          "puts_own_name_or_trademark": 0.9444444444444444,
+          "modifies_intended_purpose": 1.0,
+          "modifies_safety_relevant_components": 1.0,
+          "relevant_date": 1.0
+        },
+        "affected_empty": 22,
+        "leaks": 0
+      },
+      "replicate": {
+        "runs": 90,
+        "ok": 90,
+        "false_fills": 6,
+        "false_fill_slots": 39,
+        "false_fills_clear": 0,
+        "false_fills_ambiguous": 6,
+        "absence_only_fills": 1,
+        "guard_misses": 0,
+        "guard_slots": 51,
+        "field_accuracy": {
+          "intended_purpose": 0.9666666666666667,
+          "ai_functionality": 0.9555555555555556,
+          "role_in_decision_making": 0.9333333333333333,
+          "affected_persons": 0.8555555555555555,
+          "jurisdiction": 1.0,
+          "develops_system": 0.9666666666666667,
+          "uses_system": 1.0,
+          "puts_own_name_or_trademark": 0.9555555555555556,
+          "modifies_intended_purpose": 1.0,
+          "modifies_safety_relevant_components": 1.0,
+          "relevant_date": 1.0
+        },
+        "affected_empty": 21,
+        "leaks": 0
+      },
+      "new": {
+        "runs": 90,
+        "ok": 90,
+        "false_fills": 2,
+        "false_fill_slots": 39,
+        "false_fills_clear": 0,
+        "false_fills_ambiguous": 2,
+        "absence_only_fills": 0,
+        "guard_misses": 3,
+        "guard_slots": 51,
+        "field_accuracy": {
+          "intended_purpose": 0.9888888888888889,
+          "ai_functionality": 0.9555555555555556,
+          "role_in_decision_making": 0.9444444444444444,
+          "affected_persons": 0.8444444444444444,
+          "jurisdiction": 1.0,
+          "develops_system": 0.9666666666666667,
+          "uses_system": 1.0,
+          "puts_own_name_or_trademark": 0.9555555555555556,
+          "modifies_intended_purpose": 1.0,
+          "modifies_safety_relevant_components": 1.0,
+          "relevant_date": 0.9888888888888889
+        },
+        "affected_empty": 21,
+        "leaks": 0
+      },
+      "decision": {
+        "checks": {
+          "1_false_fills_down": true,
+          "2_guard": false,
+          "3_other_fields_within_noise": false,
+          "4_zero_leaks": true
+        },
+        "field_moves": {
+          "intended_purpose": {
+            "moved": 0.022222222222222254,
+            "noise": 0.0,
+            "ok": false
+          },
+          "ai_functionality": {
+            "moved": 0.0,
+            "noise": 0.0,
+            "ok": true
+          },
+          "affected_persons": {
+            "moved": 0.033333333333333326,
+            "noise": 0.0444444444444444,
+            "ok": true
+          },
+          "jurisdiction": {
+            "moved": 0.0,
+            "noise": 0.0,
+            "ok": true
+          },
+          "develops_system": {
+            "moved": 0.0,
+            "noise": 0.0,
+            "ok": true
+          },
+          "uses_system": {
+            "moved": 0.0,
+            "noise": 0.0,
+            "ok": true
+          },
+          "puts_own_name_or_trademark": {
+            "moved": 0.011111111111111183,
+            "noise": 0.011111111111111183,
+            "ok": true
+          },
+          "modifies_intended_purpose": {
+            "moved": 0.0,
+            "noise": 0.0,
+            "ok": true
+          },
+          "modifies_safety_relevant_components": {
+            "moved": 0.0,
+            "noise": 0.0,
+            "ok": true
+          },
+          "relevant_date": {
+            "moved": 0.011111111111111072,
+            "noise": 0.0,
+            "ok": false
+          }
+        },
+        "passed": false
+      }
+    }
+  },
+  "worked": false
+}
