@@ -209,6 +209,11 @@ one rule-matching engine → cited, fail-closed output.
   first, and one changed in that review (E18, documented as pre-registration, not
   post-hoc). Field rules and labelling decisions L1–L9 are in SYSTEM_SPEC.md §3.4. The
   accuracy target is locked after the first run.
+- First pre-registered run (2026-10-02): overall field accuracy 0.967 (`low`) and
+  0.959 (`medium`), with 0 leakage hits. Results are frozen in
+  `data/eval/results/extraction_v1_30c*` and summarised in SYSTEM_SPEC.md §18. The
+  accuracy target is **not yet locked**, pending error analysis of `affected_persons`
+  and `role_in_decision_making`.
 - Deliverable: schema-constrained extraction from free text to the `Case` schema
   (SYSTEM_SPEC.md §3.2).
 - Deliverable: extraction eval set (hand-labeled free-text → expected fields).
