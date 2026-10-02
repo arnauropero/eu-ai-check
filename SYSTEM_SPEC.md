@@ -1167,6 +1167,24 @@ Opus 5.5 after pre-registration and before any API call; the evaluation is uncha
 (§3.5). The numerical accuracy target is locked only after the first run is seen,
 and is labelled accordingly.
 
+**Extraction — Phase 2 first run (pre-registered, 2026-10-02).** Run with the
+committed defaults (30 cases × 3 repeats × effort `low`/`medium`, judge on) and frozen
+unchanged in `data/eval/results/extraction_v1_30c.{txt,json,runs.jsonl}`. No label,
+scoring rule, prompt or case was changed before or after the run.
+
+| arm | overall | booleans | dates | free text | unstable | output tokens |
+|---|---|---|---|---|---|---|
+| `low` | 0.967 | 0.984 | 1.000 | 0.942 | 4 | 11.5k |
+| `medium` | 0.959 | 0.982 | 1.000 | 0.927 | 5 | 18.5k |
+
+180/180 runs succeeded, with 0 leakage hits and 0 fallbacks. `medium` scored no higher
+than `low` (8 fewer correct field scores out of 990) and used about 60% more output
+tokens. No significance test was pre-registered, so this difference is reported as
+observed, not as a finding. The weakest field in both arms is `affected_persons`
+(0.833 / 0.811). Secondary judge agreement with the primary score was 268/298
+(`low`) and 263/299 (`medium`). **No accuracy target has been locked yet**, and any
+later label or scoring change will be flagged as post-hoc.
+
 **Determination:**
 - Correctness against the four-state contract (§14): `applicable` /
   `not_applicable` / `unresolved` / `not_in_force`, scored per state, not just overall
