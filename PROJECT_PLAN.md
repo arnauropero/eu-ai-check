@@ -195,11 +195,14 @@ one rule-matching engine → cited, fail-closed output.
   citation priority; left unfixed rather than tuned to seen queries.
 
 **Phase 2 — Extraction stage (IN PROGRESS — eval set pre-registered 2026-10-02)**
-- Extraction model: **OpenAI GPT-6.1 Sol (`gpt-6.1-sol`)**, effort arms `low`/`medium`,
-  Structured Outputs (strict). It was switched from Claude Opus 5.5 on 2026-10-02,
-  after pre-registration and before any API call, with the pre-registered eval set,
-  labels and scoring unchanged (SYSTEM_SPEC.md §3.5). Claude Opus 5.5 remains the
-  secondary judge and an optional extraction provider.
+- LLM evaluation stack: **OpenAI only, needing only `OPENAI_API_KEY`**. The extractor
+  is **GPT-6.1 Sol (`gpt-6.1-sol`)**, with effort arms `low`/`medium` and strict
+  Structured Outputs. The optional secondary judge is **GPT-6 Astra (`gpt-6-astra`)**
+  at effort `low`; it never defines or changes the ground truth, and `--no-judge`
+  skips it. Both were switched from Claude Opus 5.5 on 2026-10-02, after
+  pre-registration and before any API call, with the eval set, labels, scoring and
+  judge method unchanged (SYSTEM_SPEC.md §3.5). The Claude extractor stays as an
+  optional, non-evaluated provider behind the `anthropic` extra.
 - Status: extractor (originally Claude Opus 5.5, structured outputs, refusal fallbacks), harness
   (`eu-ai-check eval-extraction`), conclusion-leakage check and a 30-case labelled eval
   set were committed **before the first API run**. The labels were reviewed by the user

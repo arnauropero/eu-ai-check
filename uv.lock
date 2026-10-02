@@ -181,12 +181,16 @@ name = "eu-ai-check"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
-    { name = "anthropic" },
     { name = "lxml" },
     { name = "openai" },
     { name = "pydantic" },
     { name = "qdrant-client" },
     { name = "sentence-transformers" },
+]
+
+[package.optional-dependencies]
+anthropic = [
+    { name = "anthropic" },
 ]
 
 [package.dev-dependencies]
@@ -196,13 +200,14 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "anthropic", specifier = ">=1.11.0" },
+    { name = "anthropic", marker = "extra == 'anthropic'", specifier = ">=1.11.0" },
     { name = "lxml", specifier = ">=5.3" },
     { name = "openai", specifier = ">=3.23.0" },
     { name = "pydantic", specifier = ">=2.9" },
     { name = "qdrant-client", specifier = ">=1.19.1" },
     { name = "sentence-transformers", specifier = ">=6.1.0" },
 ]
+provides-extras = ["anthropic"]
 
 [package.metadata.requires-dev]
 dev = [{ name = "pytest", specifier = ">=8.3" }]

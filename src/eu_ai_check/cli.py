@@ -275,21 +275,32 @@ def cmd_extract(args: argparse.Namespace) -> int:
 
 
 def cmd_eval_extraction(args: argparse.Namespace) -> int:
-    from .extraction.evaluation import load_cases, render, run_arm, run_records, summary_json
-    from .extraction.providers import MODELS, create_extractor
+    import openai
 
+    from .extraction.evaluation import (
+        JUDGE_EFFORT,
+        JUDGE_MODEL,
+        load_cases,
+        render,
+        run_arm,
+        run_records,
+        summary_json,
+    )
+    from .extraction.openai_extractor import OPENAI_MODEL, OpenAIExtractor
+
+    # The whole LLM evaluation stack is OpenAI: one client, OPENAI_API_KEY only.
+    # Extractor (system under test): gpt-6.1-sol. Judge (secondary, optional):
+    # gpt-6-astra. --no-judge runs the primary evaluation with the extractor alone.
     cases = load_cases(args.cases)
-    # Judge: unchanged from the pre-registration -- Claude Opus 5.5 -- so it needs
-    # Anthropic credentials. --no-judge skips it; the primary metric is unaffected.
-    judge_client = None
-    if not args.no_judge:
-        import anthropic
-
-        judge_client = anthropic.Anthropic()
+    client = openai.OpenAI()
+    judge_client = None if args.no_judge else client
+    print(f"extractor: {OPENAI_MODEL}; judge: "
+          f"{'disabled' if args.no_judge else f'{JUDGE_MODEL} (effort={JUDGE_EFFORT})'}",
+          file=sys.stderr)
     arms = []
     for effort in args.efforts.split(","):
-        extractor = create_extractor(args.provider, effort=effort)
-        label = f"{MODELS[args.provider]} effort={extractor.effort}"
+        extractor = OpenAIExtractor(client, effort=effort)
+        label = f"{OPENAI_MODEL} effort={extractor.effort}"
         print(f"running {label}: {len(cases)} cases x {args.repeats} repeats", file=sys.stderr)
         arms.append(run_arm(label, extractor, cases, args.repeats, judge_client=judge_client))
     report = render(arms)
@@ -372,17 +383,18 @@ def main(argv: list[str] | None = None) -> int:
                            help="assessment date (default: today)")
     p_extract.add_argument("--effort", default="medium", choices=["low", "medium"])
     p_extract.add_argument("--provider", default="openai", choices=["openai", "anthropic"],
-                           help="extraction provider (default: openai, gpt-6.1-sol)")
+                           help="extraction provider (default: openai, gpt-6.1-sol). "
+                                "'anthropic' is an optional, non-evaluated alternative "
+                                "and needs the 'anthropic' extra and ANTHROPIC_API_KEY")
     p_extract.set_defaults(func=cmd_extract)
 
     p_eval_x = sub.add_parser("eval-extraction", help="run the Phase 2 extraction eval harness")
     p_eval_x.add_argument("--cases", type=Path, default=DEFAULT_EXTRACTION_CASES)
     p_eval_x.add_argument("--repeats", type=int, default=3)
     p_eval_x.add_argument("--efforts", default="low,medium", help="comma-separated effort arms")
-    p_eval_x.add_argument("--provider", default="openai", choices=["openai", "anthropic"],
-                          help="extraction provider (default: openai, gpt-6.1-sol)")
     p_eval_x.add_argument("--no-judge", action="store_true",
-                          help="skip the secondary LLM judge (Claude Opus 5.5)")
+                          help="skip the secondary LLM judge (gpt-6-astra); the primary "
+                               "evaluation then uses only the extractor (gpt-6.1-sol)")
     p_eval_x.add_argument("--out", type=Path, default=None,
                           help="write <out>.txt, <out>.json and <out>.runs.jsonl")
     p_eval_x.set_defaults(func=cmd_eval_extraction)
