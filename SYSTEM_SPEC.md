@@ -144,12 +144,61 @@ validity should be evaluated for the user's scenario.** V1 uses a single field; 
 into `event_date` / `assessment_date` / `deployment_date` is deferred until a concrete
 use case demonstrates the single field is insufficient.
 
+**[Changed in Phase 2, 2026-10-02]** Two fields became nullable in the extraction
+output (`CaseFacts`, `src/eu_ai_check/extraction/schema.py`):
+
+- `relevant_date: date | null`. Many descriptions state no date. Forcing a value
+  would make the extractor decide a default, which is pipeline policy rather than a
+  fact in the text. Extraction reports `null`; the pipeline's `Case` then substitutes
+  the assessment date **explicitly** and records `relevant_date_basis: stated |
+  assessment_date`, so "the user said this date" and "we defaulted it" are never
+  confused.
+- `role_in_decision_making: str | null`, for the same reason.
+
+Only `intended_purpose` and `ai_functionality` remain non-nullable: every AI use-case
+description has some purpose and capability, even if vague. The schema is closed
+(`additionalProperties: false`; pydantic `extra="forbid"`), so the excluded fields
+cannot be emitted at all. Structured outputs constrain decoding to it, and validation
+rejects anything else.
+
 ### 3.3 Why the raw text is preserved separately
 
 The extraction schema is not the retrieval query. The original free text remains
 available to semantic/BM25 retrieval directly; structured fields provide query
 enrichment and metadata/temporal filtering, not a replacement for the text. Structured
 fields are necessarily lossier than the source description.
+
+### 3.4 Field rules and labelling decisions (Phase 2)
+
+Several actor and date fields are ambiguous without explicit rules. Does a fine-tuned
+purchased model count as developed? Is "since January" a relevant date? If the rules
+lived only in the labeller's head, the eval would measure whether the model can guess
+them. The rules are therefore written once and used in two places:
+
+- **in the extractor's system prompt** (`FIELD_RULES`,
+  `src/eu_ai_check/extraction/extractor.py`), and
+- **verbatim in the eval set** (`data/eval/extraction_cases.json` →
+  `labelling_rules.field_rules_verbatim`). A test fails if the two drift apart.
+
+Labelling decisions, each tied in the eval file to the cases it decides, with tests
+checking the labels against them:
+
+| # | Decision | Cases |
+|---|---|---|
+| L1 | Fine-tuning or retraining a system obtained from someone else is a *modification*, not development. | E11, E26 |
+| L2 | A separate legal entity in the same group (e.g. a sister company) is "someone else": its system was obtained, not developed. | E25 |
+| L3 | `puts_own_name_or_trademark = false` only for use under another party's name, including a **named** third-party product used without rebranding. Unnamed product or undescribed branding → `null`. Selling under one's own brand → `true`. | false: E01, E08, E13, E15, E28, E30 · null: E18 · true: E03, E10, E14, E17 |
+| L4 | `uses_system` covers current **and planned** use. Build/sell/supply-only → `false`. | planned: E05, E21, E23 · supplier only: E03, E10, E14, E17 |
+| L5 | Development may be inferred when the organisation calls the system its own product that it makes or sells. | E03, E14 |
+| L6 | Repurposing a general-purpose system for a specific use → `modifies_intended_purpose = true`. | E11 |
+| L7 | Dates: explicit launch/start date or "where we stood on X" → that date; "as of today" → the assessment date; "next month" → 1st of that month; already in use with no date asked for, or vague timing → `null`. | E17, E19, E20, E18, E13, E29, E21 |
+| L8 | Null discipline: `role_in_decision_making` and `affected_persons` are `null` unless described; they are not filled in from what such systems usually do. | 15 cases, listed in the eval file |
+| L9 | A legal conclusion asserted without supporting facts ("we are the provider") yields no actor facts. | E24, E27 |
+
+**Review record.** The user reviewed all 30 labels before pre-registration. One
+label changed during that review, E18 `puts_own_name_or_trademark` false → null
+(L3: the payroll provider's tool is not named). Because the change was made before
+any API run, it is *not* post-hoc. Any change after the first run is.
 
 ---
 
@@ -1013,6 +1062,26 @@ evaluated.
   excluded/conclusion-level field (risk_tier, prohibited_practice, actor_roles,
   substantial_modification) — any occurrence in the eval set is a hard failure, not a
   score to optimize.
+
+**Extraction — Phase 2 pre-registration (2026-10-02).** Learning from Phase 1, the
+extraction eval set (`data/eval/extraction_cases.json`, 30 hand-labelled cases), the
+scoring rules, the leakage term list and the extractor were **committed before the
+first API run**, so the first results count as pre-registered. Scoring, as committed:
+
+- booleans and dates: exact match, `null` included (`null` ≠ `false`);
+- free text, **primary**: hand-written concept groups (every group matched by at least
+  one stem; an expected `null` must be predicted `null`);
+- free text, **secondary**: an LLM judge (Claude Opus 5.5) compares each value with
+  the label's reference sentence. It never overrides the primary metric, and every
+  disagreement is listed;
+- zero tolerance: no excluded field *and* no conclusion term
+  (`src/eu_ai_check/extraction/leakage.py`) in any free-text value. Structured
+  outputs prevent the first; the second is the realistic failure, and 5 adversarial
+  cases assert conclusions outright to provoke it.
+
+Each case runs several times per effort arm (`low`, `medium`), and fields whose
+correctness changes between repeats are reported as unstable. The numerical accuracy
+target is locked only after the first run is seen, and is labelled accordingly.
 
 **Determination:**
 - Correctness against the four-state contract (§14): `applicable` /

@@ -12,6 +12,7 @@ dependencies = [
     "lxml>=5.3",
     "sentence-transformers>=6.1.0",
     "qdrant-client>=1.19.1",
+    "anthropic>=1.11.0",
 ]
 
 [project.scripts]
