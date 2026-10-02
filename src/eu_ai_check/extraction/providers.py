@@ -12,14 +12,14 @@ from __future__ import annotations
 
 from typing import Any
 
-from .extractor import ANTHROPIC_MODEL, AnthropicExtractor
+from .extractor import ANTHROPIC_MODEL, DEFAULT_EFFORT, AnthropicExtractor
 from .openai_extractor import OPENAI_MODEL, OpenAIExtractor
 
 DEFAULT_PROVIDER = "openai"
 MODELS = {"openai": OPENAI_MODEL, "anthropic": ANTHROPIC_MODEL}
 
 
-def create_extractor(provider: str = DEFAULT_PROVIDER, *, effort: str = "medium",
+def create_extractor(provider: str = DEFAULT_PROVIDER, *, effort: str = DEFAULT_EFFORT,
                      client: Any = None):
     if provider == "openai":
         return OpenAIExtractor(client, effort=effort)

@@ -32,7 +32,9 @@ from .schema import CaseFacts, output_schema
 
 ANTHROPIC_MODEL = "claude-opus-5-5"
 FALLBACK_BETA = "server-side-fallback-2026-07-01"
-DEFAULT_EFFORT = "medium"
+#: Default extraction effort everywhere (CLI, `create_extractor`, extractors): the
+#: accepted Phase 2 configuration, gpt-6.1-sol + baseline prompt + `low` (SYSTEM_SPEC.md §18).
+DEFAULT_EFFORT = "low"
 
 SYSTEM_PROMPT = """\
 You extract facts from a user's description of an AI system, for a later EU AI Act \

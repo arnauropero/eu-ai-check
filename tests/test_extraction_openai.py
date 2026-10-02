@@ -406,3 +406,46 @@ def test_still_thirty_cases_three_repeats_two_arms(monkeypatch: pytest.MonkeyPat
     assert seen["repeats"] == 3
     assert seen["efforts"] == "low,medium"
     assert seen["no_judge"] is False  # judge on by default; --no-judge skips it
+
+
+# --------------------------------------------------------------------------
+# Production default = the accepted Phase 2 configuration (SYSTEM_SPEC.md §18)
+# --------------------------------------------------------------------------
+
+def test_default_production_extraction_effort_is_low() -> None:
+    """Accepted configuration: gpt-6.1-sol + baseline prompt + low effort."""
+    from eu_ai_check.extraction.extractor import DEFAULT_EFFORT
+
+    assert DEFAULT_EFFORT == "low"
+    client = fake_openai(openai_response(json.dumps(GOOD)))
+    ex = OpenAIExtractor(client)
+    assert (ex.effort, ex.prompt_variant) == ("low", "baseline")
+    assert ex.request("x", TODAY)["reasoning"] == {"effort": "low"}
+    assert ex.request("x", TODAY)["input"][0]["content"] == system_prompt()
+    assert ex.extract("x", TODAY).effort == "low"
+    made = create_extractor(client=client)
+    assert isinstance(made, OpenAIExtractor) and made.effort == "low"
+
+
+def _run_extract_cli(monkeypatch, argv: list[str]) -> list[dict]:
+    import openai
+
+    from eu_ai_check import cli
+
+    responses = FakeResponses(openai_response(json.dumps(GOOD)))
+    monkeypatch.setattr(openai, "OpenAI", lambda *a, **k: SimpleNamespace(responses=responses))
+    cli.main(["extract", "We use an AI tool to screen CVs.", "--date", "2026-10-02", *argv])
+    return responses.calls
+
+
+def test_extract_cli_defaults_to_low_effort(monkeypatch, capsys) -> None:
+    calls = _run_extract_cli(monkeypatch, [])
+    assert [c["reasoning"] for c in calls] == [{"effort": "low"}]
+    assert calls[0]["model"] == "gpt-6.1-sol"
+    assert "effort=low" in capsys.readouterr().out
+
+
+def test_extract_cli_explicit_medium_still_works(monkeypatch, capsys) -> None:
+    calls = _run_extract_cli(monkeypatch, ["--effort", "medium"])
+    assert [c["reasoning"] for c in calls] == [{"effort": "medium"}]
+    assert "effort=medium" in capsys.readouterr().out
