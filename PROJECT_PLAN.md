@@ -214,6 +214,11 @@ one rule-matching engine → cited, fail-closed output.
   `data/eval/results/extraction_v1_30c*` and summarised in SYSTEM_SPEC.md §18. The
   accuracy target is **not yet locked**, pending error analysis of `affected_persons`
   and `role_in_decision_making`.
+- Follow-up experiment `role-null-v1` (pre-registered 2026-10-02): a prompt-only
+  clarification of `role_in_decision_making` null discipline. It runs 4 arms
+  ({baseline, role-null-v1} × {low, medium}, 360 calls) under a fixed decision rule
+  (SYSTEM_SPEC.md §18). The frozen v1 baseline is unchanged. Adopting the prompt and
+  changing the default effort are decided separately.
 - Deliverable: schema-constrained extraction from free text to the `Case` schema
   (SYSTEM_SPEC.md §3.2).
 - Deliverable: extraction eval set (hand-labeled free-text → expected fields).

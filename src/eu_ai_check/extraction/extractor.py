@@ -92,6 +92,28 @@ the output is used or whom it concerns. Do not fill them in from what systems of
 kind usually do.
 - jurisdiction: the country or region where the system is used, if stated."""
 
+#: Phase 2 follow-up experiment (pre-registered 2026-10-02, SYSTEM_SPEC.md §18):
+#: one clarification appended AFTER the field rules, so FIELD_RULES -- shared
+#: verbatim with the frozen eval set -- stays byte-identical. It restates L8's
+#: condition for role_in_decision_making; it does not change the definition.
+ROLE_NULL_V1 = """\
+CLARIFICATION: role_in_decision_making
+- Fill role_in_decision_making only when the description says what happens with the \
+system's output: who acts on it or decides with it, or that the system itself acts or \
+decides without a person. A description of the system's task alone (for example "it \
+translates text" or "it transcribes audio") does not say how its output is used.
+- If the description does not say how the output is used, return null. Do not write a \
+value that only says the role, the decision-maker or human involvement is not \
+described."""
+
+#: Prompt variants. "baseline" is the frozen prompt of the first run (82467bb) and
+#: the default everywhere; other variants exist only for follow-up experiments.
+PROMPT_VARIANTS = {
+    "baseline": "",
+    "role-null-v1": "\n\n" + ROLE_NULL_V1,
+}
+DEFAULT_PROMPT_VARIANT = "baseline"
+
 
 @dataclass
 class ExtractionResult:
@@ -102,6 +124,7 @@ class ExtractionResult:
     provider: str | None = None
     requested_model: str | None = None
     effort: str | None = None
+    prompt_variant: str | None = None
     #: What actually answered, as reported by the API -- may be a dated snapshot
     #: or, on Anthropic, a fallback model.
     served_model: str | None = None
@@ -116,8 +139,10 @@ class ExtractionResult:
         return self.facts is not None
 
 
-def system_prompt() -> str:
-    return SYSTEM_PROMPT.format(rules=FIELD_RULES)
+def system_prompt(variant: str = DEFAULT_PROMPT_VARIANT) -> str:
+    if variant not in PROMPT_VARIANTS:
+        raise ValueError(f"unknown prompt variant {variant!r} ({sorted(PROMPT_VARIANTS)})")
+    return SYSTEM_PROMPT.format(rules=FIELD_RULES) + PROMPT_VARIANTS[variant]
 
 
 def user_message(description: str, assessment_date: date) -> str:

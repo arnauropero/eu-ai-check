@@ -26,7 +26,14 @@ from __future__ import annotations
 from datetime import date
 from typing import Any
 
-from .extractor import ExtractionResult, finish, system_prompt, user_message
+from .extractor import (
+    DEFAULT_PROMPT_VARIANT,
+    PROMPT_VARIANTS,
+    ExtractionResult,
+    finish,
+    system_prompt,
+    user_message,
+)
 from .schema import openai_strict_schema
 
 OPENAI_MODEL = "gpt-6.1-sol"
@@ -39,9 +46,12 @@ SCHEMA_NAME = "case_facts"
 class OpenAIExtractor:
     provider = "openai"
 
-    def __init__(self, client: Any = None, *, model: str = OPENAI_MODEL, effort: str = "medium"):
+    def __init__(self, client: Any = None, *, model: str = OPENAI_MODEL, effort: str = "medium",
+                 prompt_variant: str = DEFAULT_PROMPT_VARIANT):
         if effort not in EFFORT_MAP:
             raise ValueError(f"effort {effort!r} is not a pre-registered arm ({sorted(EFFORT_MAP)})")
+        if prompt_variant not in PROMPT_VARIANTS:
+            raise ValueError(f"unknown prompt variant {prompt_variant!r} ({sorted(PROMPT_VARIANTS)})")
         if client is None:
             import openai
 
@@ -49,6 +59,7 @@ class OpenAIExtractor:
         self.client = client
         self.model = model
         self.effort = effort
+        self.prompt_variant = prompt_variant
         self._schema = openai_strict_schema()
 
     def request(self, description: str, assessment_date: date) -> dict[str, Any]:
@@ -56,7 +67,7 @@ class OpenAIExtractor:
         return {
             "model": self.model,
             "input": [
-                {"role": "system", "content": system_prompt()},
+                {"role": "system", "content": system_prompt(self.prompt_variant)},
                 {"role": "user", "content": user_message(description, assessment_date)},
             ],
             "reasoning": {"effort": EFFORT_MAP[self.effort]},
@@ -80,6 +91,7 @@ class OpenAIExtractor:
             provider=self.provider,
             requested_model=self.model,
             effort=EFFORT_MAP[self.effort],
+            prompt_variant=self.prompt_variant,
             served_model=getattr(response, "model", None),
             stop_reason=getattr(response, "status", None),
             input_tokens=getattr(usage, "input_tokens", 0) or 0,

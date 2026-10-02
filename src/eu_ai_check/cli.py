@@ -297,12 +297,16 @@ def cmd_eval_extraction(args: argparse.Namespace) -> int:
     print(f"extractor: {OPENAI_MODEL}; judge: "
           f"{'disabled' if args.no_judge else f'{JUDGE_MODEL} (effort={JUDGE_EFFORT})'}",
           file=sys.stderr)
+    variants = args.prompt_variants.split(",")
     arms = []
-    for effort in args.efforts.split(","):
-        extractor = OpenAIExtractor(client, effort=effort)
-        label = f"{OPENAI_MODEL} effort={extractor.effort}"
-        print(f"running {label}: {len(cases)} cases x {args.repeats} repeats", file=sys.stderr)
-        arms.append(run_arm(label, extractor, cases, args.repeats, judge_client=judge_client))
+    for variant in variants:
+        for effort in args.efforts.split(","):
+            extractor = OpenAIExtractor(client, effort=effort, prompt_variant=variant)
+            # The default run (baseline prompt only) keeps the first run's labels.
+            label = (f"{OPENAI_MODEL} effort={extractor.effort}" if variants == ["baseline"]
+                     else f"{OPENAI_MODEL} prompt={variant} effort={extractor.effort}")
+            print(f"running {label}: {len(cases)} cases x {args.repeats} repeats", file=sys.stderr)
+            arms.append(run_arm(label, extractor, cases, args.repeats, judge_client=judge_client))
     report = render(arms)
     print(report)
     if args.out:
@@ -392,6 +396,9 @@ def main(argv: list[str] | None = None) -> int:
     p_eval_x.add_argument("--cases", type=Path, default=DEFAULT_EXTRACTION_CASES)
     p_eval_x.add_argument("--repeats", type=int, default=3)
     p_eval_x.add_argument("--efforts", default="low,medium", help="comma-separated effort arms")
+    p_eval_x.add_argument("--prompt-variants", default="baseline",
+                          help="comma-separated prompt variants (default: baseline, the "
+                               "frozen prompt; others are follow-up experiments only)")
     p_eval_x.add_argument("--no-judge", action="store_true",
                           help="skip the secondary LLM judge (gpt-6-astra); the primary "
                                "evaluation then uses only the extractor (gpt-6.1-sol)")
