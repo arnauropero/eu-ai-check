@@ -15,7 +15,13 @@ Scoring, as fixed in `data/eval/extraction_cases.json` before the first run:
 Each case runs `repeats` times per arm, because the model is not deterministic:
 a field that is right on one run and wrong on the next is reported as unstable
 rather than averaged into a flattering mean.
+
+**Models.** The extraction model under test is OpenAI GPT-6.1 Sol (see
+`providers.py`). The secondary judge is unchanged from the pre-registered
+methodology: Claude Opus 5.5 (`JUDGE_MODEL`). Keeping the judge on a different
+provider from the extractor also means the extractor is never graded by itself.
 """
+
 
 from __future__ import annotations
 
@@ -29,11 +35,14 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
-from .extractor import FALLBACK_BETA, MODEL, ExtractionResult, Extractor
+from .extractor import ANTHROPIC_MODEL, FALLBACK_BETA, ExtractionResult
 from .schema import BOOL_FIELDS, DATE_FIELDS, SHORT_TEXT_FIELDS, TEXT_FIELDS
 
 CONCEPT_FIELDS = (*TEXT_FIELDS, *SHORT_TEXT_FIELDS)
 ALL_SCORED = (*CONCEPT_FIELDS, *BOOL_FIELDS, *DATE_FIELDS)
+
+#: Secondary judge model -- unchanged from the pre-registration (fe0b0f6).
+JUDGE_MODEL = ANTHROPIC_MODEL
 
 
 @dataclass(frozen=True)
@@ -120,7 +129,7 @@ def judge(client: Any, case: EvalCase, values: dict[str, str]) -> dict[str, tupl
     if not items:
         return {}
     response = client.beta.messages.create(
-        model=MODEL,
+        model=JUDGE_MODEL,
         max_tokens=4000,
         betas=[FALLBACK_BETA],
         fallbacks="default",
@@ -219,7 +228,7 @@ class ArmReport:
 
 def run_arm(
     label: str,
-    extractor: Extractor,
+    extractor: Any,
     cases: Sequence[EvalCase],
     repeats: int,
     judge_client: Any | None = None,
@@ -253,8 +262,11 @@ def render(arms: Sequence[ArmReport], *, show_errors: bool = True) -> str:
         fell_back = sum(r.result.fell_back for r in arm.runs)
         tokens_in = sum(r.result.input_tokens for r in arm.runs)
         tokens_out = sum(r.result.output_tokens for r in arm.runs)
-        lines.append(f"## {arm.label}   runs={len(arm.runs)} ok={n_ok}  served={dict(served)}  "
-                     f"fallbacks={fell_back}  tokens in/out={tokens_in}/{tokens_out}")
+        requested = Counter((r.result.provider, r.result.requested_model, r.result.effort) for r in arm.runs)
+        lines.append(f"## {arm.label}   runs={len(arm.runs)} ok={n_ok}")
+        lines.append(f"  requested (provider, model, effort): {dict(requested)}")
+        lines.append(f"  served by: {dict(served)}  fallbacks={fell_back}  "
+                     f"tokens in/out={tokens_in}/{tokens_out}")
         leaks = arm.leaks()
         lines.append(f"  ZERO-TOLERANCE conclusion leaks: {len(leaks)}"
                      + ("  <-- HARD FAILURE" if leaks else ""))
@@ -306,6 +318,11 @@ def summary_json(arms: Sequence[ArmReport]) -> dict[str, Any]:
     for arm in arms:
         null_ok, value_ok = arm.null_discipline() if any(r.result.ok for r in arm.runs) else (None, None)
         out[arm.label] = {
+            "requested": sorted({
+                f"{r.result.provider}:{r.result.requested_model}:effort={r.result.effort}"
+                for r in arm.runs
+            }),
+            "served_models": dict(Counter(r.result.served_model for r in arm.runs)),
             "runs": len(arm.runs),
             "ok": sum(r.result.ok for r in arm.runs),
             "leaks": len(arm.leaks()),
@@ -322,3 +339,32 @@ def summary_json(arms: Sequence[ArmReport]) -> dict[str, Any]:
             "output_tokens": sum(r.result.output_tokens for r in arm.runs),
         }
     return out
+
+
+def run_records(arms: Sequence[ArmReport]) -> list[dict[str, Any]]:
+    """One record per extraction call, with the exact provider, requested model,
+    served model and reasoning effort -- written alongside the summary so every
+    individual result is attributable."""
+    records = []
+    for arm in arms:
+        for r in arm.runs:
+            records.append({
+                "arm": arm.label,
+                "case": r.case.id,
+                "repeat": r.repeat,
+                "provider": r.result.provider,
+                "requested_model": r.result.requested_model,
+                "served_model": r.result.served_model,
+                "effort": r.result.effort,
+                "fell_back": r.result.fell_back,
+                "stop_reason": r.result.stop_reason,
+                "ok": r.result.ok,
+                "error": r.result.error,
+                "raw_output": r.result.raw,
+                "correct": r.correct,
+                "leaks": [{"field": l.field, "kind": l.kind, "excerpt": l.excerpt} for l in r.result.leaks],
+                "judge": {f: {"same_fact": s, "reason": why} for f, (s, why) in r.judged.items()},
+                "input_tokens": r.result.input_tokens,
+                "output_tokens": r.result.output_tokens,
+            })
+    return records

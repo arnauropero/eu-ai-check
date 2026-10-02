@@ -257,11 +257,12 @@ def cmd_bench_filter(args: argparse.Namespace) -> int:
 
 
 def cmd_extract(args: argparse.Namespace) -> int:
-    from .extraction.extractor import Extractor
+    from .extraction.providers import create_extractor
     from .extraction.schema import Case
 
-    result = Extractor(effort=args.effort).extract(args.text, args.date)
-    print(f"served by {result.served_model}  fallback={result.fell_back}  "
+    result = create_extractor(args.provider, effort=args.effort).extract(args.text, args.date)
+    print(f"provider={result.provider} model={result.requested_model} effort={result.effort}  "
+          f"served by {result.served_model}  fallback={result.fell_back}  "
           f"stop={result.stop_reason}  tokens in/out={result.input_tokens}/{result.output_tokens}")
     for leak in result.leaks:
         print(f"CONCLUSION LEAK in {leak.field}: [{leak.kind}] {leak.excerpt}")
@@ -274,26 +275,35 @@ def cmd_extract(args: argparse.Namespace) -> int:
 
 
 def cmd_eval_extraction(args: argparse.Namespace) -> int:
-    import anthropic
-
-    from .extraction.evaluation import load_cases, render, run_arm, summary_json
-    from .extraction.extractor import Extractor
+    from .extraction.evaluation import load_cases, render, run_arm, run_records, summary_json
+    from .extraction.providers import MODELS, create_extractor
 
     cases = load_cases(args.cases)
-    client = anthropic.Anthropic()
+    # Judge: unchanged from the pre-registration -- Claude Opus 5.5 -- so it needs
+    # Anthropic credentials. --no-judge skips it; the primary metric is unaffected.
+    judge_client = None
+    if not args.no_judge:
+        import anthropic
+
+        judge_client = anthropic.Anthropic()
     arms = []
     for effort in args.efforts.split(","):
-        label = f"opus-5-5 effort={effort}"
+        extractor = create_extractor(args.provider, effort=effort)
+        label = f"{MODELS[args.provider]} effort={extractor.effort}"
         print(f"running {label}: {len(cases)} cases x {args.repeats} repeats", file=sys.stderr)
-        arms.append(run_arm(label, Extractor(client, effort=effort), cases, args.repeats,
-                            judge_client=None if args.no_judge else client))
+        arms.append(run_arm(label, extractor, cases, args.repeats, judge_client=judge_client))
     report = render(arms)
     print(report)
     if args.out:
         args.out.parent.mkdir(parents=True, exist_ok=True)
         args.out.with_suffix(".txt").write_text(report + "\n", encoding="utf-8")
         args.out.with_suffix(".json").write_text(json.dumps(summary_json(arms), indent=2), encoding="utf-8")
-        print(f"wrote {args.out.with_suffix('.txt')} and .json", file=sys.stderr)
+        runs_path = args.out.with_suffix(".runs.jsonl")
+        runs_path.write_text(
+            "".join(json.dumps(r, ensure_ascii=False, default=str) + "\n" for r in run_records(arms)),
+            encoding="utf-8",
+        )
+        print(f"wrote {args.out.with_suffix('.txt')}, .json and {runs_path.name}", file=sys.stderr)
     return 1 if any(a.leaks() for a in arms) else 0
 
 
@@ -360,16 +370,21 @@ def main(argv: list[str] | None = None) -> int:
     p_extract.add_argument("text")
     p_extract.add_argument("--date", type=date.fromisoformat, default=date.today(),
                            help="assessment date (default: today)")
-    p_extract.add_argument("--effort", default="medium", choices=["low", "medium", "high"])
+    p_extract.add_argument("--effort", default="medium", choices=["low", "medium"])
+    p_extract.add_argument("--provider", default="openai", choices=["openai", "anthropic"],
+                           help="extraction provider (default: openai, gpt-6.1-sol)")
     p_extract.set_defaults(func=cmd_extract)
 
     p_eval_x = sub.add_parser("eval-extraction", help="run the Phase 2 extraction eval harness")
     p_eval_x.add_argument("--cases", type=Path, default=DEFAULT_EXTRACTION_CASES)
     p_eval_x.add_argument("--repeats", type=int, default=3)
     p_eval_x.add_argument("--efforts", default="low,medium", help="comma-separated effort arms")
-    p_eval_x.add_argument("--no-judge", action="store_true", help="skip the secondary LLM judge")
+    p_eval_x.add_argument("--provider", default="openai", choices=["openai", "anthropic"],
+                          help="extraction provider (default: openai, gpt-6.1-sol)")
+    p_eval_x.add_argument("--no-judge", action="store_true",
+                          help="skip the secondary LLM judge (Claude Opus 5.5)")
     p_eval_x.add_argument("--out", type=Path, default=None,
-                          help="write <out>.txt and <out>.json")
+                          help="write <out>.txt, <out>.json and <out>.runs.jsonl")
     p_eval_x.set_defaults(func=cmd_eval_extraction)
 
     args = parser.parse_args(argv)
