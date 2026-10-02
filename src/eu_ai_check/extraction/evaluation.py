@@ -408,6 +408,7 @@ def run_records(arms: Sequence[ArmReport]) -> list[dict[str, Any]]:
                 "requested_model": r.result.requested_model,
                 "served_model": r.result.served_model,
                 "effort": r.result.effort,
+                "prompt_variant": r.result.prompt_variant,
                 "fell_back": r.result.fell_back,
                 "stop_reason": r.result.stop_reason,
                 "ok": r.result.ok,

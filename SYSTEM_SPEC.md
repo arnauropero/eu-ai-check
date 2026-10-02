@@ -1185,6 +1185,67 @@ observed, not as a finding. The weakest field in both arms is `affected_persons`
 (`low`) and 263/299 (`medium`). **No accuracy target has been locked yet**, and any
 later label or scoring change will be flagged as post-hoc.
 
+**Extraction — follow-up experiment `role-null-v1` (pre-registered 2026-10-02, before
+any follow-up API call).** This experiment is separate from the frozen first run.
+It tests one prompt-only intervention suggested by the error analysis of that run.
+The frozen eval set, labels, scoring rules, `FIELD_RULES` and the v1 results are all
+unchanged; tests pin the eval content, the baseline prompt's SHA-256 and the v1
+results file.
+
+- *Intervention.* `ROLE_NULL_V1` in `src/eu_ai_check/extraction/extractor.py` is
+  appended after FIELD RULES as a `CLARIFICATION: role_in_decision_making` section,
+  selected with `--prompt-variants role-null-v1`. The default, `baseline`, is the
+  frozen prompt. The clarification restates L8's condition and does not change the
+  definition: fill the field only when the description says what happens with the
+  output, and never fill it just to say the role is not described. Its two examples
+  appear in no eval case.
+- *Hypothesis.* Most role false fills on cases with a null role label come from two
+  habits: restating the system's task as its role, and filling the field just to say
+  the role is not described. Stating L8's condition explicitly removes those habits
+  without causing nulls where a role is described.
+- *Target cases.* E09 and E14 are clear extractor errors in the baseline, at medium
+  only. E20's outcome is uncertain and its label possibly ambiguous. E06 is not
+  targeted, and turning it null would be read as over-correction. The guard is the
+  17 cases with a non-null role label, especially E07, E12, E25, E26 and E29, where
+  the system acts by itself. `affected_persons` is deliberately not addressed and
+  serves as a no-regression field.
+- *Design.* 4 arms: {baseline prompt, `role-null-v1`} × {`low`, `medium`}, each
+  30 cases × 3 repeats, for 360 extraction calls. The judge is on, with the
+  baseline's configuration. Results go to
+  `data/eval/results/extraction_v2_role_null_*`. The frozen v1 run stays the
+  reference; the baseline re-run only measures run-to-run noise.
+- *Metrics.* These are fixed in code in `src/eu_ai_check/extraction/followup.py`
+  and checked against the frozen run:
+
+  | metric | measured on | frozen low / medium |
+  |---|---|---|
+  | role false fills | 13 null-role cases, 39 runs per arm | 5/39 / 9/39 |
+  | of which E09+E14 | 6 runs | 0/6 / 3/6 |
+  | absence-only fills (`ABSENCE_RE`, descriptive) | filled values on null-role cases | 2 / 4 |
+  | guard misses | 17 non-null-role cases, 51 runs | 0/51 / 0/51 |
+  | other fields | per-field accuracy | first-run table above |
+  | leaks | all runs | 0 / 0 |
+
+- *Decision rule (fixed now; it may not change after results are seen).*
+  `role-null-v1` counts as having worked only if all four checks hold at both
+  efforts:
+  1. total false fills fall below the frozen run's, and E09+E14 false fills do not
+     rise;
+  2. guard misses rise by at most 1 over the frozen run, with every new miss listed;
+  3. for every scored field other than `role_in_decision_making`,
+     |acc(role-null-v1) − acc(frozen)| ≤ |acc(baseline re-run) − acc(frozen)|. A
+     movement in either direction counts;
+  4. zero leaks in the `role-null-v1` arms.
+
+  Results are reported per arm, per case and per repeat, with E09/E14 separate from
+  E06/E20. With 39 runs per arm the result shows the direction of an effect, not
+  statistical significance. Even if the rule passes, adopting the prompt and changing
+  the default effort remain separate decisions.
+- *Separate POST-HOC analysis (not pre-registered).* `affected_persons` in the
+  frozen run is re-scored so that a value also counts as correct when the secondary
+  judge accepted it (`followup.posthoc_affected_persons`). It uses no API calls and
+  never replaces the frozen scoring rules.
+
 **Determination:**
 - Correctness against the four-state contract (§14): `applicable` /
   `not_applicable` / `unresolved` / `not_in_force`, scored per state, not just overall
