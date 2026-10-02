@@ -183,6 +183,7 @@ source = { editable = "." }
 dependencies = [
     { name = "anthropic" },
     { name = "lxml" },
+    { name = "openai" },
     { name = "pydantic" },
     { name = "qdrant-client" },
     { name = "sentence-transformers" },
@@ -197,6 +198,7 @@ dev = [
 requires-dist = [
     { name = "anthropic", specifier = ">=1.11.0" },
     { name = "lxml", specifier = ">=5.3" },
+    { name = "openai", specifier = ">=3.23.0" },
     { name = "pydantic", specifier = ">=2.9" },
     { name = "qdrant-client", specifier = ">=1.19.1" },
     { name = "sentence-transformers", specifier = ">=6.1.0" },
@@ -1011,6 +1013,23 @@ source = { registry = "https://pypi.org/simple" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c2/f3/d86c845465a2723ad7e1e5c36dcd75ddb82898b3f53be47ebd429fb2fa5d/nvidia_nvtx-13.0.85-py3-none-manylinux1_x86_64.manylinux_2_5_x86_64.whl", hash = "sha256:4936d1d6780fbe68db454f5e72a42ff64d1fd6397df9f363ae786930fd5c1cd4", size = 148047, upload-time = "2025-09-04T08:29:01.761Z" },
     { url = "https://files.pythonhosted.org/packages/a8/64/3708a90d1ebe202ffdeb7185f878a3c84d15c2b2c31858da2ce0583e2def/nvidia_nvtx-13.0.85-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:cb7780edb6b14107373c835bf8b72e7a178bac7367e23da7acb108f973f157a6", size = 148878, upload-time = "2025-09-04T08:28:53.627Z" },
+]
+
+[[package]]
+name = "openai"
+version = "3.23.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anyio" },
+    { name = "httpx2" },
+    { name = "jiter" },
+    { name = "pydantic" },
+    { name = "sniffio" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/45/69/59a8efa0e41e497041305459546ce27423829448682be7c1d192c5242f5e/openai-3.23.0.tar.gz", hash = "sha256:47381c61622d4dbdc3c8492dad18628fd940b8fbd9cb1f89ed46cf0bb6795bb8", size = 1791261, upload-time = "2026-10-01T23:03:52.859Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ed/7a/956c370cc36c40e722410662a0bd79da3fc08a62f68cabc0c0c590444ac9/openai-3.23.0-py3-none-any.whl", hash = "sha256:7fbec2e50a05ac0fa858629505688e5998fd82245058390ac1b6d98960174bd5", size = 2118825, upload-time = "2026-10-01T23:03:50.23Z" },
 ]
 
 [[package]]

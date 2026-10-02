@@ -142,6 +142,48 @@ def output_schema() -> dict[str, Any]:
     return schema
 
 
+def openai_strict_schema() -> dict[str, Any]:
+    """The same `CaseFacts` schema, in the form OpenAI Structured Outputs
+    (`strict: true`) documents.
+
+    Derived mechanically from `output_schema()`, so both providers constrain the
+    same fields, types and nullability. Two transformations, both deliberate:
+
+      * nullable fields are written as a type array (`{"type": ["string",
+        "null"]}`), the nullable form OpenAI's documentation shows, instead of
+        `anyOf`;
+      * `"format": "date"` on `relevant_date` is dropped, because OpenAI's
+        documentation did not confirm strict-mode support for string formats.
+        The date constraint is not lost: every output is validated by pydantic
+        (`CaseFacts.relevant_date: date | None`), and a value that is not an ISO
+        date fails closed as a schema-validation error. The field description
+        states the expected format.
+
+    Everything else -- property set, `required`, `additionalProperties: false`,
+    descriptions -- is unchanged, and tests compare the two schemas.
+    """
+    base = output_schema()
+    props: dict[str, Any] = {}
+    for name, prop in base["properties"].items():
+        if "anyOf" in prop:
+            types = [alt["type"] for alt in prop["anyOf"]]
+            new = {"type": [t for t in types if t != "null"] + ["null"]}
+        else:
+            new = {"type": prop["type"]}
+        description = prop.get("description", "")
+        if name in DATE_FIELDS:
+            description = f"{description} Format: YYYY-MM-DD.".strip()
+        if description:
+            new["description"] = description
+        props[name] = new
+    return {
+        "type": "object",
+        "properties": props,
+        "required": list(props),
+        "additionalProperties": False,
+    }
+
+
 class DateBasis(StrEnum):
     STATED = "stated"            # the description gave or implied the date
     ASSESSMENT_DATE = "assessment_date"  # none given; the pipeline defaulted it

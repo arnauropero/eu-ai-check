@@ -23,7 +23,8 @@ from eu_ai_check.extraction.evaluation import (
     run_arm,
     score_field,
 )
-from eu_ai_check.extraction.extractor import FALLBACK_BETA, MODEL, Extractor
+from eu_ai_check.extraction.extractor import ANTHROPIC_MODEL as MODEL, FALLBACK_BETA
+from eu_ai_check.extraction.extractor import AnthropicExtractor as Extractor
 from eu_ai_check.extraction.leakage import find_leaks
 from eu_ai_check.extraction.schema import (
     ALL_FIELDS,

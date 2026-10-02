@@ -195,6 +195,48 @@ checking the labels against them:
 | L8 | Null discipline: `role_in_decision_making` and `affected_persons` are `null` unless described; they are not filled in from what such systems usually do. | 15 cases, listed in the eval file |
 | L9 | A legal conclusion asserted without supporting facts ("we are the provider") yields no actor facts. | E24, E27 |
 
+### 3.5 Extraction model (Phase 2)
+
+**The extraction model is OpenAI GPT-6.1 Sol, `gpt-6.1-sol`**, called through the
+Responses API (`src/eu_ai_check/extraction/openai_extractor.py`; the default in
+`providers.py`).
+
+- **Reasoning effort.** The pre-registered arms `low` and `medium` map one-to-one
+  onto GPT-6.1 Sol's `reasoning.effort` values `"low"` and `"medium"`. The model
+  supports `low`, `medium` (its default), `high`, `xhigh` and `max`, but not `none`
+  or `minimal` (OpenAI model page, checked 2026-10-02). No approximation is
+  involved, and the extractor rejects any other value.
+- **Structured Outputs.** `text.format = {type: "json_schema", name: "case_facts",
+  strict: true, schema: openai_strict_schema()}`. That schema is derived
+  mechanically from the same `CaseFacts` pydantic model, so property set,
+  `required`, `additionalProperties: false`, base types, nullability and
+  descriptions are identical, and a test compares the two field by field. Only two
+  things differ:
+  - nullable fields use the type-array form OpenAI documents
+    (`["string", "null"]`) rather than `anyOf`;
+  - `"format": "date"` is not sent, because OpenAI's documentation did not confirm
+    strict-mode support for string formats. The date constraint is still enforced
+    by pydantic validation of every output, which fails closed on a non-ISO date.
+- **Same prompt, same rules.** The system prompt, FIELD RULES and user message are
+  byte-identical to the pre-registered commit.
+- **Recording.** Every result records the provider, the requested model, the
+  reasoning effort and the model the API reports as having served the request.
+  The harness writes all of them per call to `<out>.runs.jsonl`.
+- **Fail-closed.** A refusal content item, an incomplete response, invalid JSON or a
+  schema mismatch gives `facts = None` with the reason. There is no server-side
+  fallback on this path.
+- **Judge unchanged.** The secondary LLM judge stays Claude Opus 5.5, as
+  pre-registered. It also means the extractor is never graded by itself.
+
+**Provenance of the switch.** The extraction model changed from Claude Opus 5.5 to
+GPT-6.1 Sol on 2026-10-02: *after* the eval set was pre-registered (`fe0b0f6`) and
+*before* any extraction API call. Eval set, labels, labelling rules, null discipline,
+leakage check, scoring, categories, repeats (3) and effort arms are unchanged, and a
+test pins a SHA-256 fingerprint of the pre-registered eval content. The system under
+test changed; the pre-registered evaluation did not, and no result had been seen when
+it changed. The Claude Opus 5.5 extractor remains available as
+`--provider anthropic`.
+
 **Review record.** The user reviewed all 30 labels before pre-registration. One
 label changed during that review, E18 `puts_own_name_or_trademark` false → null
 (L3: the payroll provider's tool is not named). Because the change was made before
@@ -1079,8 +1121,10 @@ first API run**, so the first results count as pre-registered. Scoring, as commi
   outputs prevent the first; the second is the realistic failure, and 5 adversarial
   cases assert conclusions outright to provoke it.
 
-Each case runs several times per effort arm (`low`, `medium`), and fields whose
-correctness changes between repeats are reported as unstable. The numerical accuracy
+Each case runs three times per effort arm (`low`, `medium`), and fields whose
+correctness changes between repeats are reported as unstable. **Extraction model:
+OpenAI GPT-6.1 Sol** (`gpt-6.1-sol`), switched from Claude Opus 5.5 after
+pre-registration and before any API call. The evaluation is unchanged (§3.5). The numerical accuracy
 target is locked only after the first run is seen, and is labelled accordingly.
 
 **Determination:**

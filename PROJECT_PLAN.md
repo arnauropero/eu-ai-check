@@ -195,7 +195,12 @@ one rule-matching engine → cited, fail-closed output.
   citation priority; left unfixed rather than tuned to seen queries.
 
 **Phase 2 — Extraction stage (IN PROGRESS — eval set pre-registered 2026-10-02)**
-- Status: extractor (Claude Opus 5.5, structured outputs, refusal fallbacks), harness
+- Extraction model: **OpenAI GPT-6.1 Sol (`gpt-6.1-sol`)**, effort arms `low`/`medium`,
+  Structured Outputs (strict). It was switched from Claude Opus 5.5 on 2026-10-02,
+  after pre-registration and before any API call, with the pre-registered eval set,
+  labels and scoring unchanged (SYSTEM_SPEC.md §3.5). Claude Opus 5.5 remains the
+  secondary judge and an optional extraction provider.
+- Status: extractor (originally Claude Opus 5.5, structured outputs, refusal fallbacks), harness
   (`eu-ai-check eval-extraction`), conclusion-leakage check and a 30-case labelled eval
   set were committed **before the first API run**. The labels were reviewed by the user
   first, and one changed in that review (E18, documented as pre-registration, not

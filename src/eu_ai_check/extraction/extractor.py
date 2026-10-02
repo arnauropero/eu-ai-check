@@ -1,18 +1,21 @@
-"""Schema-constrained fact extraction with Claude (SYSTEM_SPEC.md §3).
+"""Schema-constrained fact extraction (SYSTEM_SPEC.md §3) -- shared core and the
+Anthropic provider.
 
-One Messages API call per description:
+The extraction model for Phase 2 is **OpenAI GPT-6.1 Sol** (`openai_extractor.py`,
+the default in `providers.py`). This module holds what every provider shares --
+the system prompt, the FIELD RULES, the result type and the fail-closed output
+handling -- plus the original Claude Opus 5.5 implementation, kept as an
+alternative provider option. Both providers send the same prompt and enforce the
+same `CaseFacts` schema, so swapping them changes the model under test and nothing
+in the pre-registered evaluation.
 
-  * `output_config.format` = the `CaseFacts` JSON schema, so decoding is
-    constrained to exactly the allowed fields;
-  * `fallbacks: "default"` (beta `server-side-fallback-2026-07-01`), so a safety
-    decline is re-run server-side on Anthropic's recommended fallback model
-    instead of failing. Whichever model actually answered is recorded on every
-    result, so a fallback can never silently mix models into eval numbers;
-  * adaptive thinking (always on for Opus 5.5) with an explicit `effort`, since
-    Opus 5.5's default (`medium`) differs from earlier Opus models.
+Claude call: `output_config.format` = the `CaseFacts` JSON schema; `fallbacks:
+"default"` (beta `server-side-fallback-2026-07-01`) re-runs a safety decline on a
+fallback model, and whichever model answered is recorded; explicit `effort`.
 
-Fail-closed: a refusal, a truncated response or output that does not validate
-yields `facts=None` with the reason -- never a partially filled `CaseFacts`.
+Fail-closed, for every provider: a refusal, a truncated response or output that
+does not validate yields `facts=None` with the reason -- never a partially filled
+`CaseFacts`.
 """
 
 from __future__ import annotations
@@ -27,7 +30,7 @@ from pydantic import ValidationError
 from .leakage import Leak, find_leaks
 from .schema import CaseFacts, output_schema
 
-MODEL = "claude-opus-5-5"
+ANTHROPIC_MODEL = "claude-opus-5-5"
 FALLBACK_BETA = "server-side-fallback-2026-07-01"
 DEFAULT_EFFORT = "medium"
 
@@ -95,6 +98,12 @@ class ExtractionResult:
     facts: CaseFacts | None
     raw: dict[str, Any] | None
     leaks: list[Leak] = field(default_factory=list)
+    #: What was asked for, recorded on every result (Phase 2 requirement).
+    provider: str | None = None
+    requested_model: str | None = None
+    effort: str | None = None
+    #: What actually answered, as reported by the API -- may be a dated snapshot
+    #: or, on Anthropic, a fallback model.
     served_model: str | None = None
     fell_back: bool = False
     stop_reason: str | None = None
@@ -107,6 +116,10 @@ class ExtractionResult:
         return self.facts is not None
 
 
+def system_prompt() -> str:
+    return SYSTEM_PROMPT.format(rules=FIELD_RULES)
+
+
 def user_message(description: str, assessment_date: date) -> str:
     return (
         f"Assessment date: {assessment_date.isoformat()}\n\n"
@@ -114,9 +127,39 @@ def user_message(description: str, assessment_date: date) -> str:
     )
 
 
-class Extractor:
-    def __init__(self, client: Any = None, *, model: str = MODEL, effort: str = DEFAULT_EFFORT,
-                 use_fallbacks: bool = True):
+def finish(result: ExtractionResult, text: str | None) -> ExtractionResult:
+    """Shared, provider-independent output handling: parse JSON, scan for
+    conclusion leaks, validate against `CaseFacts`. The pydantic validation is
+    the final enforcement of the schema for every provider, whatever the
+    provider-side constraint was."""
+    if text is None:
+        result.error = "no text output in response"
+        return result
+    try:
+        result.raw = json.loads(text)
+    except json.JSONDecodeError as e:
+        result.error = f"invalid JSON: {e}"
+        return result
+    if not isinstance(result.raw, dict):
+        result.error = "JSON output is not an object"
+        return result
+    # Scan before validating: an excluded field must show up as a leak, not
+    # only as a validation error.
+    result.leaks = find_leaks(result.raw)
+    try:
+        result.facts = CaseFacts.model_validate(result.raw)
+    except ValidationError as e:
+        result.error = f"schema validation failed: {e.error_count()} error(s)"
+    return result
+
+
+class AnthropicExtractor:
+    """Claude Opus 5.5 extraction -- a provider option, not the Phase 2 default."""
+
+    provider = "anthropic"
+
+    def __init__(self, client: Any = None, *, model: str = ANTHROPIC_MODEL,
+                 effort: str = DEFAULT_EFFORT, use_fallbacks: bool = True):
         if client is None:
             import anthropic
 
@@ -132,7 +175,7 @@ class Extractor:
         kwargs: dict[str, Any] = {
             "model": self.model,
             "max_tokens": 16000,
-            "system": SYSTEM_PROMPT.format(rules=FIELD_RULES),
+            "system": system_prompt(),
             "messages": [{"role": "user", "content": user_message(description, assessment_date)}],
             "output_config": {
                 "effort": self.effort,
@@ -149,6 +192,9 @@ class Extractor:
         result = ExtractionResult(
             facts=None,
             raw=None,
+            provider=self.provider,
+            requested_model=self.model,
+            effort=self.effort,
             served_model=getattr(response, "model", None),
             stop_reason=response.stop_reason,
             fell_back=_fell_back(response),
@@ -162,25 +208,8 @@ class Extractor:
         if response.stop_reason == "max_tokens":
             result.error = "truncated at max_tokens"
             return result
-
         text = next((b.text for b in response.content if b.type == "text"), None)
-        if text is None:
-            result.error = "no text block in response"
-            return result
-        try:
-            result.raw = json.loads(text)
-        except json.JSONDecodeError as e:
-            result.error = f"invalid JSON: {e}"
-            return result
-
-        # Scan before validating: an excluded field must show up as a leak, not
-        # only as a validation error.
-        result.leaks = find_leaks(result.raw)
-        try:
-            result.facts = CaseFacts.model_validate(result.raw)
-        except ValidationError as e:
-            result.error = f"schema validation failed: {e.error_count()} error(s)"
-        return result
+        return finish(result, text)
 
 
 def _fell_back(response: Any) -> bool:
