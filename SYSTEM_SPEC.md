@@ -6,7 +6,9 @@ implemented as of 2026-10-01; Phase 1 (retrieval) and Phase 2 (extraction) as of
 against a target locked after the first run (§18). Phase 1 changed the retrieval design in three measured
 places — exact-citation priority (§7.4), reranker off by default (§7.4), and date
 payload indexes as a hard index requirement (§13.2) — and closed the §21
-filtered-HNSW open question. This document is the
+filtered-HNSW open question. **Phase 3 design (2026-10-03)** added the provision
+matcher (§2, §4.2), the Article 6 route combination and Annex I (§9.1), and found a
+corpus defect: trailing paragraph-level text was dropped (§9.1). This document is the
 technical source of truth for implementation in Claude Code. Where a decision rests on
 assumption rather than verified source material, it is marked **[ASSUMPTION]**. Where a
 decision has been checked against the actual EUR-Lex / AI Act Explorer text, it is marked
@@ -15,7 +17,8 @@ decision has been checked against the actual EUR-Lex / AI Act Explorer text, it 
 Phase 0 changed the architecture in exactly one place: **Article 6 was added to the V1
 corpus** on corpus evidence (§9). Every other invariant, identity, and structural
 decision in this document survived contact with the real Official Journal text unchanged.
-The corpus is 85 canonical provisions and 76 `ApplicabilityRule` records, built from
+The corpus was 85 canonical provisions and 76 `ApplicabilityRule` records at the end of
+Phase 0 (107 provisions after the Phase 3 corpus fixes and Annex I, §9.1), built from
 CELEX 32024R1689 retrieved via the EU Publications Office Cellar API — note that EUR-Lex
 itself sits behind an AWS WAF JavaScript challenge that blocks scripted fetching.
 
@@ -64,7 +67,8 @@ Retrieval (hybrid: semantic + BM25 + metadata/temporal filter + reranking)
         │  → date-eligible, structurally-relevant canonical provisions
         ▼
 Grounded determination (GroundedDetermination pattern, 4 top-level stages):
-        │  1. Risk-tier classification (Annex III matching)
+        │  1. Risk-tier classification (Article 6 routes: Annex III matching,
+        │     Article 6(3) derogation, Article 6(1) / Annex I matching)
         │  2. Prohibited-practice determination (Article 5 matching, via
         │     ApplicabilityRule where applicable-date conditions apply)
         │  3. Actor-role determination — internally invokes a nested
@@ -83,9 +87,22 @@ Generation: tier + obligations + explanation + citations
 Output to user
 ```
 
-Two determination-adjacent LLM steps exist (extraction, generation); everything between
-them is retrieval and rule evaluation, not free LLM reasoning. This is a deliberate
-design choice to keep the legally load-bearing part of the pipeline auditable.
+Two determination-adjacent LLM steps exist (extraction, generation). Between them sits
+retrieval, rule evaluation, and **exactly one constrained LLM step: the provision
+matcher (§4.2)**. No other free LLM reasoning happens there. This is a deliberate design
+choice to keep the legally load-bearing part of the pipeline auditable.
+
+**[Changed in Phase 3 design, 2026-10-03]** This paragraph originally said that
+everything between extraction and generation was retrieval and rule evaluation. That
+left a gap. Retrieval returns candidate Annex III / Article 5 / Article 6 provisions,
+but nothing specified how a free-text case is judged to *fall under* one of them.
+Similarity is not membership, and the rule layer only tests `actor_role` ×
+`system_category` plus dates (§12). The alternatives considered were a retrieval-score
+cutoff and a fixed keyword or category mapping. Both are recorded in §20, and the score
+cutoff is kept as a measured baseline arm (§18). The matcher does not weaken the
+auditability goal. It sees only a closed candidate set, emits only schema-constrained
+per-candidate verdicts with verbatim quotes, and every verdict is checked by code before
+it is used (§4.2).
 
 ---
 
@@ -317,6 +334,22 @@ determinations conclude directly from retrieved provision content matched agains
 facts, without a rule-matching layer, since Annex III category membership and role
 definitions are not phased in over time the way obligations and prohibitions are.
 
+**How "matched against case facts" happens differs by determination [Phase 3 design,
+2026-10-03]:**
+
+| Determination | Conclusion mechanism |
+|---|---|
+| Risk tier | Provision matcher (§4.2) over Annex III, Article 6(3) and Article 6(1) / Annex I candidates, combined by fixed code (§9.1) |
+| Prohibited practice | Provision matcher over Article 5(1) candidates, then `ApplicabilityRule` dates |
+| Actor role | Rules over the boolean actor facts (§3.2) and the Article 3 / Article 25 definitions; no LLM |
+| Substantial modification | Rules over `modifies_*` facts; no LLM |
+| Obligation applicability | `ApplicabilityRule` engine (§12); no LLM |
+
+The matcher is used only where the legal question is "does this free-text use case fall
+under this listed category?" There, both sides are open-ended natural language and no
+boolean fact can stand in without becoming a legal conclusion (§3.1). Everywhere else
+the inputs are already structured, so rules suffice.
+
 ### 4.1 Actor-Role Determination Output
 
 Actor roles can be held simultaneously (an organization can be both provider and
@@ -356,6 +389,81 @@ A provider+deployer case therefore receives the union of both obligation sets, e
 independently evidence-backed, not a blind merge — a provision could be `applicable`
 under one role and `not_applicable` or `unresolved` under the other, and both outcomes
 are preserved per-role in `supporting_evidence` rather than collapsed to one status.
+
+### 4.2 The Provision Matcher (Phase 3 design, 2026-10-03)
+
+The one LLM step between extraction and generation (§2). It answers a single question
+per candidate provision: does the described use case fall under this provision?
+
+**Inputs.**
+- The **original free-text description**, not just the extracted `Case`. Extraction is
+  deliberately lossy (§3.3). Some matching criteria, for example the Article 6(3)
+  conditions, are deliberately absent from the schema (§9.1), so the matcher must read
+  the source text.
+- The extracted `Case`, as context.
+- A **closed candidate set**: every date-eligible provision in the determination's
+  scope, each with its id and canonical text.
+
+**The candidate set is exhaustive over the scope, not top-k.** The scopes are short
+closed lists: 25 Annex III provisions, 8 Article 5(1) points, the Article 6(3)
+provisions, and Annex I. Taking only the top-k would let a retrieval miss turn into a
+confident `not_high_risk` or "not prohibited", which is the most dangerous error this
+system can make. The Phase 1 retriever still provides the temporal pre-filter and the
+candidate ordering, and it alone drives the baseline arm (below). If a scope ever grows
+too large to evaluate exhaustively, top-k needs a measured recall guarantee first. That
+case is not V1.
+
+**Output (schema-constrained, one verdict per candidate):**
+
+```yaml
+MatchVerdict:
+  logical_provision_id: str      # must be in the candidate set
+  verdict: matches | does_not_match | insufficient
+  case_quote: str | null         # verbatim span of the description; required for
+                                 # matches and does_not_match
+  provision_quote: str | null    # verbatim span of the candidate's canonical text;
+                                 # required for matches
+  rationale: str                 # for the explanation only; never read by code
+```
+
+**Code verification before any verdict is used.** Each check that fails *downgrades*
+that verdict to `insufficient` and is logged. No check ever upgrades a verdict.
+1. `logical_provision_id` is in the candidate set. An unknown id is discarded.
+2. Every candidate has exactly one verdict. A missing verdict becomes `insufficient`.
+   For duplicates, the most conservative verdict wins.
+3. `case_quote` occurs verbatim in the description and `provision_quote` occurs
+   verbatim in the candidate's canonical text. Both checks run after whitespace and
+   quote-character normalisation only.
+4. Required quotes are present for the verdict given.
+
+**Verdict semantics.** `does_not_match` must be backed by a case quote that shows the
+use case is something else, such as a spam filter quoted against Annex III 4(a).
+"Nothing in the text says so" is `insufficient`, not `does_not_match`. This is what
+lets `unresolved` arise from the matcher at all, instead of an absence of evidence
+being silently read as a negative.
+
+**Combination is code, not LLM.** The matcher judges candidates one at a time. How
+verdicts combine into a determination status is fixed in code: §9.1 for risk tier, and
+for prohibited practice:
+- any Article 5(1) point `matches` → that point's `ApplicabilityRule`s decide the
+  status (§12, §14);
+- every point `does_not_match` → `not_applicable`;
+- otherwise → `unresolved`.
+
+Article 5(1)(h) carries its exceptions inside one canonical provision (§7.1), so a
+`matches` on it means the use falls under the prohibition and none of the exceptions
+apply.
+
+**Model.** Same stack as extraction (§3.5): OpenAI, strict Structured Outputs. The
+model and effort arms are fixed in the Phase 3 pre-registration, before any
+determination run.
+
+**Baseline arm: retrieval-score cutoff.** The highest-scoring candidate in a scope
+counts as `matches` if its retrieval score clears a threshold τ. Every other candidate
+counts as `does_not_match`. τ is fixed before the first determination run, using the
+Phase 1 retrieval eval set, not the determination eval set. By construction this arm
+can never produce `insufficient`, so it cannot produce `unresolved` from matching. That
+limit is one of the things the comparison is meant to show (§18, §20).
 
 ---
 
@@ -422,7 +530,7 @@ not fixed named fields:
 
 ```yaml
 StructuralPath:
-  - type: chapter | section | article | paragraph | point | sub_point | annex | annex_area | annex_item
+  - type: chapter | section | article | paragraph | subparagraph | point | sub_point | annex | annex_area | annex_item
     value: str
   # ordered list, e.g.:
   # [ {article, "5"}, {paragraph, "1"}, {point, "h"}, {sub_point, "iii"} ]
@@ -431,6 +539,16 @@ StructuralPath:
 Citation rendering and the "full structural path" display (e.g. `EU AI Act → Chapter III
 → Section 3 → Article 26 → Paragraph 2`) are derived by walking this path, not by
 reading fixed columns.
+
+**[Phase 3, 2026-10-03]** The variable-depth path absorbed two new shapes without any
+model change, which is the point of this decision:
+- `Article → Paragraph → Subparagraph`, for trailing subparagraphs that name no point
+  (Article 6(3), third subparagraph; §9.1). It is rendered as "Article 6(3), third
+  subparagraph".
+- `Annex → Section → Annex item`, for Annex I, Sections A and B. It is rendered as
+  "Annex I, Section A, point 11". As with chapters and sections in articles, the
+  section is navigational context and is left out of `logical_provision_id`
+  (`aiact:anx_I:item_11`). Annex I numbers its entries continuously across sections.
 
 ---
 
@@ -603,6 +721,117 @@ Verified area structure, for reference:
 6. Law enforcement — (a)–(e)
 7. Migration, asylum, border control — (a)–(d)
 8. Administration of justice and democratic processes — (a), (b)
+
+### 9.1 Risk-tier determination: the two routes and the derogation (Phase 3 design, 2026-10-03)
+
+**No `Case` schema change.** Article 6(3) and 6(1) depend on facts the Phase 2 schema
+does not hold: whether the task is narrow or preparatory, whether the system profiles
+people, whether it is a safety component, and whether third-party conformity assessment
+applies. Two ways to supply those facts were considered:
+- add fields to `Case`;
+- have the matcher read the original description against these provisions (§4.2).
+
+The second was chosen. Adding fields would reopen the closed Phase 2 contract: the 30
+labelled cases, the field rules, the accuracy target, and the leakage check. Several of
+the candidate fields would also sit on the fact/conclusion boundary. "Performs
+profiling" is a term the Act defines by reference to the GDPR, so as an extraction
+field it would be a legal conclusion (§3.1).
+
+**Annex I joins the corpus.** Article 6(1)(a) and (b) refer to "the Union harmonisation
+legislation listed in Annex I". Without Annex I, the product-embedded route depends on
+a list that is absent, which is the same gap Phase 0 found for Article 6 itself.
+Annex I is ingested like Annex III. It is a list, typed `scope`, with its Section A and
+Section B entries as the atomic provisions. **[VERIFIED at ingestion]** It has 20
+entries numbered continuously: Section A covers 1–12 (New Legislative Framework, e.g.
+machinery, toys, medical devices), and Section B covers 13–20 (e.g. civil aviation,
+vehicles, rail). Each entry carries its own section heading as a lead-in (§6). Its OJ
+markup differs from every other V1 list: a three-column row with an empty indent cell,
+and the text in a bare `<span>`. The parser handles both.
+
+**Combination (fixed code over verified matcher verdicts):**
+
+*Article 6(2), the Annex III route:*
+- Any Annex III candidate `matches` → Annex III membership is established. Go to the
+  Article 6(3) check.
+- Every Annex III candidate `does_not_match` → the route is not met.
+- Otherwise → the route is `unresolved`.
+
+*Article 6(3), evaluated only after an Annex III match:*
+
+| Profiling override (6(3), third subparagraph) | Any of 6(3)(a)–(d) | Route outcome |
+|---|---|---|
+| `matches` | — | high-risk (Annex III) — the override always wins |
+| `does_not_match` | `matches` | **not high-risk** (derogation applies; cited) |
+| `insufficient` | `matches` | `unresolved` — the override would flip the outcome |
+| any | none `matches` | high-risk (Annex III), with `derogation: not_established` recorded |
+
+The last row is a deliberate asymmetry. The derogation is an exception that the
+provider must positively claim and document under Article 6(4). The Act's default for
+an Annex III system is high-risk. A description that is silent on 6(3) therefore does
+not establish the derogation. It does not leave the tier unresolved either. The output
+records that the derogation was considered and not established, so the result is never
+a bare "high-risk" that hides the question.
+
+*Article 6(1), the product-embedded route.* Both conditions are required:
+- (a) covered by Annex I legislation, judged by matching against Annex I entries;
+- (b) subject to third-party conformity assessment, judged by matching against 6(1)(b).
+
+| (a) | (b) | Route outcome |
+|---|---|---|
+| `matches` | `matches` | high-risk (Article 6(1)) |
+| either `does_not_match` | — | route not met |
+| otherwise | | `unresolved` |
+
+Descriptions rarely state the conformity-assessment requirement. Expect this route to
+be `unresolved` unless the description says so explicitly. That is accepted V1
+behaviour, not a defect to tune away.
+
+*Routes combined into `risk_tier`:*
+- Either route reaches high-risk → `applicable`.
+- Both routes are not met, or the derogation applies → `not_applicable`.
+- Otherwise → `unresolved`.
+
+The output carries `system_category`, which is `annex_iii_high_risk`,
+`article_6_1_high_risk`, or both. Downstream `ApplicabilityRule` conditions select on
+exactly this value (§12). This field is what makes the two application dates
+(2026-08-02 and 2027-08-02) reachable. Before Phase 3, the risk-tier output (§16) had
+no slot for it.
+
+**Corpus defect found while designing this section, and fixed [2026-10-03].** The
+Article 6(3) profiling override was absent from every ingested provision. So was the
+second subparagraph of Article 5(2). Both are trailing paragraph-level text that names
+no specific point. Phase 0 attached trailing text only when it *named* a node (the
+Article 5(1)(h) savings clause) and silently dropped everything else. This is a variant
+of Phase 0 hazard (2) that the original fix did not cover.
+
+The fix applies one rule:
+- Trailing text that names a point stays a qualifier of that point, as before.
+- Trailing text that names no point becomes its own canonical provision at a new
+  `subparagraph` level (§6). It is numbered as the Act cites it: each own-text
+  fragment opens a subparagraph, and a list belongs to the fragment before it. That
+  gives `aiact:art_6:para_3:subpara_3`, "Article 6(3), third subparagraph", and
+  `aiact:art_5:para_2:subpara_2`.
+- Its text carries the paragraph's preceding standalone subparagraphs, but not list
+  lead-ins. So "Notwithstanding the first subparagraph" is read together with the
+  derogation it overrides.
+
+Attaching the override to each of 6(3)(a)–(d) was rejected. The override needs its own
+matcher verdict in the table above, and attaching the Article 5(2) rule to (a) and (b)
+would cite a registration duty as "Article 5(2)(a)". A Phase 4 evidence-resolution
+item follows from the split: citing a 6(3) point must also bring in the override, as
+an explicit dependency (§8). A new test asserts that every source fragment of a V1
+article or annex appears in some canonical provision. Before the fix it found exactly
+these two fragments.
+
+While Annex I was being added, a second Phase 0 defect surfaced in cross-reference
+extraction. The external-instrument exclusion could be dodged by regex backtracking:
+"Article 35 of Regulation (EU) 2016/679" failed the exclusion as "Article 35" but then
+matched as an internal "Article 3". Five provisions carried false edges of this kind,
+in Article 26(9)–(11) and Annex III 6(d)–(e). They are fixed and tested.
+
+Corpus after both fixes and Annex I: 107 provisions (was 85) and 76 rules (unchanged).
+None of the 85 existing provisions changed text or `content_id`. Cross-reference
+resolution is 0.174 (was 0.120): 23 distinct edges (was 25), 4 of them resolvable.
 
 ---
 
@@ -912,7 +1141,10 @@ plain `GroundedDetermination` instantiation:
 - `not_in_force` — the matched provision's own text was not valid at `relevant_date`
   (same meaning as above, evaluated against text validity only).
 - `unresolved` — retrieved evidence is insufficient to reach a conclusion (an evidence
-  gap, not a rule-coverage gap, since there is no rule set to have gaps in).
+  gap, not a rule-coverage gap, since there is no rule set to have gaps in). For
+  matcher-backed determinations this means the combination in §4.2 / §9.1 hit an
+  `insufficient` verdict that could change the outcome. A verdict downgraded by code
+  verification counts the same way.
 - `applicable` / `not_applicable` — a direct conclusion drawn from matching retrieved
   provision content against case facts.
 
@@ -1004,10 +1236,20 @@ actor-role outputs use the same shape rather than a bespoke structure each.
 **Value mapping for `risk_tier` and `prohibited_practice`.** Both determination types
 reuse the generic `applicability_status` field rather than a separate tier enum:
 
-- `determination_type = risk_tier`: `applicable` means the system matches an Annex III
-  high-risk category (`high_risk`); `not_applicable` means it does not
-  (`not_high_risk`); `unresolved` and `not_in_force` retain their standard §14/§14.1
-  meanings, applied to Annex III category matching.
+- `determination_type = risk_tier`: `applicable` means the system is high-risk under
+  either Article 6 route (`high_risk`). `not_applicable` means it is not
+  (`not_high_risk`): both routes are not met, or the Article 6(3) derogation applies.
+  `unresolved` and `not_in_force` keep their standard §14/§14.1 meanings, applied to
+  the route combination in §9.1. **[Changed in Phase 3 design, 2026-10-03]** This
+  originally read "matches an Annex III high-risk category", which is the
+  "Annex III ⇒ high-risk" collapse §9 warns against. A risk-tier `Determination` also
+  carries:
+
+  ```yaml
+  system_category: [annex_iii_high_risk | article_6_1_high_risk]  # empty unless applicable
+  derogation: applied | not_established | not_assessed  # Art 6(3); not_assessed when
+                                                        # no Annex III match
+  ```
 - `determination_type = prohibited_practice`: `applicable` means the case matches an
   Article 5 prohibited practice; `not_applicable` means it does not; `unresolved` and
   `not_in_force` retain their standard meanings, applied to Article 5 matching (via
@@ -1138,6 +1380,31 @@ presented as such.
 A genuinely pre-registered test of the citation design needs citation queries
 written *before* the next run; new query sets should be committed before they are
 evaluated.
+
+**Re-check on the Phase 3 corpus (107 provisions, 2026-10-03).** The corpus fixes
+and Annex I (§9.1) added 22 provisions, and none of the existing ones changed. The
+same 98 queries were re-run unchanged. Results are in
+`data/eval/results/corpus_v2_107p_98q.*`; the Phase 1 files stay frozen.
+
+| slice | vector | hybrid (RRF) | **design** | design, Phase 1 |
+|---|---|---|---|---|
+| bare citations, R@5 | 0.654 | 0.827 | **1.000** | 1.000 |
+| bare citations, P@5 | 0.131 | 0.169 | **0.215** | 0.215 |
+| use case, R@5 | 0.929 | 0.946 | **0.946** | 0.946 |
+| all pre-registered, R@5 | 0.948 | 0.958 | **0.969** | 0.969 |
+
+- **All three regression guards still hold.** On bare citations, R@5 is +0.346 over
+  vector-only and P@5 is +0.084. On use case, the design scores 0.946 against 0.929.
+  The temporal results did not change.
+- **The design's own numbers are unchanged at R@5**, and use-case R@1 rose from 0.679
+  to 0.750. Vector-only lost ground on bare citations (0.731 → 0.654) and on
+  pre-registered queries (0.958 → 0.948). The new Annex I entries are long,
+  boilerplate-heavy legislative titles that crowd the top-5 for vague queries
+  (misses B03, B25, V04).
+- **Caveat:** none of the 98 queries targets an Annex I entry or one of the new
+  subparagraphs, so this re-check measures distraction, not retrieval of the new
+  provisions. The matcher evaluates those scopes exhaustively (§4.2), so it does not
+  depend on retrieving them.
 
 **Extraction:**
 - Field-level accuracy (semantic match for free-text fields: purpose, functionality)
@@ -1345,6 +1612,12 @@ remains available. The eval harness still runs both pre-registered arms by defau
 - **Zero-tolerance metric:** no `unresolved` case in the eval set may be silently
   produced as `not_applicable` or `applicable`. No `not_in_force` case may be produced
   as `not_applicable`. Both are hard failures (§14's invariant), not threshold misses.
+- **Matcher vs score-cutoff baseline [Phase 3 design, 2026-10-03]:** both arms run on
+  the same determination eval set, scored per state as above. Also reported: the
+  matcher's verification-downgrade rate (§4.2), and `system_category` / `derogation`
+  correctness for risk-tier cases. The matcher is adopted only if it beats the
+  baseline under a decision rule fixed in the Phase 3 pre-registration, the same
+  discipline as Phase 1 (invariant 20).
 
 **End-to-end:**
 - Obligation correctness (right obligations, right roles, right union/dedup per §4.1)
@@ -1432,6 +1705,19 @@ to a specific stage, not just logged as "wrong answer."
     variants and citation handling each enter as a measured eval arm first; the
     reranker stayed off because it lost (§7.4, §18).
 
+**Updated (Phase 3 design) additions:**
+
+21. **The only LLM step between extraction and generation is the provision matcher**
+    (§4.2). It sees a closed, exhaustive candidate set, emits per-candidate verdicts
+    with verbatim quotes, and code verifies each verdict before use. Verification can
+    only downgrade a verdict, never upgrade it. How verdicts combine into a status is
+    code (§9.1).
+22. **Silence is not a negative.** `does_not_match` requires a case quote showing the
+    use case is something else. Absence of evidence is `insufficient`. Exception: an
+    exception the Act requires a party to positively establish, such as the Article
+    6(3) derogation, is recorded as `not_established` rather than `unresolved`. The
+    default applies, and the record says so (§9.1).
+
 ---
 
 ## 20. Rejected Alternatives
@@ -1450,6 +1736,10 @@ to a specific stage, not just logged as "wrong answer."
 | Plain RRF hybrid with no citation handling (Phase 1) | Measured: fusion with a vector ranking that cannot read "26(7)" dilutes BM25's exact match (bare-citation Recall@5 0.865 vs BM25 0.962). Replaced by exact-citation priority after RRF (§7.4). |
 | Cross-encoder reranking by default (Phase 1) | Measured: bge-reranker-base lowered hybrid Recall@5 (use case 0.946 → 0.875; bare citations 0.865 → 0.769). Kept as an eval arm; a larger reranker must win as an arm before adoption. |
 | Embedding whole provisions regardless of length (Phase 1) | Article 26(10) exceeds bge-base's 512-token window; its closing sentences would be silently truncated out of the embedding. |
+| Retrieval-score cutoff as the Annex III / Article 5 decision mechanism (Phase 3 design) | Similarity is not legal membership. An interview-scheduling chatbot scores as "recruitment". It cannot evaluate Article 5(1)(h)'s exceptions or the Article 6(3) conditions, cannot produce `unresolved`, and its threshold would be tuned on seen results. Kept as the baseline arm (§4.2, §18). |
+| Fixed keyword or category mapping per Annex III item (Phase 3 design) | Keyword lists break on free-text paraphrase. An extracted "Annex III area" field would be a legal conclusion and fail the zero-tolerance leakage check (§3.1). |
+| Top-k candidates for the matcher (Phase 3 design) | A retrieval miss would become a confident negative. The scopes are short closed lists, so exhaustive evaluation is affordable (§4.2). |
+| Extending `Case` with Article 6(3) / 6(1) facts (Phase 3 design) | Reopens the closed Phase 2 contract (labels, field rules, target, leakage check), and "performs profiling" is itself a defined legal term. The matcher reads the description instead (§9.1). |
 | Extraction step directly outputting legal conclusions (risk_tier, prohibited_practice, actor_roles, substantial_modification) | Leakage risk — the model would silently guess conclusions from surface pattern-matching before any retrieval or grounding occurs, defeating the point of a grounded, citable determination. |
 
 ---
