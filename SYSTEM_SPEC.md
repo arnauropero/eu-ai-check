@@ -1819,10 +1819,19 @@ precedent; see "Pre-registration completed" below).
   | Arm | Model and effort | Role | Runs per case |
   |---|---|---|---|
   | **M-low** | matcher, `gpt-6.1-sol`, effort `low` | primary (the accepted Phase 2 configuration) | 3 |
-  | M-medium | matcher, effort `medium` | reported only | 3 |
+  | ~~M-medium~~ | ~~matcher, effort `medium`~~ | ~~reported only~~ | dropped, see below |
   | B | score-cutoff baseline | comparison | 1 (deterministic) |
 
   For the matcher arms, per-state accuracy is the mean over runs.
+
+  **[Pre-run amendment, 2026-10-03, before any determination API call]** The M-medium
+  arm is dropped for cost. Its estimated share was about $11–17 of a $20–30 run. It
+  was "reported only": the decision rule compares M-low with B and never reads
+  M-medium. Dropping it changes neither the decision rule, nor the targets, nor any
+  label. The run is therefore M-low × 3 repeats (123 calls) plus B. Before the run, one
+  smoke-test call is made with `eu-ai-check match` on a made-up description that is
+  not in the eval set. It confirms that the API accepts the strict schema and measures
+  the real token usage. That call is not a result on the eval set.
 - **Baseline score and τ.**
   - Score: the maximum cosine similarity (bge-base-en-v1.5, the Phase 1 embedder)
     between the description and any chunk of an in-scope provision. Cosine is used
