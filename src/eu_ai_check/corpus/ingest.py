@@ -71,6 +71,8 @@ ID_PREFIX = "aiact"
 #: Which articles V1 ingests, and the legal character of their operative units
 #: (PROJECT_PLAN.md §3).
 V1_ARTICLES: dict[str, ProvisionType] = {
+    # Article 3 is ingested only in part (see `V1_PARTIAL_ARTICLES`).
+    "3": ProvisionType.DEFINITION,
     "5": ProvisionType.PROHIBITION,
     # Article 6 carries the high-risk classification rules. It is in V1 scope
     # because Phase 0 ingestion showed the rest of the corpus depends on it: 27 of
@@ -91,6 +93,16 @@ V1_ANNEXES: dict[str, ProvisionType] = {
     # (SYSTEM_SPEC.md §9.1). It classifies rather than imposing duties, so `scope`.
     "I": ProvisionType.SCOPE,
     "III": ProvisionType.ANNEX_CATEGORY,
+}
+
+#: Articles ingested only in part: article -> the top-level points kept. Article 3
+#: has 68 definitions, but V1 needs exactly three of them to ground the actor-role
+#: determination (SYSTEM_SPEC.md §4.3): (3) 'provider', (4) 'deployer' and (23)
+#: 'substantial modification'. The other 65 would only add retrieval distractors,
+#: as Annex I's long legislative titles did (§18). The omission is explicit here,
+#: not an accident of parsing.
+V1_PARTIAL_ARTICLES: dict[str, frozenset[str]] = {
+    "3": frozenset({"3", "4", "23"}),
 }
 
 #: Per-paragraph type overrides, where an article's paragraphs do not all share the
@@ -379,7 +391,10 @@ def ingest_article(article: ArticleNode) -> tuple[list[Provision], list[IngestIs
             emit(_canonical_text(node, ancestors), path)
             return
 
+        kept = None if article.is_annex else V1_PARTIAL_ARTICLES.get(article.number)
         for child in node.children:
+            if node is article.root and kept is not None and child.marker not in kept:
+                continue
             walk(
                 child,
                 [*path, StructuralSegment(type=child.level, value=child.marker)],
@@ -403,7 +418,8 @@ def ingest_article(article: ArticleNode) -> tuple[list[Provision], list[IngestIs
 def ingest_corpus(
     articles: list[ArticleNode],
 ) -> tuple[list[Provision], list[IngestIssue]]:
-    """Ingest the V1 corpus: Articles 5, 6, 16, 25, 26 and Annexes I and III."""
+    """Ingest the V1 corpus: Article 3 (in part), Articles 5, 6, 16, 25, 26 and
+    Annexes I and III."""
     provisions: list[Provision] = []
     issues: list[IngestIssue] = []
     seen: dict[str, ArticleNode] = {}

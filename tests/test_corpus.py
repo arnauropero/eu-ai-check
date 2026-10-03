@@ -19,6 +19,7 @@ from eu_ai_check.corpus.ingest import (
     ENTRY_INTO_FORCE,
     V1_ANNEXES,
     V1_ARTICLES,
+    V1_PARTIAL_ARTICLES,
     ingest_corpus,
 )
 from eu_ai_check.corpus.models import (
@@ -76,7 +77,7 @@ def test_v1_corpus_scope_is_fully_ingested(corpus: Corpus) -> None:
         for seg in p.structural_location
         if seg.type == SegmentType.ANNEX
     }
-    assert articles == {"5", "6", "16", "25", "26"}
+    assert articles == {"3", "5", "6", "16", "25", "26"}
     assert annexes == {"I", "III"}
 
 
@@ -241,26 +242,50 @@ def test_every_v1_source_fragment_is_in_some_canonical_provision(
     """No source text may be silently dropped. Phase 0 lost two subparagraphs this
     way (Article 6(3) third, Article 5(2) second) because trailing text that named
     no point was attached nowhere. Compared ignoring punctuation and spacing, so
-    the check is about lost words, not normalisation."""
+    the check is about lost words, not normalisation. Points an article
+    deliberately leaves out (`V1_PARTIAL_ARTICLES`) are skipped."""
     def key(text: str) -> str:
         return re.sub(r"[^a-z0-9]", "", text.lower())
 
     in_corpus = key(" ".join(p.text for p in corpus.provisions))
 
-    def walk(node):
+    def walk(node, kept=None):
         yield node
         for child in node.children:
-            yield from walk(child)
+            if kept is None or child.marker in kept:
+                yield from walk(child)
 
     missing = [
         (article.number, fragment[:80])
         for article in parse_document(SOURCE)
         if article.number in (V1_ANNEXES if article.is_annex else V1_ARTICLES)
-        for node in walk(article.root)
+        for node in walk(
+            article.root,
+            None if article.is_annex else V1_PARTIAL_ARTICLES.get(article.number),
+        )
         for fragment in node.own_text
         if key(fragment) not in in_corpus
     ]
     assert missing == []
+
+
+def test_article_3_keeps_only_the_three_actor_role_definitions(corpus: Corpus) -> None:
+    """Article 3 is ingested in part, on purpose: provider (3), deployer (4) and
+    substantial modification (23) ground the actor-role determination; the other
+    65 definitions are left out explicitly, not lost."""
+    ids = {
+        p.logical_provision_id for p in corpus.provisions
+        if p.logical_provision_id.startswith("aiact:art_3:")
+    }
+    assert ids == {"aiact:art_3:point_3", "aiact:art_3:point_4", "aiact:art_3:point_23"}
+    provider = find(corpus, "aiact:art_3:point_3")
+    assert provider.provision_type == ProvisionType.DEFINITION
+    assert provider.citation() == "Chapter I -> Article 3(3)"
+    assert provider.text.startswith(
+        "For the purposes of this Regulation, the following definitions apply: ‘provider’"
+    )
+    assert "‘deployer’ means" in find(corpus, "aiact:art_3:point_4").text
+    assert "‘substantial modification’ means" in find(corpus, "aiact:art_3:point_23").text
 
 
 def test_article_6_3_profiling_override_is_its_own_provision(corpus: Corpus) -> None:

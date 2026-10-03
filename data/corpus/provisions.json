@@ -1,5 +1,83 @@
 [
   {
+    "logical_provision_id": "aiact:art_3:point_3",
+    "versioned_provision_id": "aiact:art_3:point_3@2024-08-01",
+    "content_id": "c75262dd6b19fa61563b94d9cc8fd62f64802d12037fbc3e4381cb64f7ae8dbf",
+    "provision_type": "definition",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "I"
+      },
+      {
+        "type": "article",
+        "value": "3"
+      },
+      {
+        "type": "point",
+        "value": "3"
+      }
+    ],
+    "text": "For the purposes of this Regulation, the following definitions apply: ‘provider’ means a natural or legal person, public authority, agency or other body that develops an AI system or a general-purpose AI model or that has an AI system or a general-purpose AI model developed and places it on the market or puts the AI system into service under its own name or trademark, whether for payment or free of charge;",
+    "heading": "Definitions",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_3:point_4",
+    "versioned_provision_id": "aiact:art_3:point_4@2024-08-01",
+    "content_id": "3dc694051c3425ccf5ca53d785edb8e825c0aa551569acb084be0eac813f513d",
+    "provision_type": "definition",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "I"
+      },
+      {
+        "type": "article",
+        "value": "3"
+      },
+      {
+        "type": "point",
+        "value": "4"
+      }
+    ],
+    "text": "For the purposes of this Regulation, the following definitions apply: ‘deployer’ means a natural or legal person, public authority, agency or other body using an AI system under its authority except where the AI system is used in the course of a personal non-professional activity;",
+    "heading": "Definitions",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_3:point_23",
+    "versioned_provision_id": "aiact:art_3:point_23@2024-08-01",
+    "content_id": "b3a14f5ad2557265ecf4cbf7c85480a6388e70b67536595b21751b2993d229fa",
+    "provision_type": "definition",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "I"
+      },
+      {
+        "type": "article",
+        "value": "3"
+      },
+      {
+        "type": "point",
+        "value": "23"
+      }
+    ],
+    "text": "For the purposes of this Regulation, the following definitions apply: ‘substantial modification’ means a change to an AI system after its placing on the market or putting into service which is not foreseen or planned in the initial conformity assessment carried out by the provider and as a result of which the compliance of the AI system with the requirements set out in Chapter III, Section 2 is affected or results in a modification to the intended purpose for which the AI system has been assessed;",
+    "heading": "Definitions",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
     "logical_provision_id": "aiact:art_5:para_1:point_a",
     "versioned_provision_id": "aiact:art_5:para_1:point_a@2024-08-01",
     "content_id": "6e49c6438befa04a53acf255b5f3acfd55e676fa517af57021946783eef31abb",
