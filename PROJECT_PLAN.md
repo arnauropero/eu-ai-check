@@ -293,6 +293,22 @@ one rule-matching engine → cited, fail-closed output.
   `not_in_force`) correctly produced on eval set; `unresolved` never silently collapsed
   to `not_applicable`; `not_in_force` never silently collapsed to `not_applicable`
   (SYSTEM_SPEC.md §14).
+  **"Correctly produced" defined before the first run (2026-10-03,
+  SYSTEM_SPEC.md §18):**
+  - Scored on gold `Case` inputs.
+  - Rule-based outputs (actor role, obligations, `not_in_force`, `not_applicable`
+    reason) must score 1.00.
+  - Matcher-backed outputs (risk tier, prohibited practice) need per-state accuracy
+    ≥ 0.85 on each of `applicable` / `not_applicable` / `unresolved`, and the matcher
+    must beat the score-cutoff baseline.
+  - Zero-tolerance checks as before, plus: no positive conclusion from a verdict that
+    failed code verification.
+  - These are pre-registered, unlike the Phase 1–2 targets.
+- Phase-in dates and unknown inputs (SYSTEM_SPEC.md §14.2):
+  - A date before a rule's `applicable_from` gives `not_applicable` with
+    `not_applicable_reason: not_yet_applicable`, never `not_in_force`.
+  - Unresolved upstream determinations feed the rule engine as unknown, using
+    three-valued logic.
 
 **Phase 4 — Generation and citation**
 - Deliverable: final generation stage producing tier + obligations + explanation +
