@@ -325,6 +325,34 @@ def cmd_eval_extraction(args: argparse.Namespace) -> int:
     return 1 if any(a.leaks() for a in arms) else 0
 
 
+def cmd_match(args: argparse.Namespace) -> int:
+    """Run the provision matcher on one description and report verdicts, tokens
+    and cost. Used for the pre-run smoke test; never on eval-set descriptions."""
+    import openai
+
+    from .determination.matcher import MATCHES, OpenAIMatcher
+    from .determination.scopes import candidates
+
+    corpus = Corpus.load(args.corpus)
+    cands = candidates(corpus.provisions, args.date)
+    result = OpenAIMatcher(openai.OpenAI(), effort=args.effort).match(args.text, cands)
+    counts: dict[str, int] = {}
+    for v in result.verdicts.values():
+        counts[v.verdict] = counts.get(v.verdict, 0) + 1
+    print(f"served model: {result.served_model}; error: {result.error}")
+    print(f"verdicts: {counts} over {len(result.verdicts)} candidates")
+    for pid, v in result.verdicts.items():
+        if v.verdict == MATCHES or v.downgrade_reason:
+            print(f"  {pid}: {v.verdict}"
+                  + (f" (downgraded from {v.model_verdict}: {v.downgrade_reason})"
+                     if v.downgrade_reason else "")
+                  + f" | {v.rationale}")
+    cost = result.input_tokens * args.input_price / 1e6 + result.output_tokens * args.output_price / 1e6
+    print(f"tokens: {result.input_tokens} in / {result.output_tokens} out "
+          f"-> ${cost:.4f} at ${args.input_price}/${args.output_price} per M")
+    return 0 if result.error is None else 1
+
+
 def cmd_fit_tau(args: argparse.Namespace) -> int:
     from .determination.baseline import fit_tau
     from .retrieval.models import SentenceTransformerEncoder
@@ -464,6 +492,18 @@ def main(argv: list[str] | None = None) -> int:
                                 "and needs the 'anthropic' extra and ANTHROPIC_API_KEY")
     p_extract.set_defaults(func=cmd_extract)
 
+    p_match = sub.add_parser("match", help="run the provision matcher on one description "
+                                           "(calls the OpenAI API)")
+    p_match.add_argument("text")
+    p_match.add_argument("--date", type=date.fromisoformat, default=date.today())
+    p_match.add_argument("--effort", default="low", choices=["low", "medium"])
+    p_match.add_argument("--corpus", type=Path, default=DEFAULT_OUT)
+    p_match.add_argument("--input-price", type=float, default=2.0,
+                         help="USD per million input tokens (gpt-6.1-sol: 2.0)")
+    p_match.add_argument("--output-price", type=float, default=10.0,
+                         help="USD per million output tokens (gpt-6.1-sol: 10.0)")
+    p_match.set_defaults(func=cmd_match)
+
     p_tau = sub.add_parser("fit-tau", help="fit the Phase 3 baseline cutoffs (pre-registered)")
     p_tau.add_argument("--corpus", type=Path, default=DEFAULT_OUT)
     p_tau.add_argument("--queries", type=Path, default=DEFAULT_QUERIES)
@@ -476,7 +516,9 @@ def main(argv: list[str] | None = None) -> int:
     p_eval_d.add_argument("--cases", type=Path, default=DEFAULT_DETERMINATION_CASES)
     p_eval_d.add_argument("--corpus", type=Path, default=DEFAULT_OUT)
     p_eval_d.add_argument("--tau", type=Path, default=DEFAULT_TAU)
-    p_eval_d.add_argument("--arms", default="matcher-low,matcher-medium,baseline")
+    p_eval_d.add_argument("--arms", default="matcher-low,baseline",
+                          help="pre-registered arms; matcher-medium was dropped for "
+                               "cost before the first run (SYSTEM_SPEC.md §18)")
     p_eval_d.add_argument("--repeats", type=int, default=3)
     p_eval_d.add_argument("--workers", type=int, default=8)
     p_eval_d.add_argument("--only", default=None, help="comma-separated case ids")
