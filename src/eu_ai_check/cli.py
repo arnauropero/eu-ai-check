@@ -35,6 +35,8 @@ DEFAULT_OUT = Path("data/corpus")
 DEFAULT_QUERIES = Path("data/eval/retrieval_queries.json")
 DEFAULT_SYNTHETIC = Path("data/eval/synthetic_versions.json")
 DEFAULT_EXTRACTION_CASES = Path("data/eval/extraction_cases.json")
+DEFAULT_DETERMINATION_CASES = Path("data/eval/determination_cases.json")
+DEFAULT_TAU = Path("data/eval/determination_tau.json")
 SOURCE_REFERENCE = (
     "Regulation (EU) 2024/1689 (Artificial Intelligence Act), consolidated XHTML "
     "from the EU Publications Office (CELEX 32024R1689)"
@@ -323,6 +325,73 @@ def cmd_eval_extraction(args: argparse.Namespace) -> int:
     return 1 if any(a.leaks() for a in arms) else 0
 
 
+def cmd_fit_tau(args: argparse.Namespace) -> int:
+    from .determination.baseline import fit_tau
+    from .retrieval.models import SentenceTransformerEncoder
+
+    corpus = Corpus.load(args.corpus)
+    queries = json.loads(args.queries.read_text(encoding="utf-8"))["queries"]
+    fit = fit_tau(SentenceTransformerEncoder(), corpus.provisions, queries)
+    print(json.dumps(fit.to_json(), indent=2))
+    args.out.write_text(json.dumps(fit.to_json(), indent=2) + "\n", encoding="utf-8")
+    print(f"wrote {args.out}", file=sys.stderr)
+    return 0
+
+
+def cmd_eval_determination(args: argparse.Namespace) -> int:
+    from .determination.evaluation import (
+        decide,
+        load_cases,
+        render,
+        run_arm,
+        score_arm,
+        score_rule_path,
+    )
+    from .determination.pipeline import Pipeline
+
+    corpus = Corpus.load(args.corpus)
+    pipeline = Pipeline(corpus.provisions, corpus.applicability_rules)
+    cases = load_cases(args.cases)
+    if args.only:
+        wanted = set(args.only.split(","))
+        cases = [c for c in cases if c["id"] in wanted]
+    rule_path = score_rule_path(pipeline, cases)
+    arms = []
+    for name in args.arms.split(","):
+        if name == "baseline":
+            from .determination.baseline import CutoffBaseline, load_tau
+            from .retrieval.models import SentenceTransformerEncoder
+
+            matcher = CutoffBaseline(SentenceTransformerEncoder(), load_tau(args.tau))
+            repeats = 1
+        else:
+            import openai
+
+            from .determination.matcher import OpenAIMatcher
+
+            matcher = OpenAIMatcher(openai.OpenAI(), effort=name.removeprefix("matcher-"))
+            repeats = args.repeats
+        print(f"running {matcher.name}: {len(cases)} cases x {repeats}", file=sys.stderr)
+        arms.append(run_arm(matcher.name, matcher, cases, repeats, pipeline,
+                            workers=args.workers))
+    scores = {a.name: score_arm(a, cases) for a in arms}
+    decision = decide(scores, rule_path)
+    report = render(scores, rule_path, decision)
+    print(report)
+    if args.out:
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+        stem = args.out.name
+        (args.out.parent / f"{stem}.txt").write_text(report + "\n", encoding="utf-8")
+        (args.out.parent / f"{stem}.json").write_text(json.dumps(
+            {"scores": scores, "rule_path": rule_path, "decision": decision},
+            indent=2, default=str), encoding="utf-8")
+        (args.out.parent / f"{stem}.runs.jsonl").write_text("".join(
+            json.dumps(r.record(a.name), ensure_ascii=False, default=str) + "\n"
+            for a in arms for r in a.runs), encoding="utf-8")
+        print(f"wrote {stem}.txt/.json/.runs.jsonl", file=sys.stderr)
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="eu-ai-check", description=__doc__)
     parser.add_argument(
@@ -394,6 +463,26 @@ def main(argv: list[str] | None = None) -> int:
                                 "'anthropic' is an optional, non-evaluated alternative "
                                 "and needs the 'anthropic' extra and ANTHROPIC_API_KEY")
     p_extract.set_defaults(func=cmd_extract)
+
+    p_tau = sub.add_parser("fit-tau", help="fit the Phase 3 baseline cutoffs (pre-registered)")
+    p_tau.add_argument("--corpus", type=Path, default=DEFAULT_OUT)
+    p_tau.add_argument("--queries", type=Path, default=DEFAULT_QUERIES)
+    p_tau.add_argument("--out", type=Path, default=DEFAULT_TAU)
+    p_tau.set_defaults(func=cmd_fit_tau)
+
+    p_eval_d = sub.add_parser("eval-determination",
+                              help="run the Phase 3 determination eval (calls the OpenAI API "
+                                   "for matcher arms)")
+    p_eval_d.add_argument("--cases", type=Path, default=DEFAULT_DETERMINATION_CASES)
+    p_eval_d.add_argument("--corpus", type=Path, default=DEFAULT_OUT)
+    p_eval_d.add_argument("--tau", type=Path, default=DEFAULT_TAU)
+    p_eval_d.add_argument("--arms", default="matcher-low,matcher-medium,baseline")
+    p_eval_d.add_argument("--repeats", type=int, default=3)
+    p_eval_d.add_argument("--workers", type=int, default=8)
+    p_eval_d.add_argument("--only", default=None, help="comma-separated case ids")
+    p_eval_d.add_argument("--out", type=Path, default=None,
+                          help="output stem, e.g. data/eval/results/determination_v1_41c")
+    p_eval_d.set_defaults(func=cmd_eval_determination)
 
     p_eval_x = sub.add_parser("eval-extraction", help="run the Phase 2 extraction eval harness")
     p_eval_x.add_argument("--cases", type=Path, default=DEFAULT_EXTRACTION_CASES)

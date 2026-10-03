@@ -1790,9 +1790,9 @@ not retuned.
 
 **Determination — Phase 3 pre-registration [2026-10-03].** The eval set (labels
 reviewed and approved by the user), arms, scoring and decision rule below are
-committed and binding. The first determination run happens only after a later commit
-that also holds the τ values, the matcher prompt, and the verification code (Phase 2
-precedent).
+committed and binding. The τ values, the matcher prompt and the verification code
+were committed afterwards, still before the first determination run (Phase 2
+precedent; see "Pre-registration completed" below).
 
 - **Eval set.** `data/eval/determination_cases.json`: 41 hand-labelled cases with gold
   facts plus the description. Labelling decisions DL1–DL5 are recorded in the file.
@@ -1856,6 +1856,29 @@ precedent).
   pre-registered follow-up, as `role-null-v1` was in Phase 2, and is never a retune
   against this set. If 1 and 2 hold but 3 fails, the result is reported and the
   matcher-vs-baseline design question reopens.
+- **Pre-registration completed (2026-10-03, before any determination run).**
+  - *Code:* `src/eu_ai_check/determination/` and `eu-ai-check eval-determination`.
+  - *One matcher call per case* covers every scope: 59 date-eligible candidates
+    (25 Annex III, 8 Article 5(1), 4 + 1 Article 6(3), 20 Annex I, 1 Article
+    6(1)(b)), roughly 8.5k input tokens. No call is made when no candidate text is in
+    force; the case is then `not_in_force` without asking the model.
+  - *Prompt:* the matcher prompt, response schema and scope questions are SHA-pinned
+    in `tests/test_determination.py`. One clarification was added before pinning:
+    a description of what a system *is* can answer a question "no" (a spam filter is
+    evidently not a machinery safety component). Without it, the silence rule could
+    make every non-product case `unresolved` through the 20 Annex I candidates.
+  - *τ values:* `eu-ai-check fit-tau` → `data/eval/determination_tau.json`.
+
+    | Scope | τ | Source |
+    |---|---|---|
+    | Annex III | 0.5052 | 14 positives / 14 negatives |
+    | Article 5(1) | 0.5362 | 7 / 21 |
+    | 6(3) conditions | 0.6388 | 1 positive only, fitted as the rule says |
+    | Override, Annex I, 6(1)(b) | 0.4883 (pooled) | no positive queries |
+
+  - *Rule path:* scored on the labelled risk tier as pre-registered, it reproduces
+    all 123 rule-based labels (1.00). That is checked offline in the test suite and
+    again in every run.
 - **Small-n, stated in advance.** `unresolved` has 5 risk-tier and 4 prohibited
   cases. With 3 runs each, that is 15 and 12 judgements, so 0.85 permits at most 2
   and 1 wrong runs respectively. A single systematically mislabelled or misjudged case

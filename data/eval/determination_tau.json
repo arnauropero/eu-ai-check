@@ -1,0 +1,47 @@
+{
+  "tau": {
+    "annex_iii": 0.5051941871643066,
+    "article_5": 0.5361743569374084,
+    "article_6_3_condition": 0.6388207077980042,
+    "article_6_3_override": 0.48826149106025696,
+    "annex_i": 0.48826149106025696,
+    "article_6_1_b": 0.48826149106025696
+  },
+  "detail": {
+    "annex_iii": {
+      "positives": 14,
+      "negatives": 14,
+      "source": "fitted"
+    },
+    "article_5": {
+      "positives": 7,
+      "negatives": 21,
+      "source": "fitted"
+    },
+    "article_6_3_condition": {
+      "positives": 1,
+      "negatives": 27,
+      "source": "fitted"
+    },
+    "article_6_3_override": {
+      "positives": 0,
+      "negatives": 28,
+      "source": "pooled (no positive query)"
+    },
+    "annex_i": {
+      "positives": 0,
+      "negatives": 28,
+      "source": "pooled (no positive query)"
+    },
+    "article_6_1_b": {
+      "positives": 0,
+      "negatives": 28,
+      "source": "pooled (no positive query)"
+    },
+    "_pooled": {
+      "tau": 0.48826149106025696,
+      "pairs": 168,
+      "positives": 22
+    }
+  }
+}
