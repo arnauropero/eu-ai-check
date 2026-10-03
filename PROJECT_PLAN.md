@@ -46,6 +46,9 @@ problems — not another "chat with your PDFs" demo.
   what defines. Without it the rule layer depended on a concept whose defining
   provision was absent. This is the deferred-abstraction principle in §9 working as
   intended: the scope gap was found by corpus evidence, not speculation.
+  **[Scope extended in Phase 3 design, 2026-10-03]** **Annex I** joins the corpus for
+  the same reason. Article 6(1) is defined by reference to the legislation listed
+  there (SYSTEM_SPEC.md §9.1).
 - Prohibited-practice determination against Article 5, represented as its own
   determination type (`prohibited_practice`), evaluated via the `ApplicabilityRule`
   engine where applicable-date conditions apply.
@@ -248,6 +251,30 @@ one rule-matching engine → cited, fail-closed output.
   - The post-hoc affected-persons re-score is not used for acceptance.
 
 **Phase 3 — Grounded determination stages**
+- Design decisions (2026-10-03, SYSTEM_SPEC.md §2, §4.2, §9.1):
+  - Annex III / Article 5 / Article 6 matching uses one constrained LLM provision
+    matcher. It sees a closed, exhaustive candidate set, returns per-candidate verdicts
+    with verbatim quotes, and code verifies each verdict. A retrieval-score cutoff runs
+    as the baseline arm.
+  - No `Case` schema change. Phase 2 stays closed. Article 6(3) is read from the
+    original description.
+  - Annex I is ingested for Article 6(1).
+- Deliverable (corpus, before any determination code): fix the dropped
+  trailing-subparagraph defect (Article 6(3) profiling override, Article 5(2) second
+  subparagraph), with a test that every V1 source fragment appears in some canonical
+  provision. Ingest Annex I. Re-run the Phase 0 validation and record any change in
+  Phase 1 retrieval numbers against the frozen results.
+  **Delivered (2026-10-03):**
+  - 107 provisions (was 85); the 85 existing ones are unchanged; 76 rules.
+  - The two dropped subparagraphs are now their own provisions at a new subparagraph
+    level.
+  - Annex I is ingested: 20 entries across Sections A and B.
+  - A second Phase 0 defect was found and fixed: five false internal cross-reference
+    edges caused by regex backtracking.
+  - All invariants hold. The Phase 1 regression guards still hold on the re-run
+    (`data/eval/results/corpus_v2_107p_98q.*`; SYSTEM_SPEC.md §9.1, §18).
+- Deliverable: provision matcher with code verification, plus the score-cutoff
+  baseline arm, compared under a pre-registered decision rule (SYSTEM_SPEC.md §18).
 - Deliverable: `GroundedDetermination` component implemented once, parameterized for
   risk-tier, prohibited-practice, actor-role, and obligation-applicability use.
 - Deliverable: `ApplicabilityRule` matching engine (the evaluation logic; the rule
