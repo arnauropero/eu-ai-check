@@ -281,6 +281,11 @@ one rule-matching engine → cited, fail-closed output.
     (`data/eval/results/corpus_v2_107p_98q.*`; SYSTEM_SPEC.md §9.1, §18).
 - Deliverable: provision matcher with code verification, plus the score-cutoff
   baseline arm, compared under a pre-registered decision rule (SYSTEM_SPEC.md §18).
+  **Pre-registered (2026-10-03), before any determination run:**
+  - 41-case eval set (`9cb9bd2`).
+  - Determination code, matcher prompt (SHA-pinned) and τ values (next commit).
+  - The rule path reproduces all 123 rule-based labels offline.
+  - The first API run awaits user approval.
 - Deliverable: `GroundedDetermination` component implemented once, parameterized for
   risk-tier, prohibited-practice, actor-role, and obligation-applicability use.
 - Deliverable: `ApplicabilityRule` matching engine (the evaluation logic; the rule
