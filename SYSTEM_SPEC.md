@@ -786,13 +786,22 @@ Descriptions rarely state the conformity-assessment requirement. Expect this rou
 be `unresolved` unless the description says so explicitly. That is accepted V1
 behaviour, not a defect to tune away.
 
+*Route dates.* An established route counts as high-risk only on or after its
+`ApplicabilityRule` date: 2026-08-02 for Article 6(2) and 2027-08-02 for Article 6(1)
+(§12.1). Before that date the route is **established but not yet applicable**.
+
 *Routes combined into `risk_tier`:*
-- Either route reaches high-risk → `applicable`.
-- Both routes are not met, or the derogation applies → `not_applicable`.
-- Otherwise → `unresolved`.
+- Either route reaches high-risk and is applicable on `relevant_date` → `applicable`.
+- Otherwise, any route is `unresolved` → `unresolved`.
+- Otherwise, a route is established but not yet applicable → `not_applicable` with
+  `not_applicable_reason: not_yet_applicable`.
+- Otherwise (both routes not met, or the derogation applies) → `not_applicable` with
+  `not_applicable_reason: conditions_not_met`.
 
 The output carries `system_category`, which is `annex_iii_high_risk`,
-`article_6_1_high_risk`, or both. Downstream `ApplicabilityRule` conditions select on
+`article_6_1_high_risk`, or both. It is set for every **established** route,
+including one that is not yet applicable. Downstream obligations therefore come out
+as `not_yet_applicable` rather than `conditions_not_met`. Downstream `ApplicabilityRule` conditions select on
 exactly this value (§12). This field is what makes the two application dates
 (2026-08-02 and 2027-08-02) reachable. Before Phase 3, the risk-tier output (§16) had
 no slot for it.
@@ -920,7 +929,10 @@ engine is not a mandatory layer for every `GroundedDetermination` instantiation 
 obligation applicability (Article 16/26) and prohibited-practice determination
 (Article 5) — the two determination types whose legal question depends on date-scoped
 or conditional applicability. Risk-tier and actor-role determinations do not use this
-layer; they conclude directly from retrieved provision content.
+layer; they conclude directly from retrieved provision content. **[Qualified in Phase
+3 design, 2026-10-03]** One exception: once a risk-tier route is established, the
+determination reads that route's Article 6(1) / 6(2) rule **for its date only**
+(§9.1, §14.2). It never reads the rule's conditions.
 
 ### 12.1 Ingestion and validation (Phase 0 responsibility)
 
@@ -963,9 +975,15 @@ applicability distinction (§13.1).
   are `scope` provisions — they classify rather than impose duties — but Article 113(c)
   dates Article 6(1) itself to 2027-08-02 while 6(2) falls under the general
   2026-08-02 date, so both carry rules. Without this, a determination cannot separate
-  "this system is not high-risk" from "that classification route was not yet in force
-  on the relevant date", which is precisely the `not_applicable` vs `not_in_force`
-  distinction §14 forbids collapsing.
+  "this system is not high-risk" from "that classification route did not yet apply on
+  the relevant date".
+
+  **[Corrected in Phase 3 design, 2026-10-03]** This passage originally called that
+  the `not_applicable` vs `not_in_force` distinction. It is not. Under §14,
+  `not_in_force` means only that no text version was valid on the date. A phase-in
+  date that has not arrived is a rule-layer outcome: `not_applicable` with
+  `not_applicable_reason: not_yet_applicable` (§14.2). The rules on 6(1)/6(2) are
+  what let that reason be given instead of `conditions_not_met`.
 
 These checks are additive to, not a replacement for, the version-integrity invariant in
 §11 — a `Provision` can pass text-validity validation while its `ApplicabilityRule`
@@ -1152,6 +1170,68 @@ The four-way output contract (§16) is uniform across all determination types; o
 mechanism producing it differs depending on whether the determination is
 `ApplicabilityRule`-backed.
 
+### 14.2 Phase-in dates and unknown inputs (Phase 3 design, 2026-10-03)
+
+Two gaps in the join above were found in the Phase 3 audit and settled before any
+determination code was written.
+
+**A date before a rule's `applicable_from` gives `not_applicable`, with a reason.**
+The join already routed this case to `not_applicable`. One sentence in §12.1 framed it
+as a `not_in_force` question, and has been corrected. `not_in_force` stays reserved for
+"no text version was valid on this date". But a bare `not_applicable` would read as a
+permanent exclusion for an obligation that starts next year. Every `not_applicable`
+therefore carries a reason (§16):
+
+- `conditions_not_met` — a rule covering the date was found, and the case fails its
+  conditions (wrong role, wrong category);
+- `not_yet_applicable` — the case satisfies a rule's conditions, but `relevant_date`
+  is before that rule's `applicable_from`.
+
+When both could apply, `not_yet_applicable` wins. It is the more informative and less
+reassuring of the two.
+
+"A rule was found" in the §14 join means that at least one `ApplicabilityRule` exists
+for the provision. Its date window is then evaluated like a condition. Only a provision
+with **no** rule at all is the coverage gap that gives `unresolved`. Otherwise every
+date before the first `applicable_from` would read as a coverage gap, and the phase-in
+schedule could never produce an evidence-backed answer.
+
+The PLAN §8 acceptance case runs on the real corpus with Article 16(a) for an Annex III
+provider:
+
+| `relevant_date` | Status | Reason |
+|---|---|---|
+| 2024-07-01 | `not_in_force` | text not yet in force; entry into force was 2024-08-01 |
+| 2025-06-01 | `not_applicable` / `not_yet_applicable` | rule found; it applies from 2026-08-02 |
+| 2026-09-01 | `applicable` | rule applies |
+
+Verified against the ingested rules. `aiact:art_16:point_a#annex3` applies from
+2026-08-02 for a provider and `annex_iii_high_risk`. The `#art6_1` rule fails on
+category, so it is not met at any date for this case.
+
+**Unknown condition inputs use three-valued logic.** Rule conditions do not read raw
+facts. They read `actor_role` and `system_category`, which are themselves the outputs
+of earlier determinations. A condition is therefore *unknown* exactly when its upstream
+determination is `unresolved`: `actor_role_status: unresolved`, or a risk tier that is
+`unresolved` and leaves `system_category` undetermined. `relevant_date` is never
+unknown, because `Case` always fills it in (§3.2). Evaluation:
+
+- *Within one rule, all conditions must hold:*
+  - any condition is false → the rule is not met;
+  - otherwise, any condition is unknown → the rule is unknown;
+  - otherwise → the rule is met.
+- *Across the rules for one provision, one met rule is enough:*
+  - any rule is met → `applicable`;
+  - otherwise, any rule is unknown → `unresolved`;
+  - otherwise → `not_applicable`, with the reason as above.
+
+A known deployer whose risk tier is unresolved is therefore `not_applicable` for a
+provider-only rule, because the role condition already fails. That is an
+evidence-backed exclusion, not a guess. The same deployer is `unresolved` for a
+deployer rule that needs the unresolved category. Treating every unknown input as
+`unresolved` was rejected: it would discard an exclusion the evidence already
+supports, and inflate `unresolved` until it stopped carrying information.
+
 ---
 
 ## 15. Index Structure: Version-Level Documents, Content-Level Embedding Dedup
@@ -1225,6 +1305,8 @@ Determination:            # shared shape for risk-tier, prohibited-practice, act
   determination_type: risk_tier | prohibited_practice | actor_role |
                        obligation_applicability
   applicability_status: applicable | not_applicable | unresolved | not_in_force
+  not_applicable_reason: conditions_not_met | not_yet_applicable | null
+                           # set iff status is not_applicable (§14.2)
   explanation: str
   supporting_evidence: [EvidenceItem]
 ```
@@ -1246,7 +1328,8 @@ reuse the generic `applicability_status` field rather than a separate tier enum:
   carries:
 
   ```yaml
-  system_category: [annex_iii_high_risk | article_6_1_high_risk]  # empty unless applicable
+  system_category: [annex_iii_high_risk | article_6_1_high_risk]  # every established
+                                                                  # route (§9.1)
   derogation: applied | not_established | not_assessed  # Art 6(3); not_assessed when
                                                         # no Annex III match
   ```
@@ -1618,6 +1701,32 @@ remains available. The eval harness still runs both pre-registered arms by defau
   correctness for risk-tier cases. The matcher is adopted only if it beats the
   baseline under a decision rule fixed in the Phase 3 pre-registration, the same
   discipline as Phase 1 (invariant 20).
+
+**Determination — locked targets, fixed BEFORE the first run [Phase 3 design,
+2026-10-03].** Phases 1 and 2 locked their targets after seeing results, and both are
+recorded as regression guards rather than pre-registered criteria. Phase 3 fixes its
+numbers now, before the eval set is run even once. A miss is then reported as a miss,
+not retuned.
+
+- **Inputs:** the determination stage is scored on **gold `Case` inputs** (hand-labelled
+  facts plus the original description), not live extraction. A miss is then
+  attributable to this stage (see below). End-to-end scoring is Phase 5.
+- **Zero tolerance (hard failures):**
+  - `unresolved` produced as `applicable` or `not_applicable`;
+  - `not_in_force` produced as `not_applicable`;
+  - a positive conclusion resting on a verdict that failed code verification (§4.2).
+- **Rule-based outputs:** actor role, obligation applicability, `not_in_force`, and
+  `not_applicable_reason` on rule-backed outcomes must score **1.00**. With gold
+  inputs these are deterministic code over §12 / §14.2, so anything less is a bug,
+  not a tolerance.
+- **Matcher-backed outputs:** risk tier and prohibited practice need per-state
+  accuracy **≥ 0.85**, separately on `applicable`, `not_applicable` and `unresolved`,
+  for the adopted matcher arm. This is a judgement fixed before any data, sized for a
+  small hand-built set: roughly one miss per ten cases in each state.
+  `system_category` and `derogation` are scored on risk-tier cases and reported. They
+  are not separately gated in V1.
+- The matcher must **also** beat the score-cutoff baseline under the pre-registered
+  decision rule. Clearing 0.85 alone does not adopt it.
 
 **End-to-end:**
 - Obligation correctness (right obligations, right roles, right union/dedup per §4.1)
