@@ -27,12 +27,18 @@ class SegmentType(StrEnum):
 
     Depth is variable, not fixed: Article 16 is Article -> Point (2 levels),
     Article 5 reaches Article -> Paragraph -> Point -> Sub-point (4 levels).
+
+    `SUBPARAGRAPH` holds a paragraph's trailing subparagraph that follows its
+    enumerated list and names no point of it. Article 6(3), third subparagraph
+    (the profiling override) is the verified case. `SECTION` also appears inside
+    an annex: Annex I is split into Sections A and B.
     """
 
     CHAPTER = "chapter"
     SECTION = "section"
     ARTICLE = "article"
     PARAGRAPH = "paragraph"
+    SUBPARAGRAPH = "subparagraph"
     POINT = "point"
     SUB_POINT = "sub_point"
     ANNEX = "annex"
@@ -48,12 +54,22 @@ SEGMENT_ABBREV: dict[SegmentType, str] = {
     SegmentType.SECTION: "sec",
     SegmentType.ARTICLE: "art",
     SegmentType.PARAGRAPH: "para",
+    SegmentType.SUBPARAGRAPH: "subpara",
     SegmentType.POINT: "point",
     SegmentType.SUB_POINT: "sub",
     SegmentType.ANNEX: "anx",
     SegmentType.ANNEX_AREA: "area",
     SegmentType.ANNEX_ITEM: "item",
 }
+
+
+_ORDINALS = ("first", "second", "third", "fourth", "fifth", "sixth", "seventh",
+             "eighth", "ninth", "tenth")
+
+
+def _ordinal(value: str) -> str:
+    """'3' -> 'third', the Act's own way of citing a subparagraph."""
+    return _ORDINALS[int(value) - 1]
 
 
 class ProvisionType(StrEnum):
@@ -187,6 +203,7 @@ class Provision(BaseModel):
         """Render a human citation by walking the path (§6) -- never by reading
         fixed columns, because the path depth varies by provision."""
         parts: list[str] = []
+        in_annex = False
         for seg in self.structural_location:
             match seg.type:
                 case SegmentType.ARTICLE:
@@ -195,16 +212,24 @@ class Provision(BaseModel):
                     parts.append(f"Annex {seg.value}")
                 case SegmentType.CHAPTER:
                     parts.append(f"Chapter {seg.value}")
+                case SegmentType.SECTION if in_annex:
+                    parts.append(f", Section {seg.value}")
                 case SegmentType.SECTION:
                     parts.append(f"Section {seg.value}")
+                case SegmentType.ANNEX_ITEM if parts and parts[-1].startswith(","):
+                    parts.append(f", point {seg.value}")
+                case SegmentType.SUBPARAGRAPH:
+                    parts.append(f", {_ordinal(seg.value)} subparagraph")
                 case SegmentType.PARAGRAPH | SegmentType.ANNEX_AREA:
                     parts.append(f"({seg.value})")
                 case SegmentType.POINT | SegmentType.SUB_POINT | SegmentType.ANNEX_ITEM:
                     parts.append(f"({seg.value})")
-        # Collapse the trailing parenthesised chain onto its parent: Article 5(1)(h).
+            in_annex = in_annex or seg.type == SegmentType.ANNEX
+        # Collapse the trailing chain onto its parent: Article 5(1)(h),
+        # Article 6(3), third subparagraph, Annex I, Section A, point 1.
         out = ""
         for part in parts:
-            if part.startswith("(") and out:
+            if part.startswith(("(", ",")) and out:
                 out += part
             else:
                 out = f"{out} -> {part}" if out else part

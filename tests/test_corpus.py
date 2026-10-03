@@ -9,12 +9,18 @@ there is a test named after it.
 
 from __future__ import annotations
 
+import re
 from datetime import date
 from pathlib import Path
 
 import pytest
 
-from eu_ai_check.corpus.ingest import ENTRY_INTO_FORCE, ingest_corpus
+from eu_ai_check.corpus.ingest import (
+    ENTRY_INTO_FORCE,
+    V1_ANNEXES,
+    V1_ARTICLES,
+    ingest_corpus,
+)
 from eu_ai_check.corpus.models import (
     ApplicabilityRule,
     Corpus,
@@ -71,7 +77,7 @@ def test_v1_corpus_scope_is_fully_ingested(corpus: Corpus) -> None:
         if seg.type == SegmentType.ANNEX
     }
     assert articles == {"5", "6", "16", "25", "26"}
-    assert annexes == {"III"}
+    assert annexes == {"I", "III"}
 
 
 def test_citation_renders_at_correct_granularity(corpus: Corpus) -> None:
@@ -229,6 +235,86 @@ def test_scoped_savings_clause_attaches_only_to_the_point_it_scopes(
         assert "without prejudice to Article 9" not in other.text, marker
 
 
+def test_every_v1_source_fragment_is_in_some_canonical_provision(
+    corpus: Corpus,
+) -> None:
+    """No source text may be silently dropped. Phase 0 lost two subparagraphs this
+    way (Article 6(3) third, Article 5(2) second) because trailing text that named
+    no point was attached nowhere. Compared ignoring punctuation and spacing, so
+    the check is about lost words, not normalisation."""
+    def key(text: str) -> str:
+        return re.sub(r"[^a-z0-9]", "", text.lower())
+
+    in_corpus = key(" ".join(p.text for p in corpus.provisions))
+
+    def walk(node):
+        yield node
+        for child in node.children:
+            yield from walk(child)
+
+    missing = [
+        (article.number, fragment[:80])
+        for article in parse_document(SOURCE)
+        if article.number in (V1_ANNEXES if article.is_annex else V1_ARTICLES)
+        for node in walk(article.root)
+        for fragment in node.own_text
+        if key(fragment) not in in_corpus
+    ]
+    assert missing == []
+
+
+def test_article_6_3_profiling_override_is_its_own_provision(corpus: Corpus) -> None:
+    """"Notwithstanding the first subparagraph, an AI system referred to in Annex III
+    shall always be considered to be high-risk where the AI system performs
+    profiling of natural persons." It names no point, so it is a provision of its
+    own, cited as the Act cites it, and carries the subparagraph it overrides."""
+    override = find(corpus, "aiact:art_6:para_3:subpara_3")
+    assert override.citation().endswith("Article 6(3), third subparagraph")
+    assert override.provision_type == ProvisionType.EXCEPTION
+    assert override.text.startswith("By derogation from paragraph 2")
+    assert override.text.endswith("performs profiling of natural persons.")
+    # The list lead-in introduces (a)-(d), which this provision does not carry.
+    assert "following conditions is fulfilled" not in override.text
+    for marker in "abcd":
+        point = find(corpus, f"aiact:art_6:para_3:point_{marker}")
+        assert "profiling" not in point.text, marker
+
+
+def test_article_5_2_second_subparagraph_is_its_own_provision(corpus: Corpus) -> None:
+    """The safeguards / impact-assessment / registration rule on real-time remote
+    biometric identification is a separate rule, not a condition of 5(2)(a)-(b)."""
+    second = find(corpus, "aiact:art_5:para_2:subpara_2")
+    assert second.citation().endswith("Article 5(2), second subparagraph")
+    assert second.text.startswith("In addition,")
+    assert "fundamental rights impact assessment" in second.text
+    for marker in "ab":
+        assert "In addition," not in find(
+            corpus, f"aiact:art_5:para_2:point_{marker}"
+        ).text
+
+
+def test_annex_i_is_ingested_with_its_sections(corpus: Corpus) -> None:
+    """Annex I (needed for Article 6(1)): 20 entries numbered continuously across
+    Section A (1-12) and Section B (13-20). Each entry carries its own section's
+    heading and not the other's."""
+    items = [
+        p for p in corpus.provisions
+        if p.logical_provision_id.startswith("aiact:anx_I:")
+    ]
+    assert len(items) == 20
+    assert all(p.provision_type == ProvisionType.SCOPE for p in items)
+
+    medical = find(corpus, "aiact:anx_I:item_11")
+    assert medical.citation() == "Annex I, Section A, point 11"
+    assert "medical devices" in medical.text
+    assert medical.text.startswith("Section A.")
+
+    aviation = find(corpus, "aiact:anx_I:item_13")
+    assert aviation.citation() == "Annex I, Section B, point 13"
+    assert aviation.text.startswith("Section B.")
+    assert "Section A." not in aviation.text
+
+
 # --------------------------------------------------------------------------
 # §10 identity model and normalization
 # --------------------------------------------------------------------------
@@ -292,6 +378,21 @@ def test_external_instrument_references_are_not_treated_as_internal(
     h = find(corpus, "aiact:art_5:para_1:point_h")
     assert "without prejudice to Article 9 of Regulation" in h.text
     assert "aiact:art_9" not in h.cross_references
+
+
+def test_external_references_cannot_backtrack_into_internal_ones(
+    corpus: Corpus,
+) -> None:
+    """Before the fix, "Article 35 of Regulation (EU) 2016/679" failed the
+    exclusion as "Article 35" but matched as "Article 3", and "Article 3(4) of
+    Directive (EU) 2016/680" as "Article 3" without its paragraph. Annex I point 20
+    cites "Article 2(1), points (a) and (b) thereof" of another Regulation."""
+    assert find(corpus, "aiact:art_26:para_9").cross_references == ["aiact:art_13"]
+    assert find(corpus, "aiact:art_26:para_10").cross_references == []
+    assert "aiact:art_3" not in find(
+        corpus, "aiact:anx_III:area_6:item_d"
+    ).cross_references
+    assert find(corpus, "aiact:anx_I:item_20").cross_references == []
 
 
 # --------------------------------------------------------------------------

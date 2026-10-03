@@ -165,12 +165,14 @@ def validate_structural_paths(
     #: Permitted parent -> child transitions in the Act's own hierarchy.
     allowed: dict[SegmentType, set[SegmentType]] = {
         SegmentType.CHAPTER: {SegmentType.SECTION, SegmentType.ARTICLE},
-        SegmentType.SECTION: {SegmentType.ARTICLE},
+        # Inside an annex a section holds items directly (Annex I, Sections A/B).
+        SegmentType.SECTION: {SegmentType.ARTICLE, SegmentType.ANNEX_ITEM},
         SegmentType.ARTICLE: {SegmentType.PARAGRAPH, SegmentType.POINT},
-        SegmentType.PARAGRAPH: {SegmentType.POINT},
+        SegmentType.PARAGRAPH: {SegmentType.POINT, SegmentType.SUBPARAGRAPH},
+        SegmentType.SUBPARAGRAPH: set(),
         SegmentType.POINT: {SegmentType.SUB_POINT},
         SegmentType.SUB_POINT: {SegmentType.SUB_POINT},
-        SegmentType.ANNEX: {SegmentType.ANNEX_AREA},
+        SegmentType.ANNEX: {SegmentType.ANNEX_AREA, SegmentType.SECTION},
         SegmentType.ANNEX_AREA: {SegmentType.ANNEX_ITEM},
         SegmentType.ANNEX_ITEM: set(),
     }

@@ -302,6 +302,39 @@
     "applicability_gap_reason": null
   },
   {
+    "logical_provision_id": "aiact:art_5:para_2:subpara_2",
+    "versioned_provision_id": "aiact:art_5:para_2:subpara_2@2024-08-01",
+    "content_id": "65b9fd625e4f242aa5d60a8096b6f6f4e28997ecb204f89208a1c02f2c3ffe98",
+    "provision_type": "exception",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "II"
+      },
+      {
+        "type": "article",
+        "value": "5"
+      },
+      {
+        "type": "paragraph",
+        "value": "2"
+      },
+      {
+        "type": "subparagraph",
+        "value": "2"
+      }
+    ],
+    "text": "In addition, the use of ‘real-time’ remote biometric identification systems in publicly accessible spaces for the purposes of law enforcement for any of the objectives referred to in paragraph 1, first subparagraph, point (h), of this Article shall comply with necessary and proportionate safeguards and conditions in relation to the use in accordance with the national law authorising the use thereof, in particular as regards the temporal, geographic and personal limitations. The use of the ‘real-time’ remote biometric identification system in publicly accessible spaces shall be authorised only if the law enforcement authority has completed a fundamental rights impact assessment as provided for in Article 27 and has registered the system in the EU database according to Article 49. However, in duly justified cases of urgency, the use of such systems may be commenced without the registration in the EU database, provided that such registration is completed without undue delay.",
+    "heading": "Prohibited AI practices",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:art_27",
+      "aiact:art_49"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
     "logical_provision_id": "aiact:art_5:para_3",
     "versioned_provision_id": "aiact:art_5:para_3@2024-08-01",
     "content_id": "4d3a3fba41e07e499102f92174e21954663b574bcd6e79e4374bdada3523571b",
@@ -697,6 +730,42 @@
       }
     ],
     "text": "By derogation from paragraph 2, an AI system referred to in Annex III shall not be considered to be high-risk where it does not pose a significant risk of harm to the health, safety or fundamental rights of natural persons, including by not materially influencing the outcome of decision making. The first subparagraph shall apply where any of the following conditions is fulfilled: the AI system is intended to perform a preparatory task to an assessment relevant for the purposes of the use cases listed in Annex III.",
+    "heading": "Classification rules for high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [
+      "aiact:anx_III"
+    ],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:art_6:para_3:subpara_3",
+    "versioned_provision_id": "aiact:art_6:para_3:subpara_3@2024-08-01",
+    "content_id": "4cccb55fbf7c77c51e7fb2900f1a18fc45f6d200857da8e37c67b09d40e94648",
+    "provision_type": "exception",
+    "structural_location": [
+      {
+        "type": "chapter",
+        "value": "III"
+      },
+      {
+        "type": "section",
+        "value": "1"
+      },
+      {
+        "type": "article",
+        "value": "6"
+      },
+      {
+        "type": "paragraph",
+        "value": "3"
+      },
+      {
+        "type": "subparagraph",
+        "value": "3"
+      }
+    ],
+    "text": "By derogation from paragraph 2, an AI system referred to in Annex III shall not be considered to be high-risk where it does not pose a significant risk of harm to the health, safety or fundamental rights of natural persons, including by not materially influencing the outcome of decision making. Notwithstanding the first subparagraph, an AI system referred to in Annex III shall always be considered to be high-risk where the AI system performs profiling of natural persons.",
     "heading": "Classification rules for high-risk AI systems",
     "text_valid_from": "2024-08-01",
     "text_valid_to": null,
@@ -1792,9 +1861,7 @@
     "text_valid_from": "2024-08-01",
     "text_valid_to": null,
     "cross_references": [
-      "aiact:art_13",
-      "aiact:art_3",
-      "aiact:art_2"
+      "aiact:art_13"
     ],
     "applicability_gap_reason": null
   },
@@ -1825,9 +1892,7 @@
     "heading": "Obligations of deployers of high-risk AI systems",
     "text_valid_from": "2024-08-01",
     "text_valid_to": null,
-    "cross_references": [
-      "aiact:art_1"
-    ],
+    "cross_references": [],
     "applicability_gap_reason": null
   },
   {
@@ -1859,7 +1924,6 @@
     "text_valid_to": null,
     "cross_references": [
       "aiact:art_50",
-      "aiact:art_1",
       "aiact:anx_III"
     ],
     "applicability_gap_reason": null
@@ -1889,6 +1953,526 @@
     ],
     "text": "Deployers shall cooperate with the relevant competent authorities in any action those authorities take in relation to the high-risk AI system in order to implement this Regulation.",
     "heading": "Obligations of deployers of high-risk AI systems",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_I:item_1",
+    "versioned_provision_id": "aiact:anx_I:item_1@2024-08-01",
+    "content_id": "9a585d445dcadba15781ab9ed465ccde4499ef2d78e68a5c635bb271249b83bf",
+    "provision_type": "scope",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "I"
+      },
+      {
+        "type": "section",
+        "value": "A"
+      },
+      {
+        "type": "annex_item",
+        "value": "1"
+      }
+    ],
+    "text": "Section A. List of Union harmonisation legislation based on the New Legislative Framework Directive 2006/42/EC of the European Parliament and of the Council of 17 May 2006 on machinery, and amending Directive 95/16/EC (OJ L 157, 9.6.2006, p. 24);",
+    "heading": "List of Union harmonisation legislation",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_I:item_2",
+    "versioned_provision_id": "aiact:anx_I:item_2@2024-08-01",
+    "content_id": "812da93edb0fd9fdf3575d83f4f2f5075c7089f5432f8e99986de368a6525318",
+    "provision_type": "scope",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "I"
+      },
+      {
+        "type": "section",
+        "value": "A"
+      },
+      {
+        "type": "annex_item",
+        "value": "2"
+      }
+    ],
+    "text": "Section A. List of Union harmonisation legislation based on the New Legislative Framework Directive 2009/48/EC of the European Parliament and of the Council of 18 June 2009 on the safety of toys (OJ L 170, 30.6.2009, p. 1);",
+    "heading": "List of Union harmonisation legislation",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_I:item_3",
+    "versioned_provision_id": "aiact:anx_I:item_3@2024-08-01",
+    "content_id": "6a8d4e83beaafafd06c26334a49bc80dd9afa25da1e52a51973d61c452d738a2",
+    "provision_type": "scope",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "I"
+      },
+      {
+        "type": "section",
+        "value": "A"
+      },
+      {
+        "type": "annex_item",
+        "value": "3"
+      }
+    ],
+    "text": "Section A. List of Union harmonisation legislation based on the New Legislative Framework Directive 2013/53/EU of the European Parliament and of the Council of 20 November 2013 on recreational craft and personal watercraft and repealing Directive 94/25/EC (OJ L 354, 28.12.2013, p. 90);",
+    "heading": "List of Union harmonisation legislation",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_I:item_4",
+    "versioned_provision_id": "aiact:anx_I:item_4@2024-08-01",
+    "content_id": "a47f26e52538de1bce47a0ce22eb3427bd299b47db8733d516710ab1b896ad1d",
+    "provision_type": "scope",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "I"
+      },
+      {
+        "type": "section",
+        "value": "A"
+      },
+      {
+        "type": "annex_item",
+        "value": "4"
+      }
+    ],
+    "text": "Section A. List of Union harmonisation legislation based on the New Legislative Framework Directive 2014/33/EU of the European Parliament and of the Council of 26 February 2014 on the harmonisation of the laws of the Member States relating to lifts and safety components for lifts (OJ L 96, 29.3.2014, p. 251);",
+    "heading": "List of Union harmonisation legislation",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_I:item_5",
+    "versioned_provision_id": "aiact:anx_I:item_5@2024-08-01",
+    "content_id": "d3065d91ede4f61e4ace12bf24bc27a65630e818e3f7aad01488ce33a9dc7ff0",
+    "provision_type": "scope",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "I"
+      },
+      {
+        "type": "section",
+        "value": "A"
+      },
+      {
+        "type": "annex_item",
+        "value": "5"
+      }
+    ],
+    "text": "Section A. List of Union harmonisation legislation based on the New Legislative Framework Directive 2014/34/EU of the European Parliament and of the Council of 26 February 2014 on the harmonisation of the laws of the Member States relating to equipment and protective systems intended for use in potentially explosive atmospheres (OJ L 96, 29.3.2014, p. 309);",
+    "heading": "List of Union harmonisation legislation",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_I:item_6",
+    "versioned_provision_id": "aiact:anx_I:item_6@2024-08-01",
+    "content_id": "5174a1f96f862faa8027319bfca46312e49fa1949c51bba3870ed5498118d605",
+    "provision_type": "scope",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "I"
+      },
+      {
+        "type": "section",
+        "value": "A"
+      },
+      {
+        "type": "annex_item",
+        "value": "6"
+      }
+    ],
+    "text": "Section A. List of Union harmonisation legislation based on the New Legislative Framework Directive 2014/53/EU of the European Parliament and of the Council of 16 April 2014 on the harmonisation of the laws of the Member States relating to the making available on the market of radio equipment and repealing Directive 1999/5/EC (OJ L 153, 22.5.2014, p. 62);",
+    "heading": "List of Union harmonisation legislation",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_I:item_7",
+    "versioned_provision_id": "aiact:anx_I:item_7@2024-08-01",
+    "content_id": "6bb2aebfd6ff3e641096c09039fc5c158f74032bba04941b1bc829f3faa748c7",
+    "provision_type": "scope",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "I"
+      },
+      {
+        "type": "section",
+        "value": "A"
+      },
+      {
+        "type": "annex_item",
+        "value": "7"
+      }
+    ],
+    "text": "Section A. List of Union harmonisation legislation based on the New Legislative Framework Directive 2014/68/EU of the European Parliament and of the Council of 15 May 2014 on the harmonisation of the laws of the Member States relating to the making available on the market of pressure equipment (OJ L 189, 27.6.2014, p. 164);",
+    "heading": "List of Union harmonisation legislation",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_I:item_8",
+    "versioned_provision_id": "aiact:anx_I:item_8@2024-08-01",
+    "content_id": "0d24240255901b5268db63c77e51a08a332801df98ad5c00c59af2fe5783a586",
+    "provision_type": "scope",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "I"
+      },
+      {
+        "type": "section",
+        "value": "A"
+      },
+      {
+        "type": "annex_item",
+        "value": "8"
+      }
+    ],
+    "text": "Section A. List of Union harmonisation legislation based on the New Legislative Framework Regulation (EU) 2016/424 of the European Parliament and of the Council of 9 March 2016 on cableway installations and repealing Directive 2000/9/EC (OJ L 81, 31.3.2016, p. 1);",
+    "heading": "List of Union harmonisation legislation",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_I:item_9",
+    "versioned_provision_id": "aiact:anx_I:item_9@2024-08-01",
+    "content_id": "b1c2f7b12f2d4047caf844e78a04e58150291aca8fd981b5ee0824d8d0776bca",
+    "provision_type": "scope",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "I"
+      },
+      {
+        "type": "section",
+        "value": "A"
+      },
+      {
+        "type": "annex_item",
+        "value": "9"
+      }
+    ],
+    "text": "Section A. List of Union harmonisation legislation based on the New Legislative Framework Regulation (EU) 2016/425 of the European Parliament and of the Council of 9 March 2016 on personal protective equipment and repealing Council Directive 89/686/EEC (OJ L 81, 31.3.2016, p. 51);",
+    "heading": "List of Union harmonisation legislation",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_I:item_10",
+    "versioned_provision_id": "aiact:anx_I:item_10@2024-08-01",
+    "content_id": "2b17bfb446b832390c183d1fc557e6ad147f58126786b98aaa0698f972a72f82",
+    "provision_type": "scope",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "I"
+      },
+      {
+        "type": "section",
+        "value": "A"
+      },
+      {
+        "type": "annex_item",
+        "value": "10"
+      }
+    ],
+    "text": "Section A. List of Union harmonisation legislation based on the New Legislative Framework Regulation (EU) 2016/426 of the European Parliament and of the Council of 9 March 2016 on appliances burning gaseous fuels and repealing Directive 2009/142/EC (OJ L 81, 31.3.2016, p. 99);",
+    "heading": "List of Union harmonisation legislation",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_I:item_11",
+    "versioned_provision_id": "aiact:anx_I:item_11@2024-08-01",
+    "content_id": "88ba47d75ff367b3142b7b58e3a63942c08301f335696369544fbe7a013b50e1",
+    "provision_type": "scope",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "I"
+      },
+      {
+        "type": "section",
+        "value": "A"
+      },
+      {
+        "type": "annex_item",
+        "value": "11"
+      }
+    ],
+    "text": "Section A. List of Union harmonisation legislation based on the New Legislative Framework Regulation (EU) 2017/745 of the European Parliament and of the Council of 5 April 2017 on medical devices, amending Directive 2001/83/EC, Regulation (EC) No 178/2002 and Regulation (EC) No 1223/2009 and repealing Council Directives 90/385/EEC and 93/42/EEC (OJ L 117, 5.5.2017, p. 1);",
+    "heading": "List of Union harmonisation legislation",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_I:item_12",
+    "versioned_provision_id": "aiact:anx_I:item_12@2024-08-01",
+    "content_id": "27ef9d9af18629ef9e2dc2f4e9a46cdb58d308cff02f67fb506504057be162e9",
+    "provision_type": "scope",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "I"
+      },
+      {
+        "type": "section",
+        "value": "A"
+      },
+      {
+        "type": "annex_item",
+        "value": "12"
+      }
+    ],
+    "text": "Section A. List of Union harmonisation legislation based on the New Legislative Framework Regulation (EU) 2017/746 of the European Parliament and of the Council of 5 April 2017 on in vitro diagnostic medical devices and repealing Directive 98/79/EC and Commission Decision 2010/227/EU (OJ L 117, 5.5.2017, p. 176).",
+    "heading": "List of Union harmonisation legislation",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_I:item_13",
+    "versioned_provision_id": "aiact:anx_I:item_13@2024-08-01",
+    "content_id": "a545ba310fe0ecaf03b5c33d6d66d8c64eef5effe46b368e7a30ad08ef7f8838",
+    "provision_type": "scope",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "I"
+      },
+      {
+        "type": "section",
+        "value": "B"
+      },
+      {
+        "type": "annex_item",
+        "value": "13"
+      }
+    ],
+    "text": "Section B. List of other Union harmonisation legislation Regulation (EC) No 300/2008 of the European Parliament and of the Council of 11 March 2008 on common rules in the field of civil aviation security and repealing Regulation (EC) No 2320/2002 (OJ L 97, 9.4.2008, p. 72);",
+    "heading": "List of Union harmonisation legislation",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_I:item_14",
+    "versioned_provision_id": "aiact:anx_I:item_14@2024-08-01",
+    "content_id": "8ade408bf615c27408d39c44fb5cb0b5430260a430efa4a2c988487ba554adc4",
+    "provision_type": "scope",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "I"
+      },
+      {
+        "type": "section",
+        "value": "B"
+      },
+      {
+        "type": "annex_item",
+        "value": "14"
+      }
+    ],
+    "text": "Section B. List of other Union harmonisation legislation Regulation (EU) No 168/2013 of the European Parliament and of the Council of 15 January 2013 on the approval and market surveillance of two- or three-wheel vehicles and quadricycles (OJ L 60, 2.3.2013, p. 52);",
+    "heading": "List of Union harmonisation legislation",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_I:item_15",
+    "versioned_provision_id": "aiact:anx_I:item_15@2024-08-01",
+    "content_id": "a1e46cb47e06162438d410e9b5867178e1c7296b74587a3b9a166fa6c8b98be5",
+    "provision_type": "scope",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "I"
+      },
+      {
+        "type": "section",
+        "value": "B"
+      },
+      {
+        "type": "annex_item",
+        "value": "15"
+      }
+    ],
+    "text": "Section B. List of other Union harmonisation legislation Regulation (EU) No 167/2013 of the European Parliament and of the Council of 5 February 2013 on the approval and market surveillance of agricultural and forestry vehicles (OJ L 60, 2.3.2013, p. 1);",
+    "heading": "List of Union harmonisation legislation",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_I:item_16",
+    "versioned_provision_id": "aiact:anx_I:item_16@2024-08-01",
+    "content_id": "b48cb3a5e4052cd736c044ff02733966d18ec2841805700ccdb24b091c136516",
+    "provision_type": "scope",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "I"
+      },
+      {
+        "type": "section",
+        "value": "B"
+      },
+      {
+        "type": "annex_item",
+        "value": "16"
+      }
+    ],
+    "text": "Section B. List of other Union harmonisation legislation Directive 2014/90/EU of the European Parliament and of the Council of 23 July 2014 on marine equipment and repealing Council Directive 96/98/EC (OJ L 257, 28.8.2014, p. 146);",
+    "heading": "List of Union harmonisation legislation",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_I:item_17",
+    "versioned_provision_id": "aiact:anx_I:item_17@2024-08-01",
+    "content_id": "a4efdcdc8bc37126eac35c36976d1ac5ae6d999756da96d21e0d964ded7bc100",
+    "provision_type": "scope",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "I"
+      },
+      {
+        "type": "section",
+        "value": "B"
+      },
+      {
+        "type": "annex_item",
+        "value": "17"
+      }
+    ],
+    "text": "Section B. List of other Union harmonisation legislation Directive (EU) 2016/797 of the European Parliament and of the Council of 11 May 2016 on the interoperability of the rail system within the European Union (OJ L 138, 26.5.2016, p. 44);",
+    "heading": "List of Union harmonisation legislation",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_I:item_18",
+    "versioned_provision_id": "aiact:anx_I:item_18@2024-08-01",
+    "content_id": "2e90ac27db410c21729ebc9fbea4f7b40983aa5a76f07c0b37313c17ad64d5ea",
+    "provision_type": "scope",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "I"
+      },
+      {
+        "type": "section",
+        "value": "B"
+      },
+      {
+        "type": "annex_item",
+        "value": "18"
+      }
+    ],
+    "text": "Section B. List of other Union harmonisation legislation Regulation (EU) 2018/858 of the European Parliament and of the Council of 30 May 2018 on the approval and market surveillance of motor vehicles and their trailers, and of systems, components and separate technical units intended for such vehicles, amending Regulations (EC) No 715/2007 and (EC) No 595/2009 and repealing Directive 2007/46/EC (OJ L 151, 14.6.2018, p. 1);",
+    "heading": "List of Union harmonisation legislation",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_I:item_19",
+    "versioned_provision_id": "aiact:anx_I:item_19@2024-08-01",
+    "content_id": "a7cde0efc3496935774c32919ab03e3954fdae3ee6630ef857d56e6fa94bebd5",
+    "provision_type": "scope",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "I"
+      },
+      {
+        "type": "section",
+        "value": "B"
+      },
+      {
+        "type": "annex_item",
+        "value": "19"
+      }
+    ],
+    "text": "Section B. List of other Union harmonisation legislation Regulation (EU) 2019/2144 of the European Parliament and of the Council of 27 November 2019 on type-approval requirements for motor vehicles and their trailers, and systems, components and separate technical units intended for such vehicles, as regards their general safety and the protection of vehicle occupants and vulnerable road users, amending Regulation (EU) 2018/858 of the European Parliament and of the Council and repealing Regulations (EC) No 78/2009, (EC) No 79/2009 and (EC) No 661/2009 of the European Parliament and of the Council and Commission Regulations (EC) No 631/2009, (EU) No 406/2010, (EU) No 672/2010, (EU) No 1003/2010, (EU) No 1005/2010, (EU) No 1008/2010, (EU) No 1009/2010, (EU) No 19/2011, (EU) No 109/2011, (EU) No 458/2011, (EU) No 65/2012, (EU) No 130/2012, (EU) No 347/2012, (EU) No 351/2012, (EU) No 1230/2012 and (EU) 2015/166 (OJ L 325, 16.12.2019, p. 1);",
+    "heading": "List of Union harmonisation legislation",
+    "text_valid_from": "2024-08-01",
+    "text_valid_to": null,
+    "cross_references": [],
+    "applicability_gap_reason": null
+  },
+  {
+    "logical_provision_id": "aiact:anx_I:item_20",
+    "versioned_provision_id": "aiact:anx_I:item_20@2024-08-01",
+    "content_id": "a7994c29b4edacf69b14abe80fdebda2718173f3ea54dacb76c3950074d9ca92",
+    "provision_type": "scope",
+    "structural_location": [
+      {
+        "type": "annex",
+        "value": "I"
+      },
+      {
+        "type": "section",
+        "value": "B"
+      },
+      {
+        "type": "annex_item",
+        "value": "20"
+      }
+    ],
+    "text": "Section B. List of other Union harmonisation legislation Regulation (EU) 2018/1139 of the European Parliament and of the Council of 4 July 2018 on common rules in the field of civil aviation and establishing a European Union Aviation Safety Agency, and amending Regulations (EC) No 2111/2005, (EC) No 1008/2008, (EU) No 996/2010, (EU) No 376/2014 and Directives 2014/30/EU and 2014/53/EU of the European Parliament and of the Council, and repealing Regulations (EC) No 552/2004 and (EC) No 216/2008 of the European Parliament and of the Council and Council Regulation (EEC) No 3922/91 (OJ L 212, 22.8.2018, p. 1), in so far as the design, production and placing on the market of aircrafts referred to in Article 2(1), points (a) and (b) thereof, where it concerns unmanned aircraft and their engines, propellers, parts and equipment to control them remotely, are concerned.",
+    "heading": "List of Union harmonisation legislation",
     "text_valid_from": "2024-08-01",
     "text_valid_to": null,
     "cross_references": [],
@@ -2390,8 +2974,7 @@
     "text_valid_from": "2024-08-01",
     "text_valid_to": null,
     "cross_references": [
-      "aiact:art_6",
-      "aiact:art_3"
+      "aiact:art_6"
     ],
     "applicability_gap_reason": null
   },
@@ -2419,8 +3002,7 @@
     "text_valid_from": "2024-08-01",
     "text_valid_to": null,
     "cross_references": [
-      "aiact:art_6",
-      "aiact:art_3"
+      "aiact:art_6"
     ],
     "applicability_gap_reason": null
   },

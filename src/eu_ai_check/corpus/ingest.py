@@ -29,6 +29,16 @@ therefore carries:
     which qualifies point (h) and no other point, so it is attached to (h) alone
     rather than to all of (a)-(h).
 
+Trailing ancestor text that names **no** point is not a qualifier of any one point:
+it is a subparagraph in its own right, and becomes its own canonical provision at
+`SUBPARAGRAPH` level. Article 6(3), third subparagraph (the profiling override:
+"Notwithstanding the first subparagraph, an AI system referred to in Annex III shall
+always be considered to be high-risk ...") and Article 5(2), second subparagraph are
+the verified cases; before this rule both were silently dropped from every canonical
+provision. Its text carries any ancestor lead-in plus the preceding standalone
+subparagraphs of the same paragraph (not list lead-ins), so "Notwithstanding the
+first subparagraph" is read together with the subparagraph it overrides.
+
 `content_id` hashes this assembled canonical text, because that is the text that
 actually gets embedded (§10).
 """
@@ -75,6 +85,11 @@ V1_ARTICLES: dict[str, ProvisionType] = {
     "26": ProvisionType.OBLIGATION,
 }
 V1_ANNEXES: dict[str, ProvisionType] = {
+    # Annex I lists the Union harmonisation legislation that defines Article 6(1),
+    # the product-embedded high-risk route. Added in Phase 3 for the reason Article
+    # 6 was added in Phase 0: a route in scope depended on a list that was absent
+    # (SYSTEM_SPEC.md §9.1). It classifies rather than imposing duties, so `scope`.
+    "I": ProvisionType.SCOPE,
     "III": ProvisionType.ANNEX_CATEGORY,
 }
 
@@ -136,9 +151,14 @@ _LEAD_IN_RE = re.compile(r":\s*$")
 # Cross-references to other provisions of this Regulation (§8). Single-hop,
 # article-level: "Article 6(2)" -> the Article 6 logical id. References to *other*
 # instruments ("Article 9 of Regulation (EU) 2016/679") are deliberately excluded,
-# since they are outside this corpus and cannot be resolved against it.
+# since they are outside this corpus and cannot be resolved against it. Annex I
+# point 20 cites "Article 2(1), points (a) and (b) thereof" of another Regulation,
+# so a trailing "thereof" marks an external reference too. `(?![\d(])` stops the
+# regex backtracking out of "2(1)" (or "26") to dodge the exclusions.
 _CROSS_REF_RE = re.compile(
-    r"\bArticle\s+(\d+)(?:\(\d+\))?(?!\s+of\s+(?:Regulation|Directive|Decision))"
+    r"\bArticle\s+(\d+)(?:\(\d+\))?(?![\d(])"
+    r"(?!\s+of\s+(?:Regulation|Directive|Decision))"
+    r"(?!(?:,\s*points?\s+\([a-z]\)(?:\s+and\s+\([a-z]\))?)?\s+thereof\b)"
 )
 _ANNEX_REF_RE = re.compile(
     r"\bAnnex\s+([IVXLC]+)(?!\s+of\s+(?:Regulation|Directive|Decision))"
@@ -207,6 +227,46 @@ def _qualifies(text: str, marker: str, level: SegmentType) -> bool:
 def _canonical_text(node: RawNode, ancestors: list[RawNode]) -> str:
     """Assemble the canonical text: ancestor lead-ins, the node itself, then any
     ancestor qualifier that names the node (see module docstring)."""
+    lead_ins, qualifiers = _ancestor_fragments(node, ancestors)
+    parts = [*lead_ins, node.full_text(), *qualifiers]
+    return normalize_text(" ".join(p for p in parts if p))
+
+
+def _trailing_subparagraphs(node: RawNode) -> list[tuple[int, str, list[str]]]:
+    """Own-text fragments after `node`'s last enumerated child that name none of
+    its children, as (subparagraph number, text, preceding standalone
+    subparagraphs).
+
+    Each own-text fragment opens a subparagraph; an enumerated list belongs to the
+    fragment before it. Article 6(3) is [first, second + (a)-(d), third], so the
+    profiling override is the *third* subparagraph, matching how the Act cites it.
+    """
+    children = node.children
+    if not children:
+        return []
+    last_child = max(
+        i for i, item in enumerate(node.content) if isinstance(item, RawNode)
+    )
+    found: list[tuple[int, str, list[str]]] = []
+    context: list[str] = []
+    number = 0
+    for i, item in enumerate(node.content):
+        if isinstance(item, RawNode):
+            continue
+        number += 1
+        if i > last_child and not any(
+            _qualifies(item, c.marker, c.level) for c in children
+        ):
+            found.append((number, item, list(context)))
+        if not _is_lead_in(item):
+            context.append(item)
+    return found
+
+
+def _ancestor_fragments(node: RawNode,
+                        ancestors: list[RawNode]) -> tuple[list[str], list[str]]:
+    """Ancestor own-text before `node`'s branch (lead-ins), and after it where it
+    names `node` (qualifiers)."""
     lead_ins: list[str] = []
     qualifiers: list[str] = []
 
@@ -224,9 +284,7 @@ def _canonical_text(node: RawNode, ancestors: list[RawNode]) -> str:
                 lead_ins.append(item)
             elif _qualifies(item, node.marker, node.level):
                 qualifiers.append(item)
-
-    parts = [*lead_ins, node.full_text(), *qualifiers]
-    return normalize_text(" ".join(p for p in parts if p))
+    return lead_ins, qualifiers
 
 
 def _cross_references(text: str, self_article: str | None) -> list[str]:
@@ -288,36 +346,37 @@ def ingest_article(article: ArticleNode) -> tuple[list[Provision], list[IngestIs
         )
     )
 
+    def emit(text: str, path: list[StructuralSegment]) -> None:
+        if not text:
+            issues.append(
+                IngestIssue("empty_provision", f"{_logical_id(path)} has no text")
+            )
+            return
+        logical_id = _logical_id(path)
+        provisions.append(
+            Provision(
+                logical_provision_id=logical_id,
+                versioned_provision_id=_versioned_id(logical_id, ENTRY_INTO_FORCE),
+                content_id=content_id(text),
+                provision_type=_provision_type(article, path, default_type),
+                structural_location=path,
+                text=text,
+                heading=article.heading,
+                text_valid_from=ENTRY_INTO_FORCE,
+                text_valid_to=None,
+                cross_references=_cross_references(
+                    text, None if article.is_annex else article.number
+                ),
+                applicability_gap_reason=_DECLARED_APPLICABILITY_GAPS.get(
+                    logical_id
+                ),
+            )
+        )
+
     def walk(node: RawNode, path: list[StructuralSegment],
              ancestors: list[RawNode]) -> None:
         if _is_canonical(node):
-            text = _canonical_text(node, ancestors)
-            if not text:
-                issues.append(
-                    IngestIssue("empty_provision", f"{_logical_id(path)} has no text")
-                )
-                return
-            logical_id = _logical_id(path)
-            ptype = _provision_type(article, path, default_type)
-            provisions.append(
-                Provision(
-                    logical_provision_id=logical_id,
-                    versioned_provision_id=_versioned_id(logical_id, ENTRY_INTO_FORCE),
-                    content_id=content_id(text),
-                    provision_type=ptype,
-                    structural_location=path,
-                    text=text,
-                    heading=article.heading,
-                    text_valid_from=ENTRY_INTO_FORCE,
-                    text_valid_to=None,
-                    cross_references=_cross_references(
-                        text, None if article.is_annex else article.number
-                    ),
-                    applicability_gap_reason=_DECLARED_APPLICABILITY_GAPS.get(
-                        logical_id
-                    ),
-                )
-            )
+            emit(_canonical_text(node, ancestors), path)
             return
 
         for child in node.children:
@@ -327,6 +386,16 @@ def ingest_article(article: ArticleNode) -> tuple[list[Provision], list[IngestIs
                 [*ancestors, node],
             )
 
+        # Trailing subparagraphs that name no point are provisions of their own
+        # (module docstring); without this they would be silently dropped.
+        lead_ins, _ = _ancestor_fragments(node, ancestors)
+        for number, text, context in _trailing_subparagraphs(node):
+            emit(
+                normalize_text(" ".join([*lead_ins, *context, text])),
+                [*path, StructuralSegment(type=SegmentType.SUBPARAGRAPH,
+                                          value=str(number))],
+            )
+
     walk(article.root, base, [])
     return provisions, issues
 
@@ -334,7 +403,7 @@ def ingest_article(article: ArticleNode) -> tuple[list[Provision], list[IngestIs
 def ingest_corpus(
     articles: list[ArticleNode],
 ) -> tuple[list[Provision], list[IngestIssue]]:
-    """Ingest the V1 corpus: Articles 5, 16, 25, 26 and Annex III."""
+    """Ingest the V1 corpus: Articles 5, 6, 16, 25, 26 and Annexes I and III."""
     provisions: list[Provision] = []
     issues: list[IngestIssue] = []
     seen: dict[str, ArticleNode] = {}
