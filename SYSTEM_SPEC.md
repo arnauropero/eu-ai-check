@@ -374,6 +374,23 @@ read as "no role."
 These two empty-looking cases are never conflated: one is a determination that
 concluded "no role applies," the other is a determination that could not be reached.
 
+**[Amended in Phase 3 design, 2026-10-03] Partial knowledge.** The two-state status
+could not express "certainly a deployer, provider unknown". Calling that `known` would
+overstate it, and calling it `unresolved` would discard an established role. Each role
+is therefore determined separately, as true, false or unknown (§4.3):
+
+```yaml
+ActorRoleResult:
+  actor_roles: [provider, deployer]      # roles established true
+  unresolved_roles: [provider, deployer] # roles that could not be determined
+  actor_role_status: known | unresolved  # known iff unresolved_roles is empty
+```
+
+`actor_roles` is now meaningful in both states: it always lists the roles that were
+established. `actor_roles: []` with `known` keeps its meaning, an evidence-backed
+"none". The rule engine reads each role's own value when it evaluates an
+`actor_role` condition (§14.2). An unknown role is unknown, not false.
+
 **Downstream obligation handling for simultaneous roles:** when `actor_roles` contains
 more than one role, obligation applicability (§12, §14) is evaluated **independently per
 role** against the `ApplicabilityRule` engine, then combined:
@@ -464,6 +481,42 @@ counts as `does_not_match`. τ is fixed before the first determination run, usin
 Phase 1 retrieval eval set, not the determination eval set. By construction this arm
 can never produce `insufficient`, so it cannot produce `unresolved` from matching. That
 limit is one of the things the comparison is meant to show (§18, §20).
+
+### 4.3 Actor-Role Rules (Phase 3 design, 2026-10-03)
+
+The spec named "rules over the boolean actor facts and Article 3 / Article 25" (§4) but
+never wrote them down, and the eval labels depend on them. They are three-valued
+(true / false / unknown), using the same logic as §14.2:
+
+```
+high_risk  = true if a risk-tier route is established (§9.1), whether or not it
+             applies yet; unknown if risk tier is unresolved; else false
+deployer   = uses_system                                        # Article 3(4)
+substantial_modification = modifies_safety_relevant_components
+                           OR modifies_intended_purpose         # Article 3(23)
+provider   = develops_system                                    # Article 3(3)
+             OR ( high_risk AND ( puts_own_name_or_trademark    # Article 25(1)(a)
+                                  OR substantial_modification   # Article 25(1)(b)
+                                  OR modifies_intended_purpose )) # Article 25(1)(c)
+```
+
+- **Evidence.** Each established or excluded role cites the provisions its rule used.
+  To make that possible, Article 3 points (3), (4) and (23) are ingested. Only those
+  three points are ingested, explicitly: the other 65 definitions would be retrieval
+  distractors (`V1_PARTIAL_ARTICLES`).
+- **Substantial modification** is the nested fifth instantiation (§4). It is a rule,
+  not a matcher call. Article 3(23) defines it as a change that affects compliance or
+  modifies the intended purpose, and those are exactly the two `modifies_*` facts.
+- **Transfer only on high-risk systems.** Article 25(1) speaks only of high-risk
+  systems. A reseller who rebrands a spam filter therefore stays roleless:
+  `actor_roles: []`, `known`.
+- **Known V1 simplifications, recorded rather than hidden:**
+  - `develops_system` counts as provider even without the "places on the market or
+    puts into service under its own name" part of Article 3(3). A contract developer
+    building to a client's order is the case this gets wrong.
+  - Article 25(2) (the original provider ceasing to be the provider after a transfer)
+    and Article 25(3) (product manufacturers) are not modelled as role rules. Their
+    provisions remain citable.
 
 ---
 
@@ -1330,8 +1383,10 @@ reuse the generic `applicability_status` field rather than a separate tier enum:
   ```yaml
   system_category: [annex_iii_high_risk | article_6_1_high_risk]  # every established
                                                                   # route (§9.1)
-  derogation: applied | not_established | not_assessed  # Art 6(3); not_assessed when
-                                                        # no Annex III match
+  derogation: applied | not_established | overridden_by_profiling | not_assessed
+                    # Art 6(3); not_assessed when no Annex III match;
+                    # overridden_by_profiling when a 6(3) condition matches but the
+                    # profiling override also matches (§9.1)
   ```
 - `determination_type = prohibited_practice`: `applicable` means the case matches an
   Article 5 prohibited practice; `not_applicable` means it does not; `unresolved` and
@@ -1488,6 +1543,11 @@ same 98 queries were re-run unchanged. Results are in
   subparagraphs, so this re-check measures distraction, not retrieval of the new
   provisions. The matcher evaluates those scopes exhaustively (§4.2), so it does not
   depend on retrieving them.
+- **Article 3(3), (4), (23) added (110 provisions).** Results are in
+  `data/eval/results/corpus_v3_110p_98q.*`. Recall@5 and Precision@5 are unchanged
+  for every arm on every slice. The design's use-case R@1 rose again, from 0.750 to
+  0.786. The new definitions appear as BM25 distractors (Article 3(3) in U04, U06 and
+  U07) but displace no correct result from the design's top-5. The guards hold.
 
 **Extraction:**
 - Field-level accuracy (semantic match for free-text fields: purpose, functionality)
@@ -1727,6 +1787,80 @@ not retuned.
   are not separately gated in V1.
 - The matcher must **also** beat the score-cutoff baseline under the pre-registered
   decision rule. Clearing 0.85 alone does not adopt it.
+
+**Determination — Phase 3 pre-registration [2026-10-03].** The eval set (labels
+reviewed and approved by the user), arms, scoring and decision rule below are
+committed and binding. The first determination run happens only after a later commit
+that also holds the τ values, the matcher prompt, and the verification code (Phase 2
+precedent).
+
+- **Eval set.** `data/eval/determination_cases.json`: 41 hand-labelled cases with gold
+  facts plus the description. Labelling decisions DL1–DL5 are recorded in the file.
+  Once committed, its content is SHA-pinned in tests. A test also recomputes every
+  rule-based label (roles, Article 16/26) from the gold facts and the labelled risk
+  tier, so a labelling slip cannot survive as "ground truth".
+
+  | Expected state | Risk tier | Prohibited practice |
+  |---|---|---|
+  | `applicable` | 21 | 7 |
+  | `not_applicable` (`conditions_not_met` / `not_yet_applicable`) | 14 (11 / 3) | 29 (28 / 1) |
+  | `unresolved` | 5 | 4 |
+  | `not_in_force` | 1 | 1 |
+
+  Coverage required by PLAN §8:
+  - simultaneous provider+deployer (D02);
+  - Article 25 transfer (D34–D36);
+  - the same provision at three dates (Article 26: D38 / D39 / D01);
+  - the Article 6(3) derogation (D09);
+  - the 6(1) vs 6(2) routes (D18–D19 vs D01);
+  - `not_in_force` vs `not_applicable` on one provision (D38 vs D39).
+- **Arms.**
+
+  | Arm | Model and effort | Role | Runs per case |
+  |---|---|---|---|
+  | **M-low** | matcher, `gpt-6.1-sol`, effort `low` | primary (the accepted Phase 2 configuration) | 3 |
+  | M-medium | matcher, effort `medium` | reported only | 3 |
+  | B | score-cutoff baseline | comparison | 1 (deterministic) |
+
+  For the matcher arms, per-state accuracy is the mean over runs.
+- **Baseline score and τ.**
+  - Score: the maximum cosine similarity (bge-base-en-v1.5, the Phase 1 embedder)
+    between the description and any chunk of an in-scope provision. Cosine is used
+    rather than the RRF score because RRF is rank-based and carries no
+    match/no-match magnitude.
+  - Verdicts: in each matcher scope (Annex III, Article 5(1), 6(3)(a)–(d), the 6(3)
+    override, Annex I, 6(1)(b)), the top candidate is `matches` if its score is ≥ τ,
+    and every other candidate is `does_not_match`. The verdicts then go through the
+    same §9.1 combination code as the matcher's.
+  - τ per scope: chosen by maximising Youden's J on the Phase 1 retrieval eval set.
+    A use-case query is a positive for a scope when its relevant provisions include
+    an in-scope one, and a negative otherwise.
+  - Scopes with no positives in that set (Annex I, the override, 6(1)(b)) use one
+    pooled τ fitted across all scopes.
+  - The values are computed and committed before the first determination run.
+- **Scoring.** A status is correct only on an exact match, *including* the
+  `not_applicable_reason`. The per-state buckets are `applicable`, `not_applicable`
+  (both reasons) and `unresolved`. `not_in_force` cases are gated at 1.00 as
+  deterministic outputs, not as matcher states.
+- **Decision rule (adopt the matcher, M-low, over B).** All three must hold:
+  1. Zero-tolerance checks pass in every M-low run.
+  2. M-low meets the locked targets: ≥ 0.85 per state on risk tier and on prohibited
+     practice, and 1.00 on rule-based outputs.
+  3. M-low beats B by ≥ 0.10 on macro per-state accuracy (the mean over the three
+     buckets), for risk tier and for prohibited practice separately. M-low must also
+     be ≥ B on the `applicable` bucket and on the `not_applicable` bucket
+     individually. Without that last condition, the win could come entirely from B
+     being structurally unable to produce `unresolved`.
+
+  If 2 fails, Phase 3 acceptance is not met. Any prompt change becomes a new
+  pre-registered follow-up, as `role-null-v1` was in Phase 2, and is never a retune
+  against this set. If 1 and 2 hold but 3 fails, the result is reported and the
+  matcher-vs-baseline design question reopens.
+- **Small-n, stated in advance.** `unresolved` has 5 risk-tier and 4 prohibited
+  cases. With 3 runs each, that is 15 and 12 judgements, so 0.85 permits at most 2
+  and 1 wrong runs respectively. A single systematically mislabelled or misjudged case
+  can sink the bucket. That is accepted as the price of a hand-built set, and is said
+  here so it cannot be discovered conveniently later.
 
 **End-to-end:**
 - Obligation correctness (right obligations, right roles, right union/dedup per §4.1)

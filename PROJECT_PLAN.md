@@ -48,7 +48,9 @@ problems — not another "chat with your PDFs" demo.
   intended: the scope gap was found by corpus evidence, not speculation.
   **[Scope extended in Phase 3 design, 2026-10-03]** **Annex I** joins the corpus for
   the same reason. Article 6(1) is defined by reference to the legislation listed
-  there (SYSTEM_SPEC.md §9.1).
+  there (SYSTEM_SPEC.md §9.1). **Article 3, points (3), (4) and (23) only** (the
+  provider, deployer and substantial-modification definitions) joins too, to ground
+  the actor-role rules (SYSTEM_SPEC.md §4.3).
 - Prohibited-practice determination against Article 5, represented as its own
   determination type (`prohibited_practice`), evaluated via the `ApplicabilityRule`
   engine where applicable-date conditions apply.
@@ -259,6 +261,10 @@ one rule-matching engine → cited, fail-closed output.
   - No `Case` schema change. Phase 2 stays closed. Article 6(3) is read from the
     original description.
   - Annex I is ingested for Article 6(1).
+  - Actor-role rules are written down (SYSTEM_SPEC.md §4.3): three-valued, with
+    Article 25 transfer only on high-risk systems.
+  - `unresolved_roles` keeps partial role knowledge.
+  - Article 3(3), (4) and (23) are ingested. Corpus: 110 provisions.
 - Deliverable (corpus, before any determination code): fix the dropped
   trailing-subparagraph defect (Article 6(3) profiling override, Article 5(2) second
   subparagraph), with a test that every V1 source fragment appears in some canonical
