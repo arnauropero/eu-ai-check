@@ -1,0 +1,79 @@
+{
+  "notice": "HELD-OUT confirmation set for the POST-HOC Article 5(1)(c) intervention (SYSTEM_SPEC.md §18, opened 2026-10-04). Built and committed BEFORE any change to the matcher prompt or logic, and not run or inspected against any model output during iteration. It is used for ONE confirmation pass only, after user approval, and its results are reported separately from the 41-case dev set. The angles deliberately differ from the 12 dev cases where 5(1)(c) came back insufficient: payment fraud, workplace productivity scoring, churn risk, motor telematics pricing, buy-now-pay-later credit, an employer scoring private social-media behaviour (positive control), and two cases where the information that decides 5(1)(c) is missing (borderline, gold unresolved). Labels follow the dev set's labelling_rules unchanged.",
+  "status_format": "'applicable' | 'unresolved' | 'not_in_force' | 'not_applicable/<reason>' with reason conditions_not_met | not_yet_applicable",
+  "labelling_rules": "Same as data/eval/determination_cases.json (role_rules, obligation_rules, DL1-DL5).",
+  "cases": [
+    {
+      "id": "H01",
+      "category": "heldout_not_social_scoring",
+      "assessment_date": "2026-10-04",
+      "description": "Our payment company built a model that gives every card transaction a fraud-risk score in real time. Transactions with a high score are held until a fraud analyst has reviewed them.",
+      "gold_facts": {"intended_purpose": "payment fraud prevention", "ai_functionality": "scores card transactions for fraud risk", "relevant_date": null, "role_in_decision_making": "high-score transactions held for analyst review", "develops_system": true, "uses_system": true, "puts_own_name_or_trademark": null, "modifies_intended_purpose": false, "modifies_safety_relevant_components": false, "jurisdiction": null, "affected_persons": "cardholders"},
+      "expected": {"risk_tier": {"status": "not_applicable/conditions_not_met", "system_category": [], "derogation": "not_assessed", "annex_iii": [], "annex_i": []}, "prohibited_practice": {"status": "not_applicable/conditions_not_met", "points": []}, "actor_role": {"actor_roles": ["provider", "deployer"], "unresolved_roles": [], "status": "known"}, "obligations": {"aiact:art_16": "not_applicable/conditions_not_met", "aiact:art_26": "not_applicable/conditions_not_met"}},
+      "labelling_note": "Fraud detection scores transactions, not people's social behaviour; Annex III 5(b) expressly excludes financial-fraud detection."
+    },
+    {
+      "id": "H02",
+      "category": "heldout_not_social_scoring",
+      "assessment_date": "2026-10-04",
+      "description": "We bought PickRate, which scores each warehouse worker's productivity from their handheld-scanner data. Shift managers use the weekly scores to allocate tasks and to decide who is offered extra shifts.",
+      "gold_facts": {"intended_purpose": "warehouse workforce management", "ai_functionality": "scores worker productivity from scanner data", "relevant_date": null, "role_in_decision_making": "managers use scores to allocate tasks and extra shifts", "develops_system": false, "uses_system": true, "puts_own_name_or_trademark": false, "modifies_intended_purpose": false, "modifies_safety_relevant_components": false, "jurisdiction": null, "affected_persons": "warehouse workers"},
+      "expected": {"risk_tier": {"status": "applicable", "system_category": ["annex_iii_high_risk"], "derogation": "not_established", "annex_iii": ["aiact:anx_III:area_4:item_b"], "annex_i": []}, "prohibited_practice": {"status": "not_applicable/conditions_not_met", "points": []}, "actor_role": {"actor_roles": ["deployer"], "unresolved_roles": [], "status": "known"}, "obligations": {"aiact:art_16": "not_applicable/conditions_not_met", "aiact:art_26": "applicable"}},
+      "labelling_note": "Performance evaluation used within the same work context is Annex III 4(b), not a social score applied in unrelated contexts."
+    },
+    {
+      "id": "H03",
+      "category": "heldout_not_social_scoring",
+      "assessment_date": "2026-10-04",
+      "description": "Our telecom company built a model that predicts which customers are likely to cancel their contract, from their usage and billing history. Customers flagged as likely to leave are offered a discount.",
+      "gold_facts": {"intended_purpose": "customer retention", "ai_functionality": "predicts customer churn from usage and billing history", "relevant_date": null, "role_in_decision_making": "flagged customers are offered a discount", "develops_system": true, "uses_system": true, "puts_own_name_or_trademark": null, "modifies_intended_purpose": false, "modifies_safety_relevant_components": false, "jurisdiction": null, "affected_persons": "telecom customers"},
+      "expected": {"risk_tier": {"status": "not_applicable/conditions_not_met", "system_category": [], "derogation": "not_assessed", "annex_iii": [], "annex_i": []}, "prohibited_practice": {"status": "not_applicable/conditions_not_met", "points": []}, "actor_role": {"actor_roles": ["provider", "deployer"], "unresolved_roles": [], "status": "known"}, "obligations": {"aiact:art_16": "not_applicable/conditions_not_met", "aiact:art_26": "not_applicable/conditions_not_met"}},
+      "labelling_note": "Generic risk score of people whose stated consequence is favourable treatment (a discount) in the same context: no detrimental treatment."
+    },
+    {
+      "id": "H04",
+      "category": "heldout_not_social_scoring",
+      "assessment_date": "2026-10-04",
+      "description": "We are a car insurer and developed an app that customers can choose to install. It scores their driving each month (speed, harsh braking, night driving), and the score moves their motor-insurance premium up or down.",
+      "gold_facts": {"intended_purpose": "motor-insurance pricing", "ai_functionality": "scores driving behaviour", "relevant_date": null, "role_in_decision_making": "score adjusts the premium", "develops_system": true, "uses_system": true, "puts_own_name_or_trademark": null, "modifies_intended_purpose": false, "modifies_safety_relevant_components": false, "jurisdiction": null, "affected_persons": "motor-insurance customers"},
+      "expected": {"risk_tier": {"status": "not_applicable/conditions_not_met", "system_category": [], "derogation": "not_assessed", "annex_iii": [], "annex_i": []}, "prohibited_practice": {"status": "not_applicable/conditions_not_met", "points": []}, "actor_role": {"actor_roles": ["provider", "deployer"], "unresolved_roles": [], "status": "known"}, "obligations": {"aiact:art_16": "not_applicable/conditions_not_met", "aiact:art_26": "not_applicable/conditions_not_met"}},
+      "labelling_note": "Driving data used to price motor insurance: same context, and the consequence tracks the behaviour scored. Annex III 5(c) covers life and health insurance only."
+    },
+    {
+      "id": "H05",
+      "category": "heldout_not_social_scoring",
+      "assessment_date": "2026-10-04",
+      "description": "We built and run a buy-now-pay-later service. At checkout it decides how much credit each shopper can get, based on their repayment history with us and a credit-bureau check.",
+      "gold_facts": {"intended_purpose": "consumer credit at checkout", "ai_functionality": "sets each shopper's credit limit from repayment history and a credit-bureau check", "relevant_date": null, "role_in_decision_making": "decides the credit limit", "develops_system": true, "uses_system": true, "puts_own_name_or_trademark": null, "modifies_intended_purpose": false, "modifies_safety_relevant_components": false, "jurisdiction": null, "affected_persons": "shoppers applying for credit"},
+      "expected": {"risk_tier": {"status": "applicable", "system_category": ["annex_iii_high_risk"], "derogation": "not_established", "annex_iii": ["aiact:anx_III:area_5:item_b"], "annex_i": []}, "prohibited_practice": {"status": "not_applicable/conditions_not_met", "points": []}, "actor_role": {"actor_roles": ["provider", "deployer"], "unresolved_roles": [], "status": "known"}, "obligations": {"aiact:art_16": "applicable", "aiact:art_26": "applicable"}},
+      "labelling_note": "Creditworthiness assessment (Annex III 5(b)) using financial data in the credit context; not social scoring."
+    },
+    {
+      "id": "H06",
+      "category": "heldout_social_scoring_positive",
+      "assessment_date": "2026-10-04",
+      "description": "As an employer, we use a tool that monitors our employees' personal social-media accounts and rates their behaviour outside work over the year. Employees with low ratings are excluded from bonuses and promotions.",
+      "gold_facts": {"intended_purpose": "employee evaluation", "ai_functionality": "rates employees' private social-media behaviour", "relevant_date": null, "role_in_decision_making": "low ratings exclude employees from bonuses and promotions", "develops_system": false, "uses_system": true, "puts_own_name_or_trademark": false, "modifies_intended_purpose": false, "modifies_safety_relevant_components": false, "jurisdiction": null, "affected_persons": "employees"},
+      "expected": {"risk_tier": {"status": "applicable", "system_category": ["annex_iii_high_risk"], "derogation": "not_established", "annex_iii": ["aiact:anx_III:area_4:item_b"], "annex_i": []}, "prohibited_practice": {"status": "applicable", "points": ["aiact:art_5:para_1:point_c"]}, "actor_role": {"actor_roles": ["deployer"], "unresolved_roles": [], "status": "known"}, "obligations": {"aiact:art_16": "not_applicable/conditions_not_met", "aiact:art_26": "applicable"}},
+      "labelling_note": "Positive control: social behaviour in private life, scored over time, leading to detrimental treatment at work (an unrelated context, 5(1)(c)(i)). Risk tier is separate (DL3): promotion decisions are Annex III 4(b)."
+    },
+    {
+      "id": "H07",
+      "category": "heldout_borderline_unresolved",
+      "assessment_date": "2026-10-04",
+      "description": "We built our supermarket's loyalty app. It gives each member a behaviour rating based on how they shop and act in our stores, and members with a low rating are treated differently.",
+      "gold_facts": {"intended_purpose": "loyalty programme", "ai_functionality": "rates members' in-store behaviour", "relevant_date": null, "role_in_decision_making": "members with low ratings are treated differently", "develops_system": true, "uses_system": true, "puts_own_name_or_trademark": null, "modifies_intended_purpose": false, "modifies_safety_relevant_components": false, "jurisdiction": null, "affected_persons": "loyalty members"},
+      "expected": {"risk_tier": {"status": "not_applicable/conditions_not_met", "system_category": [], "derogation": "not_assessed", "annex_iii": [], "annex_i": []}, "prohibited_practice": {"status": "unresolved", "points": []}, "actor_role": {"actor_roles": ["provider", "deployer"], "unresolved_roles": [], "status": "known"}, "obligations": {"aiact:art_16": "not_applicable/conditions_not_met", "aiact:art_26": "not_applicable/conditions_not_met"}},
+      "labelling_note": "Borderline: people are scored on behaviour, but whether the different treatment is detrimental, and whether it is disproportionate or in an unrelated context, is not stated. Tests that the fix does not turn genuine silence into does_not_match."
+    },
+    {
+      "id": "H08",
+      "category": "heldout_borderline_unresolved",
+      "assessment_date": "2026-10-04",
+      "description": "Our city council developed a system that scores residents on their civic behaviour over the year, such as recycling and noise complaints. We have not yet decided what the scores will be used for.",
+      "gold_facts": {"intended_purpose": "scoring residents' civic behaviour", "ai_functionality": "scores residents' civic behaviour", "relevant_date": null, "role_in_decision_making": null, "develops_system": true, "uses_system": true, "puts_own_name_or_trademark": null, "modifies_intended_purpose": false, "modifies_safety_relevant_components": false, "jurisdiction": null, "affected_persons": "residents"},
+      "expected": {"risk_tier": {"status": "unresolved", "system_category": [], "derogation": null, "annex_iii": [], "annex_i": []}, "prohibited_practice": {"status": "unresolved", "points": []}, "actor_role": {"actor_roles": ["provider", "deployer"], "unresolved_roles": [], "status": "known"}, "obligations": {"aiact:art_16": "unresolved", "aiact:art_26": "unresolved"}},
+      "labelling_note": "Borderline: social behaviour scored over time, but the consequence (the part 5(1)(c) turns on) and the use (Annex III) are undecided. Same convention as dev D31."
+    }
+  ]
+}
