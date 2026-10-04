@@ -1,0 +1,68 @@
+{
+  "scores": {
+    "matcher-low+social-scoring-v1": {
+      "arm": "matcher-low+social-scoring-v1",
+      "runs": 18,
+      "errors": 4,
+      "risk_tier": {
+        "per_state": {
+          "applicable": 0.75,
+          "not_applicable": 0.5,
+          "unresolved": 0.75
+        },
+        "n": {
+          "applicable": 12,
+          "not_applicable": 2,
+          "unresolved": 4
+        },
+        "macro": 0.6666666666666666
+      },
+      "prohibited_practice": {
+        "per_state": {
+          "applicable": 0.0,
+          "not_applicable": 0.7692307692307693,
+          "unresolved": 0.75
+        },
+        "n": {
+          "applicable": 1,
+          "not_applicable": 13,
+          "unresolved": 4
+        },
+        "macro": 0.5064102564102564
+      },
+      "not_in_force_deterministic": null,
+      "propagated_rule_outputs": {
+        "actor_role": 1.0,
+        "aiact:art_16": 0.9285714285714286,
+        "aiact:art_26": 0.9285714285714286
+      },
+      "system_category": 1.0,
+      "derogation": 1.0,
+      "verification_downgrade_rate": 0.0,
+      "zero_tolerance_violations": [
+        "D32#0 risk_tier: unresolved -> not_applicable/conditions_not_met"
+      ],
+      "misses": [
+        "D04#0 prohibited_practice: want not_applicable/conditions_not_met, got unresolved",
+        "D12#0 risk_tier: want applicable, got error",
+        "D12#0 prohibited_practice: want not_applicable/conditions_not_met, got error",
+        "D26#0 risk_tier: want not_applicable/conditions_not_met, got error",
+        "D26#0 prohibited_practice: want applicable, got error",
+        "D29#0 risk_tier: want applicable, got error",
+        "D29#0 prohibited_practice: want not_applicable/conditions_not_met, got error",
+        "D30#0 risk_tier: want applicable, got error",
+        "D30#0 prohibited_practice: want unresolved, got error",
+        "D32#0 risk_tier: want unresolved, got not_applicable/conditions_not_met"
+      ]
+    }
+  },
+  "rule_path": {
+    "checks": 54,
+    "accuracy": 1.0,
+    "failures": []
+  },
+  "decision": {
+    "decided": false,
+    "reason": "primary or baseline arm not run"
+  }
+}

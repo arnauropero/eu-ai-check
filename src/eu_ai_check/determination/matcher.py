@@ -62,6 +62,36 @@ Rules:
 - rationale is one or two sentences explaining the verdict.
 """
 
+#: POST-HOC prompt variant (SYSTEM_SPEC.md §18, opened 2026-10-04), appended to the
+#: frozen SYSTEM_PROMPT as one more rule. It targets the Article 5(1)(c) over-caution
+#: seen on the dev set and is validated only on the held-out set
+#: data/eval/determination_heldout_5_1_c.json. It deliberately names no use-case
+#: domain, so the held-out cases are not taught by example.
+SOCIAL_SCORING_V1 = """\
+- Article 5(1)(c) (social scoring) requires a score of people, built from their
+  social behaviour or personal characteristics, that leads to detrimental treatment
+  in a social context unrelated to where the data came from, or to treatment that is
+  unjustified or disproportionate. An evaluation of people that the description
+  shows is used for its own stated purpose, in the same context its data comes
+  from, is lawful purpose-specific evaluation, not social scoring: answer
+  "does_not_match" and quote the span stating that purpose. The description does not
+  have to rule out every element of the provision. Answer "insufficient" only when
+  the description shows people being scored or classified on their behaviour or
+  characteristics and leaves open how the score is used, by whom, or what treatment
+  follows.
+"""
+
+#: Prompt variants. "baseline" is the pre-registered prompt (SHA-pinned in
+#: tests/test_determination.py) and the default everywhere.
+PROMPT_VARIANTS = {"baseline": "", "social-scoring-v1": SOCIAL_SCORING_V1}
+DEFAULT_PROMPT_VARIANT = "baseline"
+
+
+def system_prompt(variant: str = DEFAULT_PROMPT_VARIANT) -> str:
+    if variant not in PROMPT_VARIANTS:
+        raise ValueError(f"unknown prompt variant {variant!r} ({sorted(PROMPT_VARIANTS)})")
+    return SYSTEM_PROMPT + PROMPT_VARIANTS[variant]
+
 
 def response_schema() -> dict[str, Any]:
     nullable = {"type": ["string", "null"]}
@@ -204,7 +234,9 @@ def all_insufficient(candidates: dict[str, list[Provision]], reason: str) -> dic
 
 
 class OpenAIMatcher:
-    def __init__(self, client: Any = None, *, model: str = OPENAI_MODEL, effort: str = "low"):
+    def __init__(self, client: Any = None, *, model: str = OPENAI_MODEL, effort: str = "low",
+                 prompt_variant: str = DEFAULT_PROMPT_VARIANT):
+        system_prompt(prompt_variant)  # validates the variant name
         if effort not in EFFORT_MAP:
             raise ValueError(f"effort {effort!r} is not a pre-registered arm ({sorted(EFFORT_MAP)})")
         if client is None:
@@ -214,13 +246,15 @@ class OpenAIMatcher:
         self.client = client
         self.model = model
         self.effort = effort
-        self.name = f"matcher-{effort}"
+        self.prompt_variant = prompt_variant
+        self.name = f"matcher-{effort}" + (
+            "" if prompt_variant == DEFAULT_PROMPT_VARIANT else f"+{prompt_variant}")
 
     def request(self, description: str, candidates: dict[str, list[Provision]]) -> dict[str, Any]:
         return {
             "model": self.model,
             "input": [
-                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "system", "content": system_prompt(self.prompt_variant)},
                 {"role": "user", "content": user_message(description, candidates)},
             ],
             "reasoning": {"effort": EFFORT_MAP[self.effort]},
