@@ -147,7 +147,8 @@ def _enumerated_rows(table: etree._Element) -> list[tuple[str, etree._Element]]:
 
     The OJ renders every enumerated item as a two-column table: a narrow cell
     holding the marker, and a wide cell holding the content (which may itself
-    contain further tables).
+    contain further tables). Annex I's list adds an empty indent cell in front,
+    making three columns; the indent is dropped.
     """
     rows: list[tuple[str, etree._Element]] = []
     # Only this table's own rows. Using .iter() here would also pick up the rows
@@ -155,6 +156,8 @@ def _enumerated_rows(table: etree._Element) -> list[tuple[str, etree._Element]]:
     # that would break Article 5(1)(h) apart from its sub-points.
     for tr in _direct_rows(table):
         cells = [td for td in tr if _tag(td) == "td"]
+        if len(cells) == 3 and not normalize_text(_text_of(cells[0])):
+            cells = cells[1:]
         if len(cells) != 2:
             continue
         marker_text = normalize_text(_text_of(cells[0]))
@@ -195,20 +198,31 @@ def _parse_container(container: etree._Element, node: RawNode, *, skip: set) -> 
     Text paragraphs become the node's own text; tables become enumerated
     children, recursed into. Nested tables inside a content cell are handled by
     the recursion, which is what preserves Article 5(1)(h) intact.
+
+    Two Annex I layouts need handling. Its entries put their text in a bare
+    `<span>` rather than a `<p>`, and a section heading ("Section A. ...") opens
+    a `SECTION` node that holds the entries after it. Without the section node,
+    the Section A heading would read as a lead-in to Section B's entries too.
     """
+    target = node
     for el in container:
         tag = _tag(el)
         if el in skip:
             continue
-        if tag == "p":
+        if tag in ("p", "span"):
             text = normalize_text(_text_of(el))
-            if text:
-                node.content.append(text)
+            if not text:
+                continue
+            section = _ANNEX_SECTION_RE.match(text)
+            if section and node.level == SegmentType.ANNEX:
+                target = RawNode(level=SegmentType.SECTION, marker=section.group(1))
+                node.content.append(target)
+            target.content.append(text)
         elif tag == "table":
             for marker, cell in _enumerated_rows(el):
-                child = RawNode(level=_child_level(node.level), marker=marker)
+                child = RawNode(level=_child_level(target.level), marker=marker)
                 _parse_container(cell, child, skip=skip)
-                node.content.append(child)
+                target.content.append(child)
         elif tag == "div":
             # A numbered paragraph container (id like "005.001"), or a wrapper.
             div_id = el.get("id") or ""
@@ -223,6 +237,8 @@ def _parse_container(container: etree._Element, node: RawNode, *, skip: set) -> 
             else:
                 _parse_container(el, node, skip=skip)
 
+
+_ANNEX_SECTION_RE = re.compile(r"^Section ([A-Z])\.\s")
 
 _LEADING_ENUM_RE = re.compile(r"^\d+\.\s*")
 

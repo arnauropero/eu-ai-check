@@ -1,0 +1,38 @@
+Phase 3 determination evaluation (pre-registered, SYSTEM_SPEC.md §18)
+==============================================================================
+
+-- risk_tier: per-state accuracy (exact status incl. reason)
+  arm                   applicable  not_applicable      unresolved     macro
+  matcher-low+social-scoring-v1     0.750 (n= 12)     0.500 (n=  2)     0.750 (n=  4)     0.667
+
+-- prohibited_practice: per-state accuracy (exact status incl. reason)
+  arm                   applicable  not_applicable      unresolved     macro
+  matcher-low+social-scoring-v1     0.000 (n=  1)     0.769 (n= 13)     0.750 (n=  4)     0.506
+
+-- other measures
+  matcher-low+social-scoring-v1 not_in_force   -    system_category 1.000  derogation 1.000  downgrade rate 0.000  errors 4
+                  propagated (from predicted risk tier): actor_role 1.000  aiact:art_16 0.929  aiact:art_26 0.929
+
+-- rule-based outputs on labelled risk tier (target 1.00): 1.000 over 54 checks
+
+-- zero-tolerance violations
+  matcher-low+social-scoring-v1: 1
+     D32#0 risk_tier: unresolved -> not_applicable/conditions_not_met
+
+-- decision rule
+{
+  "decided": false,
+  "reason": "primary or baseline arm not run"
+}
+
+-- misses
+  [matcher-low+social-scoring-v1] D04#0 prohibited_practice: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low+social-scoring-v1] D12#0 risk_tier: want applicable, got error
+  [matcher-low+social-scoring-v1] D12#0 prohibited_practice: want not_applicable/conditions_not_met, got error
+  [matcher-low+social-scoring-v1] D26#0 risk_tier: want not_applicable/conditions_not_met, got error
+  [matcher-low+social-scoring-v1] D26#0 prohibited_practice: want applicable, got error
+  [matcher-low+social-scoring-v1] D29#0 risk_tier: want applicable, got error
+  [matcher-low+social-scoring-v1] D29#0 prohibited_practice: want not_applicable/conditions_not_met, got error
+  [matcher-low+social-scoring-v1] D30#0 risk_tier: want applicable, got error
+  [matcher-low+social-scoring-v1] D30#0 prohibited_practice: want unresolved, got error
+  [matcher-low+social-scoring-v1] D32#0 risk_tier: want unresolved, got not_applicable/conditions_not_met
