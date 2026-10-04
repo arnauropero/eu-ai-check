@@ -413,3 +413,16 @@ def test_decision_rule_requires_all_three_conditions() -> None:
                       rules_ok)["adopt_matcher"]
     assert not decide({"matcher-low": _score(0.84, 0.84, per_state=0.84), "baseline": base},
                       rules_ok)["phase_3_acceptance_met"]
+
+
+#: SHA-256 of the POST-HOC `social-scoring-v1` variant text, frozen after the dev-set
+#: iteration and before the held-out confirmation pass (SYSTEM_SPEC.md §18).
+SOCIAL_SCORING_V1_SHA = "1f2a9d0c828217968c992d1fca226b7d62d1b3269e54fc35fa8b503f58122020"
+
+
+def test_social_scoring_v1_variant_is_frozen() -> None:
+    from eu_ai_check.determination.matcher import SOCIAL_SCORING_V1, system_prompt
+
+    assert hashlib.sha256(SOCIAL_SCORING_V1.encode("utf-8")).hexdigest() == SOCIAL_SCORING_V1_SHA
+    assert system_prompt() == SYSTEM_PROMPT  # the default stays the pre-registered prompt
+    assert system_prompt("social-scoring-v1") == SYSTEM_PROMPT + SOCIAL_SCORING_V1

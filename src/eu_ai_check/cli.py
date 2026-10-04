@@ -397,7 +397,9 @@ def cmd_eval_determination(args: argparse.Namespace) -> int:
 
             from .determination.matcher import OpenAIMatcher
 
-            matcher = OpenAIMatcher(openai.OpenAI(), effort=name.removeprefix("matcher-"))
+            matcher = OpenAIMatcher(openai.OpenAI(max_retries=args.max_retries),
+                                    effort=name.removeprefix("matcher-"),
+                                    prompt_variant=args.prompt_variant)
             repeats = args.repeats
         print(f"running {matcher.name}: {len(cases)} cases x {repeats}", file=sys.stderr)
         arms.append(run_arm(matcher.name, matcher, cases, repeats, pipeline,
@@ -520,7 +522,12 @@ def main(argv: list[str] | None = None) -> int:
                           help="pre-registered arms; matcher-medium was dropped for "
                                "cost before the first run (SYSTEM_SPEC.md §18)")
     p_eval_d.add_argument("--repeats", type=int, default=3)
+    p_eval_d.add_argument("--prompt-variant", default="baseline",
+                          help="matcher prompt variant; anything but 'baseline' is a "
+                               "POST-HOC experiment (SYSTEM_SPEC.md §18)")
     p_eval_d.add_argument("--workers", type=int, default=8)
+    p_eval_d.add_argument("--max-retries", type=int, default=2,
+                          help="OpenAI client transport retries (2 is the SDK default)")
     p_eval_d.add_argument("--only", default=None, help="comma-separated case ids")
     p_eval_d.add_argument("--out", type=Path, default=None,
                           help="output stem, e.g. data/eval/results/determination_v1_41c")
