@@ -1,0 +1,1959 @@
+{
+ "notice": "Hand-labelled determination eval set (PROJECT_PLAN.md §10, Phase 3). PRE-REGISTERED: labels reviewed and approved by the user on 2026-10-03 and committed before any determination run. The `cases` content is SHA-pinned in tests/test_determination_eval.py; any case or label added or changed after the first run must be flagged post_hoc. Inputs are gold facts plus the description; the determination stage is scored on these, not on live extraction (SYSTEM_SPEC.md §18).",
+ "status_format": "'applicable' | 'unresolved' | 'not_in_force' | 'not_applicable/<reason>' with reason conditions_not_met | not_yet_applicable",
+ "labelling_rules": {
+  "role_rules": "SYSTEM_SPEC.md §4.3: deployer = uses_system; provider = develops_system OR (high-risk AND (puts_own_name_or_trademark OR modifies_safety_relevant_components OR modifies_intended_purpose)), in three-valued logic.",
+  "obligation_rules": "SYSTEM_SPEC.md §12, §14.2: Article 16 = provider x {Annex III from 2026-08-02, Article 6(1) from 2027-08-02}; Article 26 = deployer x the same; three-valued logic; not_yet_applicable beats conditions_not_met.",
+  "decisions": {
+   "DL1": "Derogation labels are reported, not gated. Where two legal paths give the same risk-tier status (e.g. no Annex III match vs Annex III + 6(3)), the status is labelled and both derogation values are accepted (derogation_also_accepted).",
+   "DL2": "An unresolved risk tier carries derogation null (not scored).",
+   "DL3": "Prohibited practice and risk tier are separate determinations: a prohibited practice that is also listed in Annex III is labelled high-risk too.",
+   "DL4": "Before entry into force (2024-08-01) every determination, actor role included, is not_in_force: there is no text in force to ground any conclusion.",
+   "DL5": "Gold facts follow the Phase 2 field rules L1-L9 verbatim."
+  }
+ },
+ "cases": [
+  {
+   "id": "D01",
+   "category": "annex_iii",
+   "assessment_date": "2026-10-03",
+   "description": "We're a logistics company. We bought HireSmart, an off-the-shelf tool that scores incoming CVs against our job descriptions and shows recruiters a ranked shortlist. Recruiters decide who to interview. We use it as-is for warehouse roles in Germany.",
+   "gold_facts": {
+    "intended_purpose": "recruiting warehouse staff",
+    "ai_functionality": "scores and ranks CVs against job descriptions",
+    "relevant_date": null,
+    "role_in_decision_making": "ranked shortlist; recruiters decide",
+    "develops_system": false,
+    "uses_system": true,
+    "puts_own_name_or_trademark": false,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": "Germany",
+    "affected_persons": "job applicants"
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "applicable",
+     "system_category": [
+      "annex_iii_high_risk"
+     ],
+     "derogation": "not_established",
+     "annex_iii": [
+      "aiact:anx_III:area_4:item_a"
+     ],
+     "annex_i": []
+    },
+    "prohibited_practice": {
+     "status": "not_applicable/conditions_not_met",
+     "points": []
+    },
+    "actor_role": {
+     "actor_roles": [
+      "deployer"
+     ],
+     "unresolved_roles": [],
+     "status": "known"
+    },
+    "obligations": {
+     "aiact:art_16": "not_applicable/conditions_not_met",
+     "aiact:art_26": "applicable"
+    }
+   }
+  },
+  {
+   "id": "D02",
+   "category": "annex_iii",
+   "assessment_date": "2026-10-03",
+   "description": "Our bank built its own machine-learning model that evaluates the creditworthiness of consumers applying for personal loans. Loan officers see the score and the model's recommendation and usually follow it. We run it in our branches in Spain.",
+   "gold_facts": {
+    "intended_purpose": "consumer lending decisions",
+    "ai_functionality": "evaluates creditworthiness of loan applicants",
+    "relevant_date": null,
+    "role_in_decision_making": "score and recommendation; loan officers usually follow it",
+    "develops_system": true,
+    "uses_system": true,
+    "puts_own_name_or_trademark": null,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": "Spain",
+    "affected_persons": "consumer loan applicants"
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "applicable",
+     "system_category": [
+      "annex_iii_high_risk"
+     ],
+     "derogation": "not_established",
+     "annex_iii": [
+      "aiact:anx_III:area_5:item_b"
+     ],
+     "annex_i": []
+    },
+    "prohibited_practice": {
+     "status": "not_applicable/conditions_not_met",
+     "points": []
+    },
+    "actor_role": {
+     "actor_roles": [
+      "provider",
+      "deployer"
+     ],
+     "unresolved_roles": [],
+     "status": "known"
+    },
+    "obligations": {
+     "aiact:art_16": "applicable",
+     "aiact:art_26": "applicable"
+    }
+   },
+   "labelling_note": "Simultaneous provider+deployer (PLAN §8)."
+  },
+  {
+   "id": "D03",
+   "category": "annex_iii",
+   "assessment_date": "2026-10-03",
+   "description": "Our university developed an AI system that grades students' written exam essays and assigns the mark that goes on their transcript. Lecturers only review a 5% sample. We use it in all first-year courses.",
+   "gold_facts": {
+    "intended_purpose": "grading university exams",
+    "ai_functionality": "grades written exam essays and assigns marks",
+    "relevant_date": null,
+    "role_in_decision_making": "assigns the transcript mark; lecturers review a 5% sample",
+    "develops_system": true,
+    "uses_system": true,
+    "puts_own_name_or_trademark": null,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": null,
+    "affected_persons": "first-year students"
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "applicable",
+     "system_category": [
+      "annex_iii_high_risk"
+     ],
+     "derogation": "not_established",
+     "annex_iii": [
+      "aiact:anx_III:area_3:item_b"
+     ],
+     "annex_i": []
+    },
+    "prohibited_practice": {
+     "status": "not_applicable/conditions_not_met",
+     "points": []
+    },
+    "actor_role": {
+     "actor_roles": [
+      "provider",
+      "deployer"
+     ],
+     "unresolved_roles": [],
+     "status": "known"
+    },
+    "obligations": {
+     "aiact:art_16": "applicable",
+     "aiact:art_26": "applicable"
+    }
+   }
+  },
+  {
+   "id": "D04",
+   "category": "annex_iii",
+   "assessment_date": "2026-10-03",
+   "description": "We're a start-up selling ProctorEye, our own product, to universities. It watches students through their webcam during online exams and flags behaviour that suggests cheating for the exam board. We don't run exams ourselves.",
+   "gold_facts": {
+    "intended_purpose": "detecting cheating in online exams",
+    "ai_functionality": "monitors students via webcam and flags suspected cheating",
+    "relevant_date": null,
+    "role_in_decision_making": "flags behaviour for the exam board",
+    "develops_system": true,
+    "uses_system": false,
+    "puts_own_name_or_trademark": true,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": null,
+    "affected_persons": "students taking online exams"
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "applicable",
+     "system_category": [
+      "annex_iii_high_risk"
+     ],
+     "derogation": "not_established",
+     "annex_iii": [
+      "aiact:anx_III:area_3:item_d"
+     ],
+     "annex_i": []
+    },
+    "prohibited_practice": {
+     "status": "not_applicable/conditions_not_met",
+     "points": []
+    },
+    "actor_role": {
+     "actor_roles": [
+      "provider"
+     ],
+     "unresolved_roles": [],
+     "status": "known"
+    },
+    "obligations": {
+     "aiact:art_16": "applicable",
+     "aiact:art_26": "not_applicable/conditions_not_met"
+    }
+   }
+  },
+  {
+   "id": "D05",
+   "category": "annex_iii",
+   "assessment_date": "2026-10-03",
+   "description": "Our city council uses BenefitCheck from Civix to assess whether residents are eligible for housing benefit. Caseworkers make the final decision but rarely depart from its assessment.",
+   "gold_facts": {
+    "intended_purpose": "assessing eligibility for housing benefit",
+    "ai_functionality": "assesses residents' eligibility for a public benefit",
+    "relevant_date": null,
+    "role_in_decision_making": "assessment; caseworkers decide",
+    "develops_system": false,
+    "uses_system": true,
+    "puts_own_name_or_trademark": false,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": null,
+    "affected_persons": "residents applying for benefit"
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "applicable",
+     "system_category": [
+      "annex_iii_high_risk"
+     ],
+     "derogation": "not_established",
+     "annex_iii": [
+      "aiact:anx_III:area_5:item_a"
+     ],
+     "annex_i": []
+    },
+    "prohibited_practice": {
+     "status": "not_applicable/conditions_not_met",
+     "points": []
+    },
+    "actor_role": {
+     "actor_roles": [
+      "deployer"
+     ],
+     "unresolved_roles": [],
+     "status": "known"
+    },
+    "obligations": {
+     "aiact:art_16": "not_applicable/conditions_not_met",
+     "aiact:art_26": "applicable"
+    }
+   }
+  },
+  {
+   "id": "D06",
+   "category": "annex_iii",
+   "assessment_date": "2026-10-03",
+   "description": "As a regional water utility we developed an AI controller that adjusts pressure valves in our drinking-water network in real time to prevent pipe bursts and supply interruptions. It acts automatically; engineers can override it.",
+   "gold_facts": {
+    "intended_purpose": "managing the drinking-water supply network",
+    "ai_functionality": "controls pressure valves in real time",
+    "relevant_date": null,
+    "role_in_decision_making": "acts automatically; engineers can override",
+    "develops_system": true,
+    "uses_system": true,
+    "puts_own_name_or_trademark": null,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": null,
+    "affected_persons": null
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "applicable",
+     "system_category": [
+      "annex_iii_high_risk"
+     ],
+     "derogation": "not_established",
+     "annex_iii": [
+      "aiact:anx_III:area_2"
+     ],
+     "annex_i": []
+    },
+    "prohibited_practice": {
+     "status": "not_applicable/conditions_not_met",
+     "points": []
+    },
+    "actor_role": {
+     "actor_roles": [
+      "provider",
+      "deployer"
+     ],
+     "unresolved_roles": [],
+     "status": "known"
+    },
+    "obligations": {
+     "aiact:art_16": "applicable",
+     "aiact:art_26": "applicable"
+    }
+   },
+   "labelling_note": "Annex III area 2 has no lettered items (terminal case)."
+  },
+  {
+   "id": "D07",
+   "category": "annex_iii",
+   "assessment_date": "2026-10-03",
+   "description": "We are a life insurer. Our sister company built PriceWise, which assesses each applicant's risk and sets their life-insurance premium. We use it for all new policies in Italy.",
+   "gold_facts": {
+    "intended_purpose": "pricing life insurance",
+    "ai_functionality": "assesses applicant risk and sets premiums",
+    "relevant_date": null,
+    "role_in_decision_making": null,
+    "develops_system": false,
+    "uses_system": true,
+    "puts_own_name_or_trademark": false,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": "Italy",
+    "affected_persons": "life-insurance applicants"
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "applicable",
+     "system_category": [
+      "annex_iii_high_risk"
+     ],
+     "derogation": "not_established",
+     "annex_iii": [
+      "aiact:anx_III:area_5:item_c"
+     ],
+     "annex_i": []
+    },
+    "prohibited_practice": {
+     "status": "not_applicable/conditions_not_met",
+     "points": []
+    },
+    "actor_role": {
+     "actor_roles": [
+      "deployer"
+     ],
+     "unresolved_roles": [],
+     "status": "known"
+    },
+    "obligations": {
+     "aiact:art_16": "not_applicable/conditions_not_met",
+     "aiact:art_26": "applicable"
+    }
+   },
+   "labelling_note": "L2: a sister company's system is obtained, not developed."
+  },
+  {
+   "id": "D08",
+   "category": "annex_iii",
+   "assessment_date": "2026-10-03",
+   "description": "Our court uses JurisAssist to research case law and suggest how the law applies to the facts of each case, to help judges draft their rulings.",
+   "gold_facts": {
+    "intended_purpose": "assisting judges in deciding cases",
+    "ai_functionality": "researches case law and suggests how the law applies to the facts",
+    "relevant_date": null,
+    "role_in_decision_making": "suggestions to help judges draft rulings",
+    "develops_system": false,
+    "uses_system": true,
+    "puts_own_name_or_trademark": false,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": null,
+    "affected_persons": null
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "applicable",
+     "system_category": [
+      "annex_iii_high_risk"
+     ],
+     "derogation": "not_established",
+     "annex_iii": [
+      "aiact:anx_III:area_8:item_a"
+     ],
+     "annex_i": []
+    },
+    "prohibited_practice": {
+     "status": "not_applicable/conditions_not_met",
+     "points": []
+    },
+    "actor_role": {
+     "actor_roles": [
+      "deployer"
+     ],
+     "unresolved_roles": [],
+     "status": "known"
+    },
+    "obligations": {
+     "aiact:art_16": "not_applicable/conditions_not_met",
+     "aiact:art_26": "applicable"
+    }
+   }
+  },
+  {
+   "id": "D09",
+   "category": "derogation",
+   "assessment_date": "2026-10-03",
+   "description": "We make and sell CVFormat, a tool for recruiting teams that converts CVs in any layout into our standard template so they are easier to read. It does not score, rank or filter candidates; recruiters read every CV themselves.",
+   "gold_facts": {
+    "intended_purpose": "recruitment administration",
+    "ai_functionality": "converts CVs into a standard template",
+    "relevant_date": null,
+    "role_in_decision_making": "none; recruiters read every CV",
+    "develops_system": true,
+    "uses_system": false,
+    "puts_own_name_or_trademark": true,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": null,
+    "affected_persons": "job applicants"
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "not_applicable/conditions_not_met",
+     "system_category": [],
+     "derogation": "applied",
+     "annex_iii": [
+      "aiact:anx_III:area_4:item_a"
+     ],
+     "annex_i": []
+    },
+    "prohibited_practice": {
+     "status": "not_applicable/conditions_not_met",
+     "points": []
+    },
+    "actor_role": {
+     "actor_roles": [
+      "provider"
+     ],
+     "unresolved_roles": [],
+     "status": "known"
+    },
+    "obligations": {
+     "aiact:art_16": "not_applicable/conditions_not_met",
+     "aiact:art_26": "not_applicable/conditions_not_met"
+    }
+   },
+   "labelling_note": "Annex III 4(a) + Art 6(3)(a) narrow procedural task; override does not match (quote: does not score, rank or filter)."
+  },
+  {
+   "id": "D10",
+   "category": "derogation",
+   "assessment_date": "2026-10-03",
+   "description": "Our bank developed a tool for internal audit. After loan officers have made their credit decisions, it looks for deviations from the bank's usual decision patterns and lists them for a human reviewer. It does not change any decision and builds no profile of any applicant.",
+   "gold_facts": {
+    "intended_purpose": "internal audit of credit decisions",
+    "ai_functionality": "detects deviations from prior credit-decision patterns",
+    "relevant_date": null,
+    "role_in_decision_making": "lists deviations for a human reviewer after decisions are made",
+    "develops_system": true,
+    "uses_system": true,
+    "puts_own_name_or_trademark": null,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": null,
+    "affected_persons": null
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "not_applicable/conditions_not_met",
+     "system_category": [],
+     "derogation": "applied",
+     "annex_iii": [
+      "aiact:anx_III:area_5:item_b"
+     ],
+     "annex_i": [],
+     "derogation_also_accepted": [
+      "not_assessed"
+     ]
+    },
+    "prohibited_practice": {
+     "status": "not_applicable/conditions_not_met",
+     "points": []
+    },
+    "actor_role": {
+     "actor_roles": [
+      "provider",
+      "deployer"
+     ],
+     "unresolved_roles": [],
+     "status": "known"
+    },
+    "obligations": {
+     "aiact:art_16": "not_applicable/conditions_not_met",
+     "aiact:art_26": "not_applicable/conditions_not_met"
+    }
+   },
+   "labelling_note": "Either path is not high-risk: Annex III 5(b) + Art 6(3)(c), or no Annex III match at all. The status is gated; the derogation value accepts either."
+  },
+  {
+   "id": "D11",
+   "category": "derogation_unresolved",
+   "assessment_date": "2026-10-03",
+   "description": "Our university uses AdmitAid, which reads each applicant's file and prepares a briefing note for the admissions committee. The committee makes every admission decision.",
+   "gold_facts": {
+    "intended_purpose": "university admissions",
+    "ai_functionality": "prepares briefing notes from applicant files",
+    "relevant_date": null,
+    "role_in_decision_making": "briefing note; committee decides",
+    "develops_system": false,
+    "uses_system": true,
+    "puts_own_name_or_trademark": false,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": null,
+    "affected_persons": "applicants to the university"
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "unresolved",
+     "system_category": [],
+     "derogation": null,
+     "annex_iii": [
+      "aiact:anx_III:area_3:item_a"
+     ],
+     "annex_i": []
+    },
+    "prohibited_practice": {
+     "status": "not_applicable/conditions_not_met",
+     "points": []
+    },
+    "actor_role": {
+     "actor_roles": [
+      "deployer"
+     ],
+     "unresolved_roles": [],
+     "status": "known"
+    },
+    "obligations": {
+     "aiact:art_16": "not_applicable/conditions_not_met",
+     "aiact:art_26": "unresolved"
+    }
+   },
+   "labelling_note": "Art 6(3)(d) preparatory task matches; whether the note evaluates applicants (profiling) is not stated, so the override is insufficient -> unresolved."
+  },
+  {
+   "id": "D12",
+   "category": "derogation_override",
+   "assessment_date": "2026-10-03",
+   "description": "We developed a pre-screening assistant that we use in our own hiring. Before interviews it prepares a summary for recruiters that includes a personality profile scoring each candidate's traits, built from their CV and written answers. Recruiters make all decisions.",
+   "gold_facts": {
+    "intended_purpose": "hiring",
+    "ai_functionality": "prepares candidate summaries with personality-trait scores",
+    "relevant_date": null,
+    "role_in_decision_making": "summary for recruiters; recruiters decide",
+    "develops_system": true,
+    "uses_system": true,
+    "puts_own_name_or_trademark": null,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": null,
+    "affected_persons": "job candidates"
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "applicable",
+     "system_category": [
+      "annex_iii_high_risk"
+     ],
+     "derogation": "overridden_by_profiling",
+     "annex_iii": [
+      "aiact:anx_III:area_4:item_a"
+     ],
+     "annex_i": []
+    },
+    "prohibited_practice": {
+     "status": "not_applicable/conditions_not_met",
+     "points": []
+    },
+    "actor_role": {
+     "actor_roles": [
+      "provider",
+      "deployer"
+     ],
+     "unresolved_roles": [],
+     "status": "known"
+    },
+    "obligations": {
+     "aiact:art_16": "applicable",
+     "aiact:art_26": "applicable"
+    }
+   },
+   "labelling_note": "Art 6(3)(d) preparatory task matches, but personality scoring is profiling, so the override wins."
+  },
+  {
+   "id": "D13",
+   "category": "derogation",
+   "assessment_date": "2026-10-03",
+   "description": "Our HR team writes the decision letters for promotions and contract changes. We use LetterLift to improve the wording of these already-written letters before they are sent. It does not assess employees or change any decision.",
+   "gold_facts": {
+    "intended_purpose": "HR correspondence",
+    "ai_functionality": "improves the wording of already-written decision letters",
+    "relevant_date": null,
+    "role_in_decision_making": "none; decisions already made",
+    "develops_system": false,
+    "uses_system": true,
+    "puts_own_name_or_trademark": false,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": null,
+    "affected_persons": "employees"
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "not_applicable/conditions_not_met",
+     "system_category": [],
+     "derogation": "applied",
+     "annex_iii": [
+      "aiact:anx_III:area_4:item_b"
+     ],
+     "annex_i": [],
+     "derogation_also_accepted": [
+      "not_assessed"
+     ]
+    },
+    "prohibited_practice": {
+     "status": "not_applicable/conditions_not_met",
+     "points": []
+    },
+    "actor_role": {
+     "actor_roles": [
+      "deployer"
+     ],
+     "unresolved_roles": [],
+     "status": "known"
+    },
+    "obligations": {
+     "aiact:art_16": "not_applicable/conditions_not_met",
+     "aiact:art_26": "not_applicable/conditions_not_met"
+    }
+   },
+   "labelling_note": "Annex III 4(b) + Art 6(3)(b) improving a completed human activity; or no Annex III match at all."
+  },
+  {
+   "id": "D14",
+   "category": "not_high_risk",
+   "assessment_date": "2026-10-03",
+   "description": "We use MailShield to filter spam and phishing out of our company email.",
+   "gold_facts": {
+    "intended_purpose": "company email security",
+    "ai_functionality": "filters spam and phishing emails",
+    "relevant_date": null,
+    "role_in_decision_making": null,
+    "develops_system": false,
+    "uses_system": true,
+    "puts_own_name_or_trademark": false,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": null,
+    "affected_persons": null
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "not_applicable/conditions_not_met",
+     "system_category": [],
+     "derogation": "not_assessed",
+     "annex_iii": [],
+     "annex_i": []
+    },
+    "prohibited_practice": {
+     "status": "not_applicable/conditions_not_met",
+     "points": []
+    },
+    "actor_role": {
+     "actor_roles": [
+      "deployer"
+     ],
+     "unresolved_roles": [],
+     "status": "known"
+    },
+    "obligations": {
+     "aiact:art_16": "not_applicable/conditions_not_met",
+     "aiact:art_26": "not_applicable/conditions_not_met"
+    }
+   }
+  },
+  {
+   "id": "D15",
+   "category": "not_high_risk",
+   "assessment_date": "2026-10-03",
+   "description": "Our supermarket chain built a model that forecasts demand for each product so we can plan stock orders.",
+   "gold_facts": {
+    "intended_purpose": "stock planning",
+    "ai_functionality": "forecasts product demand",
+    "relevant_date": null,
+    "role_in_decision_making": null,
+    "develops_system": true,
+    "uses_system": true,
+    "puts_own_name_or_trademark": null,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": null,
+    "affected_persons": null
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "not_applicable/conditions_not_met",
+     "system_category": [],
+     "derogation": "not_assessed",
+     "annex_iii": [],
+     "annex_i": []
+    },
+    "prohibited_practice": {
+     "status": "not_applicable/conditions_not_met",
+     "points": []
+    },
+    "actor_role": {
+     "actor_roles": [
+      "provider",
+      "deployer"
+     ],
+     "unresolved_roles": [],
+     "status": "known"
+    },
+    "obligations": {
+     "aiact:art_16": "not_applicable/conditions_not_met",
+     "aiact:art_26": "not_applicable/conditions_not_met"
+    }
+   }
+  },
+  {
+   "id": "D16",
+   "category": "not_high_risk",
+   "assessment_date": "2026-10-03",
+   "description": "We use SlotBot, a chatbot that books interview times with job applicants who have already been shortlisted by our recruiters. It only handles scheduling.",
+   "gold_facts": {
+    "intended_purpose": "recruitment logistics",
+    "ai_functionality": "schedules interview appointments",
+    "relevant_date": null,
+    "role_in_decision_making": "none; only scheduling",
+    "develops_system": false,
+    "uses_system": true,
+    "puts_own_name_or_trademark": false,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": null,
+    "affected_persons": "shortlisted job applicants"
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "not_applicable/conditions_not_met",
+     "system_category": [],
+     "derogation": "not_assessed",
+     "annex_iii": [],
+     "annex_i": [],
+     "derogation_also_accepted": [
+      "applied"
+     ]
+    },
+    "prohibited_practice": {
+     "status": "not_applicable/conditions_not_met",
+     "points": []
+    },
+    "actor_role": {
+     "actor_roles": [
+      "deployer"
+     ],
+     "unresolved_roles": [],
+     "status": "known"
+    },
+    "obligations": {
+     "aiact:art_16": "not_applicable/conditions_not_met",
+     "aiact:art_26": "not_applicable/conditions_not_met"
+    }
+   },
+   "labelling_note": "The case named in SYSTEM_SPEC §20: recruitment words, no evaluation. Not high-risk either way (no Annex III match, or 4(a) + 6(3)(a))."
+  },
+  {
+   "id": "D17",
+   "category": "not_high_risk",
+   "assessment_date": "2026-10-03",
+   "description": "Our online shop uses HelpBot from Zendo to answer customers' questions about shipping and returns.",
+   "gold_facts": {
+    "intended_purpose": "customer service",
+    "ai_functionality": "answers customer questions",
+    "relevant_date": null,
+    "role_in_decision_making": null,
+    "develops_system": false,
+    "uses_system": true,
+    "puts_own_name_or_trademark": false,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": null,
+    "affected_persons": "customers"
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "not_applicable/conditions_not_met",
+     "system_category": [],
+     "derogation": "not_assessed",
+     "annex_iii": [],
+     "annex_i": []
+    },
+    "prohibited_practice": {
+     "status": "not_applicable/conditions_not_met",
+     "points": []
+    },
+    "actor_role": {
+     "actor_roles": [
+      "deployer"
+     ],
+     "unresolved_roles": [],
+     "status": "known"
+    },
+    "obligations": {
+     "aiact:art_16": "not_applicable/conditions_not_met",
+     "aiact:art_26": "not_applicable/conditions_not_met"
+    }
+   }
+  },
+  {
+   "id": "D18",
+   "category": "article_6_1",
+   "assessment_date": "2026-10-03",
+   "description": "We develop RetinaScan, AI software that detects diabetic retinopathy in retinal images. It is certified as a class IIa medical device under the Medical Device Regulation, which requires assessment by a notified body. We sell it to clinics.",
+   "gold_facts": {
+    "intended_purpose": "diagnosing diabetic retinopathy",
+    "ai_functionality": "detects retinopathy in retinal images",
+    "relevant_date": null,
+    "role_in_decision_making": null,
+    "develops_system": true,
+    "uses_system": false,
+    "puts_own_name_or_trademark": true,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": null,
+    "affected_persons": "patients"
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "not_applicable/not_yet_applicable",
+     "system_category": [
+      "article_6_1_high_risk"
+     ],
+     "derogation": "not_assessed",
+     "annex_iii": [],
+     "annex_i": [
+      "aiact:anx_I:item_11"
+     ]
+    },
+    "prohibited_practice": {
+     "status": "not_applicable/conditions_not_met",
+     "points": []
+    },
+    "actor_role": {
+     "actor_roles": [
+      "provider"
+     ],
+     "unresolved_roles": [],
+     "status": "known"
+    },
+    "obligations": {
+     "aiact:art_16": "not_applicable/not_yet_applicable",
+     "aiact:art_26": "not_applicable/conditions_not_met"
+    }
+   },
+   "labelling_note": "Art 6(1) route established; it applies from 2027-08-02."
+  },
+  {
+   "id": "D19",
+   "category": "article_6_1",
+   "assessment_date": "2026-10-03",
+   "description": "We develop RetinaScan, AI software that detects diabetic retinopathy in retinal images. It is certified as a class IIa medical device under the Medical Device Regulation, which requires assessment by a notified body. We sell it to clinics. Where will we stand on 1 September 2027?",
+   "gold_facts": {
+    "intended_purpose": "diagnosing diabetic retinopathy",
+    "ai_functionality": "detects retinopathy in retinal images",
+    "relevant_date": "2027-09-01",
+    "role_in_decision_making": null,
+    "develops_system": true,
+    "uses_system": false,
+    "puts_own_name_or_trademark": true,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": null,
+    "affected_persons": "patients"
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "applicable",
+     "system_category": [
+      "article_6_1_high_risk"
+     ],
+     "derogation": "not_assessed",
+     "annex_iii": [],
+     "annex_i": [
+      "aiact:anx_I:item_11"
+     ]
+    },
+    "prohibited_practice": {
+     "status": "not_applicable/conditions_not_met",
+     "points": []
+    },
+    "actor_role": {
+     "actor_roles": [
+      "provider"
+     ],
+     "unresolved_roles": [],
+     "status": "known"
+    },
+    "obligations": {
+     "aiact:art_16": "applicable",
+     "aiact:art_26": "not_applicable/conditions_not_met"
+    }
+   },
+   "labelling_note": "Temporal pair with D18 (PLAN §8): same provision, two dates, two outcomes."
+  },
+  {
+   "id": "D20",
+   "category": "article_6_1_unresolved",
+   "assessment_date": "2026-10-03",
+   "description": "We develop a vision module for industrial presses that stops the press when a worker's hand enters the danger zone. We sell it to machine builders who install it in their machines.",
+   "gold_facts": {
+    "intended_purpose": "machine safety",
+    "ai_functionality": "detects hands in the danger zone and stops the press",
+    "relevant_date": null,
+    "role_in_decision_making": "acts automatically",
+    "develops_system": true,
+    "uses_system": false,
+    "puts_own_name_or_trademark": null,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": null,
+    "affected_persons": "machine operators"
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "unresolved",
+     "system_category": [],
+     "derogation": null,
+     "annex_iii": [],
+     "annex_i": [
+      "aiact:anx_I:item_1"
+     ]
+    },
+    "prohibited_practice": {
+     "status": "not_applicable/conditions_not_met",
+     "points": []
+    },
+    "actor_role": {
+     "actor_roles": [
+      "provider"
+     ],
+     "unresolved_roles": [],
+     "status": "known"
+    },
+    "obligations": {
+     "aiact:art_16": "unresolved",
+     "aiact:art_26": "not_applicable/conditions_not_met"
+    }
+   },
+   "labelling_note": "Safety component under the Machinery Directive (6(1)(a) matches); third-party conformity assessment not stated (6(1)(b) insufficient)."
+  },
+  {
+   "id": "D21",
+   "category": "prohibited",
+   "assessment_date": "2026-10-03",
+   "description": "Our call centre uses MoodMeter, which analyses agents' voices during calls to infer their emotions, and the scores feed into their performance reviews.",
+   "gold_facts": {
+    "intended_purpose": "call-centre staff management",
+    "ai_functionality": "infers agents' emotions from their voices",
+    "relevant_date": null,
+    "role_in_decision_making": "scores feed into performance reviews",
+    "develops_system": false,
+    "uses_system": true,
+    "puts_own_name_or_trademark": false,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": null,
+    "affected_persons": "call-centre agents"
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "applicable",
+     "system_category": [
+      "annex_iii_high_risk"
+     ],
+     "derogation": "not_established",
+     "annex_iii": [
+      "aiact:anx_III:area_1:item_c",
+      "aiact:anx_III:area_4:item_b"
+     ],
+     "annex_i": []
+    },
+    "prohibited_practice": {
+     "status": "applicable",
+     "points": [
+      "aiact:art_5:para_1:point_f"
+     ]
+    },
+    "actor_role": {
+     "actor_roles": [
+      "deployer"
+     ],
+     "unresolved_roles": [],
+     "status": "known"
+    },
+    "obligations": {
+     "aiact:art_16": "not_applicable/conditions_not_met",
+     "aiact:art_26": "applicable"
+    }
+   },
+   "labelling_note": "Emotion recognition in the workplace (5(1)(f)). Risk tier is a separate determination: Annex III 1(c)/4(b) match."
+  },
+  {
+   "id": "D22",
+   "category": "prohibited",
+   "assessment_date": "2026-10-03",
+   "description": "Our game studio added imperceptible audio cues to our mobile game that push players to make in-app purchases without realising it. Many players have run up debts they cannot afford.",
+   "gold_facts": {
+    "intended_purpose": "monetising a mobile game",
+    "ai_functionality": "imperceptible audio cues that drive purchases",
+    "relevant_date": null,
+    "role_in_decision_making": null,
+    "develops_system": true,
+    "uses_system": true,
+    "puts_own_name_or_trademark": null,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": null,
+    "affected_persons": "players"
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "not_applicable/conditions_not_met",
+     "system_category": [],
+     "derogation": "not_assessed",
+     "annex_iii": [],
+     "annex_i": []
+    },
+    "prohibited_practice": {
+     "status": "applicable",
+     "points": [
+      "aiact:art_5:para_1:point_a"
+     ]
+    },
+    "actor_role": {
+     "actor_roles": [
+      "provider",
+      "deployer"
+     ],
+     "unresolved_roles": [],
+     "status": "known"
+    },
+    "obligations": {
+     "aiact:art_16": "not_applicable/conditions_not_met",
+     "aiact:art_26": "not_applicable/conditions_not_met"
+    }
+   }
+  },
+  {
+   "id": "D23",
+   "category": "prohibited",
+   "assessment_date": "2026-10-03",
+   "description": "Our police force uses FaceTrack for live facial recognition on camera feeds at the central train station, to spot people on our watchlist of shoplifting suspects.",
+   "gold_facts": {
+    "intended_purpose": "law enforcement",
+    "ai_functionality": "live facial recognition against a watchlist",
+    "relevant_date": null,
+    "role_in_decision_making": null,
+    "develops_system": false,
+    "uses_system": true,
+    "puts_own_name_or_trademark": false,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": null,
+    "affected_persons": "people passing through the station"
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "applicable",
+     "system_category": [
+      "annex_iii_high_risk"
+     ],
+     "derogation": "not_established",
+     "annex_iii": [
+      "aiact:anx_III:area_1:item_a"
+     ],
+     "annex_i": []
+    },
+    "prohibited_practice": {
+     "status": "applicable",
+     "points": [
+      "aiact:art_5:para_1:point_h"
+     ]
+    },
+    "actor_role": {
+     "actor_roles": [
+      "deployer"
+     ],
+     "unresolved_roles": [],
+     "status": "known"
+    },
+    "obligations": {
+     "aiact:art_16": "not_applicable/conditions_not_met",
+     "aiact:art_26": "applicable"
+    }
+   },
+   "labelling_note": "Real-time RBI for law enforcement; shoplifting is not among the 5(1)(h) exceptions."
+  },
+  {
+   "id": "D24",
+   "category": "prohibited_exception",
+   "assessment_date": "2026-10-03",
+   "description": "Our police force uses FaceTrack for live facial recognition at the central train station for one day, to locate a specific child who has been abducted. A judge authorised the use in advance.",
+   "gold_facts": {
+    "intended_purpose": "law enforcement",
+    "ai_functionality": "live facial recognition to locate one person",
+    "relevant_date": null,
+    "role_in_decision_making": null,
+    "develops_system": false,
+    "uses_system": true,
+    "puts_own_name_or_trademark": false,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": null,
+    "affected_persons": "people passing through the station"
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "applicable",
+     "system_category": [
+      "annex_iii_high_risk"
+     ],
+     "derogation": "not_established",
+     "annex_iii": [
+      "aiact:anx_III:area_1:item_a"
+     ],
+     "annex_i": []
+    },
+    "prohibited_practice": {
+     "status": "not_applicable/conditions_not_met",
+     "points": []
+    },
+    "actor_role": {
+     "actor_roles": [
+      "deployer"
+     ],
+     "unresolved_roles": [],
+     "status": "known"
+    },
+    "obligations": {
+     "aiact:art_16": "not_applicable/conditions_not_met",
+     "aiact:art_26": "applicable"
+    }
+   },
+   "labelling_note": "5(1)(h)(i) exception: targeted search for a specific abduction victim."
+  },
+  {
+   "id": "D25",
+   "category": "prohibited",
+   "assessment_date": "2026-10-03",
+   "description": "We scrape photos of faces from social media and the open web, without targeting anyone in particular, to build a face database. Our clients search it by uploading a photo of someone. It's our own product.",
+   "gold_facts": {
+    "intended_purpose": "face search service",
+    "ai_functionality": "builds a face database by untargeted scraping",
+    "relevant_date": null,
+    "role_in_decision_making": null,
+    "develops_system": true,
+    "uses_system": false,
+    "puts_own_name_or_trademark": true,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": null,
+    "affected_persons": "people whose photos are online"
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "applicable",
+     "system_category": [
+      "annex_iii_high_risk"
+     ],
+     "derogation": "not_established",
+     "annex_iii": [
+      "aiact:anx_III:area_1:item_a"
+     ],
+     "annex_i": []
+    },
+    "prohibited_practice": {
+     "status": "applicable",
+     "points": [
+      "aiact:art_5:para_1:point_e"
+     ]
+    },
+    "actor_role": {
+     "actor_roles": [
+      "provider"
+     ],
+     "unresolved_roles": [],
+     "status": "known"
+    },
+    "obligations": {
+     "aiact:art_16": "applicable",
+     "aiact:art_26": "not_applicable/conditions_not_met"
+    }
+   },
+   "labelling_note": "L4: running the search for clients is supply, so uses_system false."
+  },
+  {
+   "id": "D26",
+   "category": "prohibited",
+   "assessment_date": "2026-10-03",
+   "description": "Our platform gives every tenant a 'social trust' score based on their social-media behaviour, and we share the score with gyms, shops and employers, who use it to refuse people services and jobs.",
+   "gold_facts": {
+    "intended_purpose": "rating tenants",
+    "ai_functionality": "scores people's social behaviour",
+    "relevant_date": null,
+    "role_in_decision_making": "score used by third parties to refuse services",
+    "develops_system": true,
+    "uses_system": true,
+    "puts_own_name_or_trademark": null,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": null,
+    "affected_persons": "tenants"
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "not_applicable/conditions_not_met",
+     "system_category": [],
+     "derogation": "not_assessed",
+     "annex_iii": [],
+     "annex_i": []
+    },
+    "prohibited_practice": {
+     "status": "applicable",
+     "points": [
+      "aiact:art_5:para_1:point_c"
+     ]
+    },
+    "actor_role": {
+     "actor_roles": [
+      "provider",
+      "deployer"
+     ],
+     "unresolved_roles": [],
+     "status": "known"
+    },
+    "obligations": {
+     "aiact:art_16": "not_applicable/conditions_not_met",
+     "aiact:art_26": "not_applicable/conditions_not_met"
+    }
+   },
+   "labelling_note": "Social scoring with detrimental treatment in unrelated contexts."
+  },
+  {
+   "id": "D27",
+   "category": "prohibited",
+   "assessment_date": "2026-10-03",
+   "description": "Our ad-tech company developed a system that infers people's sexual orientation and religion from their profile photos, so that we can sort users into ad-targeting segments.",
+   "gold_facts": {
+    "intended_purpose": "ad targeting",
+    "ai_functionality": "infers sexual orientation and religion from photos",
+    "relevant_date": null,
+    "role_in_decision_making": null,
+    "develops_system": true,
+    "uses_system": true,
+    "puts_own_name_or_trademark": null,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": null,
+    "affected_persons": "users"
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "applicable",
+     "system_category": [
+      "annex_iii_high_risk"
+     ],
+     "derogation": "not_established",
+     "annex_iii": [
+      "aiact:anx_III:area_1:item_b"
+     ],
+     "annex_i": []
+    },
+    "prohibited_practice": {
+     "status": "applicable",
+     "points": [
+      "aiact:art_5:para_1:point_g"
+     ]
+    },
+    "actor_role": {
+     "actor_roles": [
+      "provider",
+      "deployer"
+     ],
+     "unresolved_roles": [],
+     "status": "known"
+    },
+    "obligations": {
+     "aiact:art_16": "applicable",
+     "aiact:art_26": "applicable"
+    }
+   }
+  },
+  {
+   "id": "D28",
+   "category": "prohibited",
+   "assessment_date": "2026-10-03",
+   "description": "Our lending app developed a model that spots elderly users showing signs of cognitive decline and targets them with high-interest loan offers they are likely to accept against their interests.",
+   "gold_facts": {
+    "intended_purpose": "marketing loans",
+    "ai_functionality": "identifies cognitively declining elderly users for targeting",
+    "relevant_date": null,
+    "role_in_decision_making": null,
+    "develops_system": true,
+    "uses_system": true,
+    "puts_own_name_or_trademark": null,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": null,
+    "affected_persons": "elderly users"
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "not_applicable/conditions_not_met",
+     "system_category": [],
+     "derogation": "not_assessed",
+     "annex_iii": [],
+     "annex_i": []
+    },
+    "prohibited_practice": {
+     "status": "applicable",
+     "points": [
+      "aiact:art_5:para_1:point_b"
+     ]
+    },
+    "actor_role": {
+     "actor_roles": [
+      "provider",
+      "deployer"
+     ],
+     "unresolved_roles": [],
+     "status": "known"
+    },
+    "obligations": {
+     "aiact:art_16": "not_applicable/conditions_not_met",
+     "aiact:art_26": "not_applicable/conditions_not_met"
+    }
+   }
+  },
+  {
+   "id": "D29",
+   "category": "not_prohibited",
+   "assessment_date": "2026-10-03",
+   "description": "Our retail chain uses ShelfSense cameras to estimate shoppers' emotional reactions to product displays.",
+   "gold_facts": {
+    "intended_purpose": "retail merchandising",
+    "ai_functionality": "infers shoppers' emotions from camera images",
+    "relevant_date": null,
+    "role_in_decision_making": null,
+    "develops_system": false,
+    "uses_system": true,
+    "puts_own_name_or_trademark": false,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": null,
+    "affected_persons": "shoppers"
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "applicable",
+     "system_category": [
+      "annex_iii_high_risk"
+     ],
+     "derogation": "not_established",
+     "annex_iii": [
+      "aiact:anx_III:area_1:item_c"
+     ],
+     "annex_i": []
+    },
+    "prohibited_practice": {
+     "status": "not_applicable/conditions_not_met",
+     "points": []
+    },
+    "actor_role": {
+     "actor_roles": [
+      "deployer"
+     ],
+     "unresolved_roles": [],
+     "status": "known"
+    },
+    "obligations": {
+     "aiact:art_16": "not_applicable/conditions_not_met",
+     "aiact:art_26": "applicable"
+    }
+   },
+   "labelling_note": "Emotion recognition outside workplace/education: not 5(1)(f), but Annex III 1(c)."
+  },
+  {
+   "id": "D30",
+   "category": "prohibited_unresolved",
+   "assessment_date": "2026-10-03",
+   "description": "We have developed software that infers how stressed people are from their voice during phone calls.",
+   "gold_facts": {
+    "intended_purpose": "stress detection",
+    "ai_functionality": "infers stress from voice during calls",
+    "relevant_date": null,
+    "role_in_decision_making": null,
+    "develops_system": true,
+    "uses_system": null,
+    "puts_own_name_or_trademark": null,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": null,
+    "affected_persons": null
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "applicable",
+     "system_category": [
+      "annex_iii_high_risk"
+     ],
+     "derogation": "not_established",
+     "annex_iii": [
+      "aiact:anx_III:area_1:item_c"
+     ],
+     "annex_i": []
+    },
+    "prohibited_practice": {
+     "status": "unresolved",
+     "points": []
+    },
+    "actor_role": {
+     "actor_roles": [
+      "provider"
+     ],
+     "unresolved_roles": [
+      "deployer"
+     ],
+     "status": "unresolved"
+    },
+    "obligations": {
+     "aiact:art_16": "applicable",
+     "aiact:art_26": "unresolved"
+    }
+   },
+   "labelling_note": "Whose voices (employees -> 5(1)(f); customers -> not) is not stated."
+  },
+  {
+   "id": "D31",
+   "category": "prohibited_unresolved",
+   "assessment_date": "2026-10-03",
+   "description": "Our system scores people based on their behaviour and we share the scores with partner organisations.",
+   "gold_facts": {
+    "intended_purpose": "scoring people",
+    "ai_functionality": "scores people based on behaviour",
+    "relevant_date": null,
+    "role_in_decision_making": null,
+    "develops_system": null,
+    "uses_system": true,
+    "puts_own_name_or_trademark": null,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": null,
+    "affected_persons": null
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "unresolved",
+     "system_category": [],
+     "derogation": null,
+     "annex_iii": [],
+     "annex_i": []
+    },
+    "prohibited_practice": {
+     "status": "unresolved",
+     "points": []
+    },
+    "actor_role": {
+     "actor_roles": [
+      "deployer"
+     ],
+     "unresolved_roles": [
+      "provider"
+     ],
+     "status": "unresolved"
+    },
+    "obligations": {
+     "aiact:art_16": "unresolved",
+     "aiact:art_26": "unresolved"
+    }
+   },
+   "labelling_note": "Possible social scoring; detrimental or unrelated-context treatment not stated."
+  },
+  {
+   "id": "D32",
+   "category": "prohibited_unresolved",
+   "assessment_date": "2026-10-03",
+   "description": "We use an app that estimates students' attention levels from webcam images during online classes.",
+   "gold_facts": {
+    "intended_purpose": "online teaching",
+    "ai_functionality": "estimates student attention from webcam images",
+    "relevant_date": null,
+    "role_in_decision_making": null,
+    "develops_system": null,
+    "uses_system": true,
+    "puts_own_name_or_trademark": null,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": null,
+    "affected_persons": "students"
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "unresolved",
+     "system_category": [],
+     "derogation": null,
+     "annex_iii": [],
+     "annex_i": []
+    },
+    "prohibited_practice": {
+     "status": "unresolved",
+     "points": []
+    },
+    "actor_role": {
+     "actor_roles": [
+      "deployer"
+     ],
+     "unresolved_roles": [
+      "provider"
+     ],
+     "status": "unresolved"
+    },
+    "obligations": {
+     "aiact:art_16": "unresolved",
+     "aiact:art_26": "unresolved"
+    }
+   },
+   "labelling_note": "Whether attention inference is emotion recognition is uncertain; unnamed app, so develops_system null."
+  },
+  {
+   "id": "D33",
+   "category": "roles",
+   "assessment_date": "2026-10-03",
+   "description": "We are the deployer of an AI recruitment tool that ranks job applicants. What are our obligations?",
+   "gold_facts": {
+    "intended_purpose": "recruitment",
+    "ai_functionality": "ranks job applicants",
+    "relevant_date": null,
+    "role_in_decision_making": null,
+    "develops_system": null,
+    "uses_system": null,
+    "puts_own_name_or_trademark": null,
+    "modifies_intended_purpose": null,
+    "modifies_safety_relevant_components": null,
+    "jurisdiction": null,
+    "affected_persons": "job applicants"
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "applicable",
+     "system_category": [
+      "annex_iii_high_risk"
+     ],
+     "derogation": "not_established",
+     "annex_iii": [
+      "aiact:anx_III:area_4:item_a"
+     ],
+     "annex_i": []
+    },
+    "prohibited_practice": {
+     "status": "not_applicable/conditions_not_met",
+     "points": []
+    },
+    "actor_role": {
+     "actor_roles": [],
+     "unresolved_roles": [
+      "provider",
+      "deployer"
+     ],
+     "status": "unresolved"
+    },
+    "obligations": {
+     "aiact:art_16": "unresolved",
+     "aiact:art_26": "unresolved"
+    }
+   },
+   "labelling_note": "L9: an asserted conclusion yields no actor facts."
+  },
+  {
+   "id": "D34",
+   "category": "article_25",
+   "assessment_date": "2026-10-03",
+   "description": "We buy a CV-ranking engine from a vendor and resell it to employers under our own brand, TalentRank. We don't use it ourselves.",
+   "gold_facts": {
+    "intended_purpose": "recruitment",
+    "ai_functionality": "ranks CVs",
+    "relevant_date": null,
+    "role_in_decision_making": null,
+    "develops_system": false,
+    "uses_system": false,
+    "puts_own_name_or_trademark": true,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": null,
+    "affected_persons": "job applicants"
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "applicable",
+     "system_category": [
+      "annex_iii_high_risk"
+     ],
+     "derogation": "not_established",
+     "annex_iii": [
+      "aiact:anx_III:area_4:item_a"
+     ],
+     "annex_i": []
+    },
+    "prohibited_practice": {
+     "status": "not_applicable/conditions_not_met",
+     "points": []
+    },
+    "actor_role": {
+     "actor_roles": [
+      "provider"
+     ],
+     "unresolved_roles": [],
+     "status": "known"
+    },
+    "obligations": {
+     "aiact:art_16": "applicable",
+     "aiact:art_26": "not_applicable/conditions_not_met"
+    }
+   },
+   "labelling_note": "Art 25(1)(a): own name on a high-risk system makes the reseller a provider."
+  },
+  {
+   "id": "D35",
+   "category": "article_25",
+   "assessment_date": "2026-10-03",
+   "description": "Our bank bought the ScoreCore credit-scoring model and retrained it on our own data, changing its weights and decision thresholds. We now use it to decide on consumer loans.",
+   "gold_facts": {
+    "intended_purpose": "consumer lending decisions",
+    "ai_functionality": "evaluates creditworthiness",
+    "relevant_date": null,
+    "role_in_decision_making": null,
+    "develops_system": false,
+    "uses_system": true,
+    "puts_own_name_or_trademark": false,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": true,
+    "jurisdiction": null,
+    "affected_persons": "consumer loan applicants"
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "applicable",
+     "system_category": [
+      "annex_iii_high_risk"
+     ],
+     "derogation": "not_established",
+     "annex_iii": [
+      "aiact:anx_III:area_5:item_b"
+     ],
+     "annex_i": []
+    },
+    "prohibited_practice": {
+     "status": "not_applicable/conditions_not_met",
+     "points": []
+    },
+    "actor_role": {
+     "actor_roles": [
+      "provider",
+      "deployer"
+     ],
+     "unresolved_roles": [],
+     "status": "known"
+    },
+    "obligations": {
+     "aiact:art_16": "applicable",
+     "aiact:art_26": "applicable"
+    }
+   },
+   "labelling_note": "Art 25(1)(b): substantial modification of a high-risk system (L1: retraining is modification). PLAN §8 Art 25 case."
+  },
+  {
+   "id": "D36",
+   "category": "article_25",
+   "assessment_date": "2026-10-03",
+   "description": "We took OpenMind, a general-purpose AI assistant, and set it up to read job applications and reject unsuitable applicants automatically.",
+   "gold_facts": {
+    "intended_purpose": "recruitment",
+    "ai_functionality": "reads applications and rejects applicants",
+    "relevant_date": null,
+    "role_in_decision_making": "rejects automatically",
+    "develops_system": false,
+    "uses_system": true,
+    "puts_own_name_or_trademark": false,
+    "modifies_intended_purpose": true,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": null,
+    "affected_persons": "job applicants"
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "applicable",
+     "system_category": [
+      "annex_iii_high_risk"
+     ],
+     "derogation": "not_established",
+     "annex_iii": [
+      "aiact:anx_III:area_4:item_a"
+     ],
+     "annex_i": []
+    },
+    "prohibited_practice": {
+     "status": "not_applicable/conditions_not_met",
+     "points": []
+    },
+    "actor_role": {
+     "actor_roles": [
+      "provider",
+      "deployer"
+     ],
+     "unresolved_roles": [],
+     "status": "known"
+    },
+    "obligations": {
+     "aiact:art_16": "applicable",
+     "aiact:art_26": "applicable"
+    }
+   },
+   "labelling_note": "Art 25(1)(c): repurposing a general-purpose system so it becomes high-risk (L6)."
+  },
+  {
+   "id": "D37",
+   "category": "roles",
+   "assessment_date": "2026-10-03",
+   "description": "We resell a spam filter made by another company under our own brand, CleanBox. We don't use it ourselves.",
+   "gold_facts": {
+    "intended_purpose": "email security",
+    "ai_functionality": "filters spam",
+    "relevant_date": null,
+    "role_in_decision_making": null,
+    "develops_system": false,
+    "uses_system": false,
+    "puts_own_name_or_trademark": true,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": null,
+    "affected_persons": null
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "not_applicable/conditions_not_met",
+     "system_category": [],
+     "derogation": "not_assessed",
+     "annex_iii": [],
+     "annex_i": []
+    },
+    "prohibited_practice": {
+     "status": "not_applicable/conditions_not_met",
+     "points": []
+    },
+    "actor_role": {
+     "actor_roles": [],
+     "unresolved_roles": [],
+     "status": "known"
+    },
+    "obligations": {
+     "aiact:art_16": "not_applicable/conditions_not_met",
+     "aiact:art_26": "not_applicable/conditions_not_met"
+    }
+   },
+   "labelling_note": "Own branding on a non-high-risk system transfers nothing: an evidence-backed empty role list (§4.1)."
+  },
+  {
+   "id": "D38",
+   "category": "temporal",
+   "assessment_date": "2026-10-03",
+   "description": "We're a logistics company using HireSmart, an off-the-shelf tool that scores CVs and shows recruiters a ranked shortlist. Recruiters decide. Where did we stand in June 2024?",
+   "gold_facts": {
+    "intended_purpose": "recruiting staff",
+    "ai_functionality": "scores and ranks CVs",
+    "relevant_date": "2024-06-15",
+    "role_in_decision_making": "ranked shortlist; recruiters decide",
+    "develops_system": false,
+    "uses_system": true,
+    "puts_own_name_or_trademark": false,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": null,
+    "affected_persons": "job applicants"
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "not_in_force",
+     "system_category": [],
+     "derogation": null,
+     "annex_iii": [],
+     "annex_i": []
+    },
+    "prohibited_practice": {
+     "status": "not_in_force",
+     "points": []
+    },
+    "actor_role": {
+     "actor_roles": [],
+     "unresolved_roles": [],
+     "status": "not_in_force"
+    },
+    "obligations": {
+     "aiact:art_16": "not_in_force",
+     "aiact:art_26": "not_in_force"
+    }
+   },
+   "labelling_note": "Before entry into force (2024-08-01): no text valid, every determination not_in_force (Labelling decision DL4)."
+  },
+  {
+   "id": "D39",
+   "category": "temporal",
+   "assessment_date": "2026-10-03",
+   "description": "We're a logistics company using HireSmart, an off-the-shelf tool that scores CVs and shows recruiters a ranked shortlist. Recruiters decide. Where do we stand as of 1 March 2026?",
+   "gold_facts": {
+    "intended_purpose": "recruiting staff",
+    "ai_functionality": "scores and ranks CVs",
+    "relevant_date": "2026-03-01",
+    "role_in_decision_making": "ranked shortlist; recruiters decide",
+    "develops_system": false,
+    "uses_system": true,
+    "puts_own_name_or_trademark": false,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": null,
+    "affected_persons": "job applicants"
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "not_applicable/not_yet_applicable",
+     "system_category": [
+      "annex_iii_high_risk"
+     ],
+     "derogation": "not_established",
+     "annex_iii": [
+      "aiact:anx_III:area_4:item_a"
+     ],
+     "annex_i": []
+    },
+    "prohibited_practice": {
+     "status": "not_applicable/conditions_not_met",
+     "points": []
+    },
+    "actor_role": {
+     "actor_roles": [
+      "deployer"
+     ],
+     "unresolved_roles": [],
+     "status": "known"
+    },
+    "obligations": {
+     "aiact:art_16": "not_applicable/conditions_not_met",
+     "aiact:art_26": "not_applicable/not_yet_applicable"
+    }
+   },
+   "labelling_note": "Art 26 across D38/D39/D01: not_in_force / not_yet_applicable / applicable."
+  },
+  {
+   "id": "D40",
+   "category": "temporal",
+   "assessment_date": "2026-10-03",
+   "description": "Our call centre uses MoodMeter, which analyses agents' voices to infer their emotions; the scores feed into performance reviews. Were we compliant on 15 January 2025?",
+   "gold_facts": {
+    "intended_purpose": "call-centre staff management",
+    "ai_functionality": "infers agents' emotions from their voices",
+    "relevant_date": "2025-01-15",
+    "role_in_decision_making": "scores feed into performance reviews",
+    "develops_system": false,
+    "uses_system": true,
+    "puts_own_name_or_trademark": false,
+    "modifies_intended_purpose": false,
+    "modifies_safety_relevant_components": false,
+    "jurisdiction": null,
+    "affected_persons": "call-centre agents"
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "not_applicable/not_yet_applicable",
+     "system_category": [
+      "annex_iii_high_risk"
+     ],
+     "derogation": "not_established",
+     "annex_iii": [
+      "aiact:anx_III:area_1:item_c",
+      "aiact:anx_III:area_4:item_b"
+     ],
+     "annex_i": []
+    },
+    "prohibited_practice": {
+     "status": "not_applicable/not_yet_applicable",
+     "points": [
+      "aiact:art_5:para_1:point_f"
+     ]
+    },
+    "actor_role": {
+     "actor_roles": [
+      "deployer"
+     ],
+     "unresolved_roles": [],
+     "status": "known"
+    },
+    "obligations": {
+     "aiact:art_16": "not_applicable/conditions_not_met",
+     "aiact:art_26": "not_applicable/not_yet_applicable"
+    }
+   },
+   "labelling_note": "Article 5 applies from 2025-02-02: same practice as D21, one date earlier."
+  },
+  {
+   "id": "D41",
+   "category": "unresolved",
+   "assessment_date": "2026-10-03",
+   "description": "We use AI to help with decisions about people in our organisation.",
+   "gold_facts": {
+    "intended_purpose": "decisions about people",
+    "ai_functionality": "supports decisions about people",
+    "relevant_date": null,
+    "role_in_decision_making": null,
+    "develops_system": null,
+    "uses_system": true,
+    "puts_own_name_or_trademark": null,
+    "modifies_intended_purpose": null,
+    "modifies_safety_relevant_components": null,
+    "jurisdiction": null,
+    "affected_persons": null
+   },
+   "expected": {
+    "risk_tier": {
+     "status": "unresolved",
+     "system_category": [],
+     "derogation": null,
+     "annex_iii": [],
+     "annex_i": []
+    },
+    "prohibited_practice": {
+     "status": "unresolved",
+     "points": []
+    },
+    "actor_role": {
+     "actor_roles": [
+      "deployer"
+     ],
+     "unresolved_roles": [
+      "provider"
+     ],
+     "status": "unresolved"
+    },
+    "obligations": {
+     "aiact:art_16": "unresolved",
+     "aiact:art_26": "unresolved"
+    }
+   }
+  }
+ ]
+}

@@ -6,7 +6,9 @@ implemented as of 2026-10-01; Phase 1 (retrieval) and Phase 2 (extraction) as of
 against a target locked after the first run (§18). Phase 1 changed the retrieval design in three measured
 places — exact-citation priority (§7.4), reranker off by default (§7.4), and date
 payload indexes as a hard index requirement (§13.2) — and closed the §21
-filtered-HNSW open question. This document is the
+filtered-HNSW open question. **Phase 3 design (2026-10-03)** added the provision
+matcher (§2, §4.2), the Article 6 route combination and Annex I (§9.1), and found a
+corpus defect: trailing paragraph-level text was dropped (§9.1). This document is the
 technical source of truth for implementation in Claude Code. Where a decision rests on
 assumption rather than verified source material, it is marked **[ASSUMPTION]**. Where a
 decision has been checked against the actual EUR-Lex / AI Act Explorer text, it is marked
@@ -15,7 +17,8 @@ decision has been checked against the actual EUR-Lex / AI Act Explorer text, it 
 Phase 0 changed the architecture in exactly one place: **Article 6 was added to the V1
 corpus** on corpus evidence (§9). Every other invariant, identity, and structural
 decision in this document survived contact with the real Official Journal text unchanged.
-The corpus is 85 canonical provisions and 76 `ApplicabilityRule` records, built from
+The corpus was 85 canonical provisions and 76 `ApplicabilityRule` records at the end of
+Phase 0 (107 provisions after the Phase 3 corpus fixes and Annex I, §9.1), built from
 CELEX 32024R1689 retrieved via the EU Publications Office Cellar API — note that EUR-Lex
 itself sits behind an AWS WAF JavaScript challenge that blocks scripted fetching.
 
@@ -64,7 +67,8 @@ Retrieval (hybrid: semantic + BM25 + metadata/temporal filter + reranking)
         │  → date-eligible, structurally-relevant canonical provisions
         ▼
 Grounded determination (GroundedDetermination pattern, 4 top-level stages):
-        │  1. Risk-tier classification (Annex III matching)
+        │  1. Risk-tier classification (Article 6 routes: Annex III matching,
+        │     Article 6(3) derogation, Article 6(1) / Annex I matching)
         │  2. Prohibited-practice determination (Article 5 matching, via
         │     ApplicabilityRule where applicable-date conditions apply)
         │  3. Actor-role determination — internally invokes a nested
@@ -83,9 +87,22 @@ Generation: tier + obligations + explanation + citations
 Output to user
 ```
 
-Two determination-adjacent LLM steps exist (extraction, generation); everything between
-them is retrieval and rule evaluation, not free LLM reasoning. This is a deliberate
-design choice to keep the legally load-bearing part of the pipeline auditable.
+Two determination-adjacent LLM steps exist (extraction, generation). Between them sits
+retrieval, rule evaluation, and **exactly one constrained LLM step: the provision
+matcher (§4.2)**. No other free LLM reasoning happens there. This is a deliberate design
+choice to keep the legally load-bearing part of the pipeline auditable.
+
+**[Changed in Phase 3 design, 2026-10-03]** This paragraph originally said that
+everything between extraction and generation was retrieval and rule evaluation. That
+left a gap. Retrieval returns candidate Annex III / Article 5 / Article 6 provisions,
+but nothing specified how a free-text case is judged to *fall under* one of them.
+Similarity is not membership, and the rule layer only tests `actor_role` ×
+`system_category` plus dates (§12). The alternatives considered were a retrieval-score
+cutoff and a fixed keyword or category mapping. Both are recorded in §20, and the score
+cutoff is kept as a measured baseline arm (§18). The matcher does not weaken the
+auditability goal. It sees only a closed candidate set, emits only schema-constrained
+per-candidate verdicts with verbatim quotes, and every verdict is checked by code before
+it is used (§4.2).
 
 ---
 
@@ -317,6 +334,22 @@ determinations conclude directly from retrieved provision content matched agains
 facts, without a rule-matching layer, since Annex III category membership and role
 definitions are not phased in over time the way obligations and prohibitions are.
 
+**How "matched against case facts" happens differs by determination [Phase 3 design,
+2026-10-03]:**
+
+| Determination | Conclusion mechanism |
+|---|---|
+| Risk tier | Provision matcher (§4.2) over Annex III, Article 6(3) and Article 6(1) / Annex I candidates, combined by fixed code (§9.1) |
+| Prohibited practice | Provision matcher over Article 5(1) candidates, then `ApplicabilityRule` dates |
+| Actor role | Rules over the boolean actor facts (§3.2) and the Article 3 / Article 25 definitions; no LLM |
+| Substantial modification | Rules over `modifies_*` facts; no LLM |
+| Obligation applicability | `ApplicabilityRule` engine (§12); no LLM |
+
+The matcher is used only where the legal question is "does this free-text use case fall
+under this listed category?" There, both sides are open-ended natural language and no
+boolean fact can stand in without becoming a legal conclusion (§3.1). Everywhere else
+the inputs are already structured, so rules suffice.
+
 ### 4.1 Actor-Role Determination Output
 
 Actor roles can be held simultaneously (an organization can be both provider and
@@ -341,6 +374,23 @@ read as "no role."
 These two empty-looking cases are never conflated: one is a determination that
 concluded "no role applies," the other is a determination that could not be reached.
 
+**[Amended in Phase 3 design, 2026-10-03] Partial knowledge.** The two-state status
+could not express "certainly a deployer, provider unknown". Calling that `known` would
+overstate it, and calling it `unresolved` would discard an established role. Each role
+is therefore determined separately, as true, false or unknown (§4.3):
+
+```yaml
+ActorRoleResult:
+  actor_roles: [provider, deployer]      # roles established true
+  unresolved_roles: [provider, deployer] # roles that could not be determined
+  actor_role_status: known | unresolved  # known iff unresolved_roles is empty
+```
+
+`actor_roles` is now meaningful in both states: it always lists the roles that were
+established. `actor_roles: []` with `known` keeps its meaning, an evidence-backed
+"none". The rule engine reads each role's own value when it evaluates an
+`actor_role` condition (§14.2). An unknown role is unknown, not false.
+
 **Downstream obligation handling for simultaneous roles:** when `actor_roles` contains
 more than one role, obligation applicability (§12, §14) is evaluated **independently per
 role** against the `ApplicabilityRule` engine, then combined:
@@ -356,6 +406,117 @@ A provider+deployer case therefore receives the union of both obligation sets, e
 independently evidence-backed, not a blind merge — a provision could be `applicable`
 under one role and `not_applicable` or `unresolved` under the other, and both outcomes
 are preserved per-role in `supporting_evidence` rather than collapsed to one status.
+
+### 4.2 The Provision Matcher (Phase 3 design, 2026-10-03)
+
+The one LLM step between extraction and generation (§2). It answers a single question
+per candidate provision: does the described use case fall under this provision?
+
+**Inputs.**
+- The **original free-text description**, not just the extracted `Case`. Extraction is
+  deliberately lossy (§3.3). Some matching criteria, for example the Article 6(3)
+  conditions, are deliberately absent from the schema (§9.1), so the matcher must read
+  the source text.
+- The extracted `Case`, as context.
+- A **closed candidate set**: every date-eligible provision in the determination's
+  scope, each with its id and canonical text.
+
+**The candidate set is exhaustive over the scope, not top-k.** The scopes are short
+closed lists: 25 Annex III provisions, 8 Article 5(1) points, the Article 6(3)
+provisions, and Annex I. Taking only the top-k would let a retrieval miss turn into a
+confident `not_high_risk` or "not prohibited", which is the most dangerous error this
+system can make. The Phase 1 retriever still provides the temporal pre-filter and the
+candidate ordering, and it alone drives the baseline arm (below). If a scope ever grows
+too large to evaluate exhaustively, top-k needs a measured recall guarantee first. That
+case is not V1.
+
+**Output (schema-constrained, one verdict per candidate):**
+
+```yaml
+MatchVerdict:
+  logical_provision_id: str      # must be in the candidate set
+  verdict: matches | does_not_match | insufficient
+  case_quote: str | null         # verbatim span of the description; required for
+                                 # matches and does_not_match
+  provision_quote: str | null    # verbatim span of the candidate's canonical text;
+                                 # required for matches
+  rationale: str                 # for the explanation only; never read by code
+```
+
+**Code verification before any verdict is used.** Each check that fails *downgrades*
+that verdict to `insufficient` and is logged. No check ever upgrades a verdict.
+1. `logical_provision_id` is in the candidate set. An unknown id is discarded.
+2. Every candidate has exactly one verdict. A missing verdict becomes `insufficient`.
+   For duplicates, the most conservative verdict wins.
+3. `case_quote` occurs verbatim in the description and `provision_quote` occurs
+   verbatim in the candidate's canonical text. Both checks run after whitespace and
+   quote-character normalisation only.
+4. Required quotes are present for the verdict given.
+
+**Verdict semantics.** `does_not_match` must be backed by a case quote that shows the
+use case is something else, such as a spam filter quoted against Annex III 4(a).
+"Nothing in the text says so" is `insufficient`, not `does_not_match`. This is what
+lets `unresolved` arise from the matcher at all, instead of an absence of evidence
+being silently read as a negative.
+
+**Combination is code, not LLM.** The matcher judges candidates one at a time. How
+verdicts combine into a determination status is fixed in code: §9.1 for risk tier, and
+for prohibited practice:
+- any Article 5(1) point `matches` → that point's `ApplicabilityRule`s decide the
+  status (§12, §14);
+- every point `does_not_match` → `not_applicable`;
+- otherwise → `unresolved`.
+
+Article 5(1)(h) carries its exceptions inside one canonical provision (§7.1), so a
+`matches` on it means the use falls under the prohibition and none of the exceptions
+apply.
+
+**Model.** Same stack as extraction (§3.5): OpenAI, strict Structured Outputs. The
+model and effort arms are fixed in the Phase 3 pre-registration, before any
+determination run.
+
+**Baseline arm: retrieval-score cutoff.** The highest-scoring candidate in a scope
+counts as `matches` if its retrieval score clears a threshold τ. Every other candidate
+counts as `does_not_match`. τ is fixed before the first determination run, using the
+Phase 1 retrieval eval set, not the determination eval set. By construction this arm
+can never produce `insufficient`, so it cannot produce `unresolved` from matching. That
+limit is one of the things the comparison is meant to show (§18, §20).
+
+### 4.3 Actor-Role Rules (Phase 3 design, 2026-10-03)
+
+The spec named "rules over the boolean actor facts and Article 3 / Article 25" (§4) but
+never wrote them down, and the eval labels depend on them. They are three-valued
+(true / false / unknown), using the same logic as §14.2:
+
+```
+high_risk  = true if a risk-tier route is established (§9.1), whether or not it
+             applies yet; unknown if risk tier is unresolved; else false
+deployer   = uses_system                                        # Article 3(4)
+substantial_modification = modifies_safety_relevant_components
+                           OR modifies_intended_purpose         # Article 3(23)
+provider   = develops_system                                    # Article 3(3)
+             OR ( high_risk AND ( puts_own_name_or_trademark    # Article 25(1)(a)
+                                  OR substantial_modification   # Article 25(1)(b)
+                                  OR modifies_intended_purpose )) # Article 25(1)(c)
+```
+
+- **Evidence.** Each established or excluded role cites the provisions its rule used.
+  To make that possible, Article 3 points (3), (4) and (23) are ingested. Only those
+  three points are ingested, explicitly: the other 65 definitions would be retrieval
+  distractors (`V1_PARTIAL_ARTICLES`).
+- **Substantial modification** is the nested fifth instantiation (§4). It is a rule,
+  not a matcher call. Article 3(23) defines it as a change that affects compliance or
+  modifies the intended purpose, and those are exactly the two `modifies_*` facts.
+- **Transfer only on high-risk systems.** Article 25(1) speaks only of high-risk
+  systems. A reseller who rebrands a spam filter therefore stays roleless:
+  `actor_roles: []`, `known`.
+- **Known V1 simplifications, recorded rather than hidden:**
+  - `develops_system` counts as provider even without the "places on the market or
+    puts into service under its own name" part of Article 3(3). A contract developer
+    building to a client's order is the case this gets wrong.
+  - Article 25(2) (the original provider ceasing to be the provider after a transfer)
+    and Article 25(3) (product manufacturers) are not modelled as role rules. Their
+    provisions remain citable.
 
 ---
 
@@ -422,7 +583,7 @@ not fixed named fields:
 
 ```yaml
 StructuralPath:
-  - type: chapter | section | article | paragraph | point | sub_point | annex | annex_area | annex_item
+  - type: chapter | section | article | paragraph | subparagraph | point | sub_point | annex | annex_area | annex_item
     value: str
   # ordered list, e.g.:
   # [ {article, "5"}, {paragraph, "1"}, {point, "h"}, {sub_point, "iii"} ]
@@ -431,6 +592,16 @@ StructuralPath:
 Citation rendering and the "full structural path" display (e.g. `EU AI Act → Chapter III
 → Section 3 → Article 26 → Paragraph 2`) are derived by walking this path, not by
 reading fixed columns.
+
+**[Phase 3, 2026-10-03]** The variable-depth path absorbed two new shapes without any
+model change, which is the point of this decision:
+- `Article → Paragraph → Subparagraph`, for trailing subparagraphs that name no point
+  (Article 6(3), third subparagraph; §9.1). It is rendered as "Article 6(3), third
+  subparagraph".
+- `Annex → Section → Annex item`, for Annex I, Sections A and B. It is rendered as
+  "Annex I, Section A, point 11". As with chapters and sections in articles, the
+  section is navigational context and is left out of `logical_provision_id`
+  (`aiact:anx_I:item_11`). Annex I numbers its entries continuously across sections.
 
 ---
 
@@ -604,6 +775,126 @@ Verified area structure, for reference:
 7. Migration, asylum, border control — (a)–(d)
 8. Administration of justice and democratic processes — (a), (b)
 
+### 9.1 Risk-tier determination: the two routes and the derogation (Phase 3 design, 2026-10-03)
+
+**No `Case` schema change.** Article 6(3) and 6(1) depend on facts the Phase 2 schema
+does not hold: whether the task is narrow or preparatory, whether the system profiles
+people, whether it is a safety component, and whether third-party conformity assessment
+applies. Two ways to supply those facts were considered:
+- add fields to `Case`;
+- have the matcher read the original description against these provisions (§4.2).
+
+The second was chosen. Adding fields would reopen the closed Phase 2 contract: the 30
+labelled cases, the field rules, the accuracy target, and the leakage check. Several of
+the candidate fields would also sit on the fact/conclusion boundary. "Performs
+profiling" is a term the Act defines by reference to the GDPR, so as an extraction
+field it would be a legal conclusion (§3.1).
+
+**Annex I joins the corpus.** Article 6(1)(a) and (b) refer to "the Union harmonisation
+legislation listed in Annex I". Without Annex I, the product-embedded route depends on
+a list that is absent, which is the same gap Phase 0 found for Article 6 itself.
+Annex I is ingested like Annex III. It is a list, typed `scope`, with its Section A and
+Section B entries as the atomic provisions. **[VERIFIED at ingestion]** It has 20
+entries numbered continuously: Section A covers 1–12 (New Legislative Framework, e.g.
+machinery, toys, medical devices), and Section B covers 13–20 (e.g. civil aviation,
+vehicles, rail). Each entry carries its own section heading as a lead-in (§6). Its OJ
+markup differs from every other V1 list: a three-column row with an empty indent cell,
+and the text in a bare `<span>`. The parser handles both.
+
+**Combination (fixed code over verified matcher verdicts):**
+
+*Article 6(2), the Annex III route:*
+- Any Annex III candidate `matches` → Annex III membership is established. Go to the
+  Article 6(3) check.
+- Every Annex III candidate `does_not_match` → the route is not met.
+- Otherwise → the route is `unresolved`.
+
+*Article 6(3), evaluated only after an Annex III match:*
+
+| Profiling override (6(3), third subparagraph) | Any of 6(3)(a)–(d) | Route outcome |
+|---|---|---|
+| `matches` | — | high-risk (Annex III) — the override always wins |
+| `does_not_match` | `matches` | **not high-risk** (derogation applies; cited) |
+| `insufficient` | `matches` | `unresolved` — the override would flip the outcome |
+| any | none `matches` | high-risk (Annex III), with `derogation: not_established` recorded |
+
+The last row is a deliberate asymmetry. The derogation is an exception that the
+provider must positively claim and document under Article 6(4). The Act's default for
+an Annex III system is high-risk. A description that is silent on 6(3) therefore does
+not establish the derogation. It does not leave the tier unresolved either. The output
+records that the derogation was considered and not established, so the result is never
+a bare "high-risk" that hides the question.
+
+*Article 6(1), the product-embedded route.* Both conditions are required:
+- (a) covered by Annex I legislation, judged by matching against Annex I entries;
+- (b) subject to third-party conformity assessment, judged by matching against 6(1)(b).
+
+| (a) | (b) | Route outcome |
+|---|---|---|
+| `matches` | `matches` | high-risk (Article 6(1)) |
+| either `does_not_match` | — | route not met |
+| otherwise | | `unresolved` |
+
+Descriptions rarely state the conformity-assessment requirement. Expect this route to
+be `unresolved` unless the description says so explicitly. That is accepted V1
+behaviour, not a defect to tune away.
+
+*Route dates.* An established route counts as high-risk only on or after its
+`ApplicabilityRule` date: 2026-08-02 for Article 6(2) and 2027-08-02 for Article 6(1)
+(§12.1). Before that date the route is **established but not yet applicable**.
+
+*Routes combined into `risk_tier`:*
+- Either route reaches high-risk and is applicable on `relevant_date` → `applicable`.
+- Otherwise, any route is `unresolved` → `unresolved`.
+- Otherwise, a route is established but not yet applicable → `not_applicable` with
+  `not_applicable_reason: not_yet_applicable`.
+- Otherwise (both routes not met, or the derogation applies) → `not_applicable` with
+  `not_applicable_reason: conditions_not_met`.
+
+The output carries `system_category`, which is `annex_iii_high_risk`,
+`article_6_1_high_risk`, or both. It is set for every **established** route,
+including one that is not yet applicable. Downstream obligations therefore come out
+as `not_yet_applicable` rather than `conditions_not_met`. Downstream `ApplicabilityRule` conditions select on
+exactly this value (§12). This field is what makes the two application dates
+(2026-08-02 and 2027-08-02) reachable. Before Phase 3, the risk-tier output (§16) had
+no slot for it.
+
+**Corpus defect found while designing this section, and fixed [2026-10-03].** The
+Article 6(3) profiling override was absent from every ingested provision. So was the
+second subparagraph of Article 5(2). Both are trailing paragraph-level text that names
+no specific point. Phase 0 attached trailing text only when it *named* a node (the
+Article 5(1)(h) savings clause) and silently dropped everything else. This is a variant
+of Phase 0 hazard (2) that the original fix did not cover.
+
+The fix applies one rule:
+- Trailing text that names a point stays a qualifier of that point, as before.
+- Trailing text that names no point becomes its own canonical provision at a new
+  `subparagraph` level (§6). It is numbered as the Act cites it: each own-text
+  fragment opens a subparagraph, and a list belongs to the fragment before it. That
+  gives `aiact:art_6:para_3:subpara_3`, "Article 6(3), third subparagraph", and
+  `aiact:art_5:para_2:subpara_2`.
+- Its text carries the paragraph's preceding standalone subparagraphs, but not list
+  lead-ins. So "Notwithstanding the first subparagraph" is read together with the
+  derogation it overrides.
+
+Attaching the override to each of 6(3)(a)–(d) was rejected. The override needs its own
+matcher verdict in the table above, and attaching the Article 5(2) rule to (a) and (b)
+would cite a registration duty as "Article 5(2)(a)". A Phase 4 evidence-resolution
+item follows from the split: citing a 6(3) point must also bring in the override, as
+an explicit dependency (§8). A new test asserts that every source fragment of a V1
+article or annex appears in some canonical provision. Before the fix it found exactly
+these two fragments.
+
+While Annex I was being added, a second Phase 0 defect surfaced in cross-reference
+extraction. The external-instrument exclusion could be dodged by regex backtracking:
+"Article 35 of Regulation (EU) 2016/679" failed the exclusion as "Article 35" but then
+matched as an internal "Article 3". Five provisions carried false edges of this kind,
+in Article 26(9)–(11) and Annex III 6(d)–(e). They are fixed and tested.
+
+Corpus after both fixes and Annex I: 107 provisions (was 85) and 76 rules (unchanged).
+None of the 85 existing provisions changed text or `content_id`. Cross-reference
+resolution is 0.174 (was 0.120): 23 distinct edges (was 25), 4 of them resolvable.
+
 ---
 
 ## 10. Identity Model: `logical_provision_id` / `versioned_provision_id` / `content_id`
@@ -691,7 +982,10 @@ engine is not a mandatory layer for every `GroundedDetermination` instantiation 
 obligation applicability (Article 16/26) and prohibited-practice determination
 (Article 5) — the two determination types whose legal question depends on date-scoped
 or conditional applicability. Risk-tier and actor-role determinations do not use this
-layer; they conclude directly from retrieved provision content.
+layer; they conclude directly from retrieved provision content. **[Qualified in Phase
+3 design, 2026-10-03]** One exception: once a risk-tier route is established, the
+determination reads that route's Article 6(1) / 6(2) rule **for its date only**
+(§9.1, §14.2). It never reads the rule's conditions.
 
 ### 12.1 Ingestion and validation (Phase 0 responsibility)
 
@@ -734,9 +1028,15 @@ applicability distinction (§13.1).
   are `scope` provisions — they classify rather than impose duties — but Article 113(c)
   dates Article 6(1) itself to 2027-08-02 while 6(2) falls under the general
   2026-08-02 date, so both carry rules. Without this, a determination cannot separate
-  "this system is not high-risk" from "that classification route was not yet in force
-  on the relevant date", which is precisely the `not_applicable` vs `not_in_force`
-  distinction §14 forbids collapsing.
+  "this system is not high-risk" from "that classification route did not yet apply on
+  the relevant date".
+
+  **[Corrected in Phase 3 design, 2026-10-03]** This passage originally called that
+  the `not_applicable` vs `not_in_force` distinction. It is not. Under §14,
+  `not_in_force` means only that no text version was valid on the date. A phase-in
+  date that has not arrived is a rule-layer outcome: `not_applicable` with
+  `not_applicable_reason: not_yet_applicable` (§14.2). The rules on 6(1)/6(2) are
+  what let that reason be given instead of `conditions_not_met`.
 
 These checks are additive to, not a replacement for, the version-integrity invariant in
 §11 — a `Provision` can pass text-validity validation while its `ApplicabilityRule`
@@ -912,13 +1212,78 @@ plain `GroundedDetermination` instantiation:
 - `not_in_force` — the matched provision's own text was not valid at `relevant_date`
   (same meaning as above, evaluated against text validity only).
 - `unresolved` — retrieved evidence is insufficient to reach a conclusion (an evidence
-  gap, not a rule-coverage gap, since there is no rule set to have gaps in).
+  gap, not a rule-coverage gap, since there is no rule set to have gaps in). For
+  matcher-backed determinations this means the combination in §4.2 / §9.1 hit an
+  `insufficient` verdict that could change the outcome. A verdict downgraded by code
+  verification counts the same way.
 - `applicable` / `not_applicable` — a direct conclusion drawn from matching retrieved
   provision content against case facts.
 
 The four-way output contract (§16) is uniform across all determination types; only the
 mechanism producing it differs depending on whether the determination is
 `ApplicabilityRule`-backed.
+
+### 14.2 Phase-in dates and unknown inputs (Phase 3 design, 2026-10-03)
+
+Two gaps in the join above were found in the Phase 3 audit and settled before any
+determination code was written.
+
+**A date before a rule's `applicable_from` gives `not_applicable`, with a reason.**
+The join already routed this case to `not_applicable`. One sentence in §12.1 framed it
+as a `not_in_force` question, and has been corrected. `not_in_force` stays reserved for
+"no text version was valid on this date". But a bare `not_applicable` would read as a
+permanent exclusion for an obligation that starts next year. Every `not_applicable`
+therefore carries a reason (§16):
+
+- `conditions_not_met` — a rule covering the date was found, and the case fails its
+  conditions (wrong role, wrong category);
+- `not_yet_applicable` — the case satisfies a rule's conditions, but `relevant_date`
+  is before that rule's `applicable_from`.
+
+When both could apply, `not_yet_applicable` wins. It is the more informative and less
+reassuring of the two.
+
+"A rule was found" in the §14 join means that at least one `ApplicabilityRule` exists
+for the provision. Its date window is then evaluated like a condition. Only a provision
+with **no** rule at all is the coverage gap that gives `unresolved`. Otherwise every
+date before the first `applicable_from` would read as a coverage gap, and the phase-in
+schedule could never produce an evidence-backed answer.
+
+The PLAN §8 acceptance case runs on the real corpus with Article 16(a) for an Annex III
+provider:
+
+| `relevant_date` | Status | Reason |
+|---|---|---|
+| 2024-07-01 | `not_in_force` | text not yet in force; entry into force was 2024-08-01 |
+| 2025-06-01 | `not_applicable` / `not_yet_applicable` | rule found; it applies from 2026-08-02 |
+| 2026-09-01 | `applicable` | rule applies |
+
+Verified against the ingested rules. `aiact:art_16:point_a#annex3` applies from
+2026-08-02 for a provider and `annex_iii_high_risk`. The `#art6_1` rule fails on
+category, so it is not met at any date for this case.
+
+**Unknown condition inputs use three-valued logic.** Rule conditions do not read raw
+facts. They read `actor_role` and `system_category`, which are themselves the outputs
+of earlier determinations. A condition is therefore *unknown* exactly when its upstream
+determination is `unresolved`: `actor_role_status: unresolved`, or a risk tier that is
+`unresolved` and leaves `system_category` undetermined. `relevant_date` is never
+unknown, because `Case` always fills it in (§3.2). Evaluation:
+
+- *Within one rule, all conditions must hold:*
+  - any condition is false → the rule is not met;
+  - otherwise, any condition is unknown → the rule is unknown;
+  - otherwise → the rule is met.
+- *Across the rules for one provision, one met rule is enough:*
+  - any rule is met → `applicable`;
+  - otherwise, any rule is unknown → `unresolved`;
+  - otherwise → `not_applicable`, with the reason as above.
+
+A known deployer whose risk tier is unresolved is therefore `not_applicable` for a
+provider-only rule, because the role condition already fails. That is an
+evidence-backed exclusion, not a guess. The same deployer is `unresolved` for a
+deployer rule that needs the unresolved category. Treating every unknown input as
+`unresolved` was rejected: it would discard an exclusion the evidence already
+supports, and inflate `unresolved` until it stopped carrying information.
 
 ---
 
@@ -993,6 +1358,8 @@ Determination:            # shared shape for risk-tier, prohibited-practice, act
   determination_type: risk_tier | prohibited_practice | actor_role |
                        obligation_applicability
   applicability_status: applicable | not_applicable | unresolved | not_in_force
+  not_applicable_reason: conditions_not_met | not_yet_applicable | null
+                           # set iff status is not_applicable (§14.2)
   explanation: str
   supporting_evidence: [EvidenceItem]
 ```
@@ -1004,10 +1371,23 @@ actor-role outputs use the same shape rather than a bespoke structure each.
 **Value mapping for `risk_tier` and `prohibited_practice`.** Both determination types
 reuse the generic `applicability_status` field rather than a separate tier enum:
 
-- `determination_type = risk_tier`: `applicable` means the system matches an Annex III
-  high-risk category (`high_risk`); `not_applicable` means it does not
-  (`not_high_risk`); `unresolved` and `not_in_force` retain their standard §14/§14.1
-  meanings, applied to Annex III category matching.
+- `determination_type = risk_tier`: `applicable` means the system is high-risk under
+  either Article 6 route (`high_risk`). `not_applicable` means it is not
+  (`not_high_risk`): both routes are not met, or the Article 6(3) derogation applies.
+  `unresolved` and `not_in_force` keep their standard §14/§14.1 meanings, applied to
+  the route combination in §9.1. **[Changed in Phase 3 design, 2026-10-03]** This
+  originally read "matches an Annex III high-risk category", which is the
+  "Annex III ⇒ high-risk" collapse §9 warns against. A risk-tier `Determination` also
+  carries:
+
+  ```yaml
+  system_category: [annex_iii_high_risk | article_6_1_high_risk]  # every established
+                                                                  # route (§9.1)
+  derogation: applied | not_established | overridden_by_profiling | not_assessed
+                    # Art 6(3); not_assessed when no Annex III match;
+                    # overridden_by_profiling when a 6(3) condition matches but the
+                    # profiling override also matches (§9.1)
+  ```
 - `determination_type = prohibited_practice`: `applicable` means the case matches an
   Article 5 prohibited practice; `not_applicable` means it does not; `unresolved` and
   `not_in_force` retain their standard meanings, applied to Article 5 matching (via
@@ -1138,6 +1518,36 @@ presented as such.
 A genuinely pre-registered test of the citation design needs citation queries
 written *before* the next run; new query sets should be committed before they are
 evaluated.
+
+**Re-check on the Phase 3 corpus (107 provisions, 2026-10-03).** The corpus fixes
+and Annex I (§9.1) added 22 provisions, and none of the existing ones changed. The
+same 98 queries were re-run unchanged. Results are in
+`data/eval/results/corpus_v2_107p_98q.*`; the Phase 1 files stay frozen.
+
+| slice | vector | hybrid (RRF) | **design** | design, Phase 1 |
+|---|---|---|---|---|
+| bare citations, R@5 | 0.654 | 0.827 | **1.000** | 1.000 |
+| bare citations, P@5 | 0.131 | 0.169 | **0.215** | 0.215 |
+| use case, R@5 | 0.929 | 0.946 | **0.946** | 0.946 |
+| all pre-registered, R@5 | 0.948 | 0.958 | **0.969** | 0.969 |
+
+- **All three regression guards still hold.** On bare citations, R@5 is +0.346 over
+  vector-only and P@5 is +0.084. On use case, the design scores 0.946 against 0.929.
+  The temporal results did not change.
+- **The design's own numbers are unchanged at R@5**, and use-case R@1 rose from 0.679
+  to 0.750. Vector-only lost ground on bare citations (0.731 → 0.654) and on
+  pre-registered queries (0.958 → 0.948). The new Annex I entries are long,
+  boilerplate-heavy legislative titles that crowd the top-5 for vague queries
+  (misses B03, B25, V04).
+- **Caveat:** none of the 98 queries targets an Annex I entry or one of the new
+  subparagraphs, so this re-check measures distraction, not retrieval of the new
+  provisions. The matcher evaluates those scopes exhaustively (§4.2), so it does not
+  depend on retrieving them.
+- **Article 3(3), (4), (23) added (110 provisions).** Results are in
+  `data/eval/results/corpus_v3_110p_98q.*`. Recall@5 and Precision@5 are unchanged
+  for every arm on every slice. The design's use-case R@1 rose again, from 0.750 to
+  0.786. The new definitions appear as BM25 distractors (Article 3(3) in U04, U06 and
+  U07) but displace no correct result from the design's top-5. The guards hold.
 
 **Extraction:**
 - Field-level accuracy (semantic match for free-text fields: purpose, functionality)
@@ -1345,6 +1755,308 @@ remains available. The eval harness still runs both pre-registered arms by defau
 - **Zero-tolerance metric:** no `unresolved` case in the eval set may be silently
   produced as `not_applicable` or `applicable`. No `not_in_force` case may be produced
   as `not_applicable`. Both are hard failures (§14's invariant), not threshold misses.
+- **Matcher vs score-cutoff baseline [Phase 3 design, 2026-10-03]:** both arms run on
+  the same determination eval set, scored per state as above. Also reported: the
+  matcher's verification-downgrade rate (§4.2), and `system_category` / `derogation`
+  correctness for risk-tier cases. The matcher is adopted only if it beats the
+  baseline under a decision rule fixed in the Phase 3 pre-registration, the same
+  discipline as Phase 1 (invariant 20).
+
+**Determination — locked targets, fixed BEFORE the first run [Phase 3 design,
+2026-10-03].** Phases 1 and 2 locked their targets after seeing results, and both are
+recorded as regression guards rather than pre-registered criteria. Phase 3 fixes its
+numbers now, before the eval set is run even once. A miss is then reported as a miss,
+not retuned.
+
+- **Inputs:** the determination stage is scored on **gold `Case` inputs** (hand-labelled
+  facts plus the original description), not live extraction. A miss is then
+  attributable to this stage (see below). End-to-end scoring is Phase 5.
+- **Zero tolerance (hard failures):**
+  - `unresolved` produced as `applicable` or `not_applicable`;
+  - `not_in_force` produced as `not_applicable`;
+  - a positive conclusion resting on a verdict that failed code verification (§4.2).
+- **Rule-based outputs:** actor role, obligation applicability, `not_in_force`, and
+  `not_applicable_reason` on rule-backed outcomes must score **1.00**. With gold
+  inputs these are deterministic code over §12 / §14.2, so anything less is a bug,
+  not a tolerance.
+- **Matcher-backed outputs:** risk tier and prohibited practice need per-state
+  accuracy **≥ 0.85**, separately on `applicable`, `not_applicable` and `unresolved`,
+  for the adopted matcher arm. This is a judgement fixed before any data, sized for a
+  small hand-built set: roughly one miss per ten cases in each state.
+  `system_category` and `derogation` are scored on risk-tier cases and reported. They
+  are not separately gated in V1.
+- The matcher must **also** beat the score-cutoff baseline under the pre-registered
+  decision rule. Clearing 0.85 alone does not adopt it.
+
+**Determination — Phase 3 pre-registration [2026-10-03].** The eval set (labels
+reviewed and approved by the user), arms, scoring and decision rule below are
+committed and binding. The τ values, the matcher prompt and the verification code
+were committed afterwards, still before the first determination run (Phase 2
+precedent; see "Pre-registration completed" below).
+
+- **Eval set.** `data/eval/determination_cases.json`: 41 hand-labelled cases with gold
+  facts plus the description. Labelling decisions DL1–DL5 are recorded in the file.
+  Once committed, its content is SHA-pinned in tests. A test also recomputes every
+  rule-based label (roles, Article 16/26) from the gold facts and the labelled risk
+  tier, so a labelling slip cannot survive as "ground truth".
+
+  | Expected state | Risk tier | Prohibited practice |
+  |---|---|---|
+  | `applicable` | 21 | 7 |
+  | `not_applicable` (`conditions_not_met` / `not_yet_applicable`) | 14 (11 / 3) | 29 (28 / 1) |
+  | `unresolved` | 5 | 4 |
+  | `not_in_force` | 1 | 1 |
+
+  Coverage required by PLAN §8:
+  - simultaneous provider+deployer (D02);
+  - Article 25 transfer (D34–D36);
+  - the same provision at three dates (Article 26: D38 / D39 / D01);
+  - the Article 6(3) derogation (D09);
+  - the 6(1) vs 6(2) routes (D18–D19 vs D01);
+  - `not_in_force` vs `not_applicable` on one provision (D38 vs D39).
+- **Arms.**
+
+  | Arm | Model and effort | Role | Runs per case |
+  |---|---|---|---|
+  | **M-low** | matcher, `gpt-6.1-sol`, effort `low` | primary (the accepted Phase 2 configuration) | 3 |
+  | ~~M-medium~~ | ~~matcher, effort `medium`~~ | ~~reported only~~ | dropped, see below |
+  | B | score-cutoff baseline | comparison | 1 (deterministic) |
+
+  For the matcher arms, per-state accuracy is the mean over runs.
+
+  **[Pre-run amendment, 2026-10-03, before any determination API call]** The M-medium
+  arm is dropped for cost. Its estimated share was about $11–17 of a $20–30 run. It
+  was "reported only": the decision rule compares M-low with B and never reads
+  M-medium. Dropping it changes neither the decision rule, nor the targets, nor any
+  label. The run is therefore M-low × 3 repeats (123 calls) plus B. Before the run, one
+  smoke-test call is made with `eu-ai-check match` on a made-up description that is
+  not in the eval set. It confirms that the API accepts the strict schema and measures
+  the real token usage. That call is not a result on the eval set.
+- **Baseline score and τ.**
+  - Score: the maximum cosine similarity (bge-base-en-v1.5, the Phase 1 embedder)
+    between the description and any chunk of an in-scope provision. Cosine is used
+    rather than the RRF score because RRF is rank-based and carries no
+    match/no-match magnitude.
+  - Verdicts: in each matcher scope (Annex III, Article 5(1), 6(3)(a)–(d), the 6(3)
+    override, Annex I, 6(1)(b)), the top candidate is `matches` if its score is ≥ τ,
+    and every other candidate is `does_not_match`. The verdicts then go through the
+    same §9.1 combination code as the matcher's.
+  - τ per scope: chosen by maximising Youden's J on the Phase 1 retrieval eval set.
+    A use-case query is a positive for a scope when its relevant provisions include
+    an in-scope one, and a negative otherwise.
+  - Scopes with no positives in that set (Annex I, the override, 6(1)(b)) use one
+    pooled τ fitted across all scopes.
+  - The values are computed and committed before the first determination run.
+- **Scoring.** A status is correct only on an exact match, *including* the
+  `not_applicable_reason`. The per-state buckets are `applicable`, `not_applicable`
+  (both reasons) and `unresolved`. `not_in_force` cases are gated at 1.00 as
+  deterministic outputs, not as matcher states.
+- **Decision rule (adopt the matcher, M-low, over B).** All three must hold:
+  1. Zero-tolerance checks pass in every M-low run.
+  2. M-low meets the locked targets: ≥ 0.85 per state on risk tier and on prohibited
+     practice, and 1.00 on rule-based outputs.
+  3. M-low beats B by ≥ 0.10 on macro per-state accuracy (the mean over the three
+     buckets), for risk tier and for prohibited practice separately. M-low must also
+     be ≥ B on the `applicable` bucket and on the `not_applicable` bucket
+     individually. Without that last condition, the win could come entirely from B
+     being structurally unable to produce `unresolved`.
+
+  If 2 fails, Phase 3 acceptance is not met. Any prompt change becomes a new
+  pre-registered follow-up, as `role-null-v1` was in Phase 2, and is never a retune
+  against this set. If 1 and 2 hold but 3 fails, the result is reported and the
+  matcher-vs-baseline design question reopens.
+- **Pre-registration completed (2026-10-03, before any determination run).**
+  - *Code:* `src/eu_ai_check/determination/` and `eu-ai-check eval-determination`.
+  - *One matcher call per case* covers every scope: 59 date-eligible candidates
+    (25 Annex III, 8 Article 5(1), 4 + 1 Article 6(3), 20 Annex I, 1 Article
+    6(1)(b)), roughly 8.5k input tokens. No call is made when no candidate text is in
+    force; the case is then `not_in_force` without asking the model.
+  - *Prompt:* the matcher prompt, response schema and scope questions are SHA-pinned
+    in `tests/test_determination.py`. One clarification was added before pinning:
+    a description of what a system *is* can answer a question "no" (a spam filter is
+    evidently not a machinery safety component). Without it, the silence rule could
+    make every non-product case `unresolved` through the 20 Annex I candidates.
+  - *τ values:* `eu-ai-check fit-tau` → `data/eval/determination_tau.json`.
+
+    | Scope | τ | Source |
+    |---|---|---|
+    | Annex III | 0.5052 | 14 positives / 14 negatives |
+    | Article 5(1) | 0.5362 | 7 / 21 |
+    | 6(3) conditions | 0.6388 | 1 positive only, fitted as the rule says |
+    | Override, Annex I, 6(1)(b) | 0.4883 (pooled) | no positive queries |
+
+  - *Rule path:* scored on the labelled risk tier as pre-registered, it reproduces
+    all 123 rule-based labels (1.00). That is checked offline in the test suite and
+    again in every run.
+- **Small-n, stated in advance.** `unresolved` has 5 risk-tier and 4 prohibited
+  cases. With 3 runs each, that is 15 and 12 judgements, so 0.85 permits at most 2
+  and 1 wrong runs respectively. A single systematically mislabelled or misjudged case
+  can sink the bucket. That is accepted as the price of a hand-built set, and is said
+  here so it cannot be discovered conveniently later.
+
+**Determination — Phase 3 first run (pre-registered, 2026-10-04).** A one-call smoke
+test with `eu-ai-check match` on a made-up description outside the eval set came
+first. The API accepted the strict schema, and all 59 candidates were
+`does_not_match`, which is correct. That call cost $0.057. The pre-registered run
+then went ahead as amended: M-low × 3 (123 calls) plus B, with no label, prompt,
+scoring rule or case changed.
+
+- *Raw first attempt, frozen unchanged:*
+  `data/eval/results/determination_v1_41c.{txt,json,runs.jsonl}`. 26 of the 123
+  M-low calls (21%) failed with `APIConnectionError: Connection error.`. They are
+  D30#1–2, D31, D32, D34#0–1, D35#2, D36, D37, D39, D40 and D41, all repeats unless
+  marked. They fall in the last stretch of the run, which points to a network
+  outage. The harness scored each one as wrong. B had no errors.
+- *Retry of the API-failed calls only (user decision, 2026-10-04).* The
+  pre-registration did not say how to handle transport failures. Only the 26 failed
+  (case, repeat) pairs were re-called, once each, with the same model, effort,
+  prompt and labels. The 97 successful M-low runs were not re-called: they were
+  replayed through the pipeline from their recorded verdicts, and the script stops
+  unless each replay reproduces its original record exactly. B was recomputed under
+  the same exact-match check. All 26 retries succeeded. Script:
+  `scripts/retry_determination_failed.py`. Merged result:
+  `data/eval/results/determination_v1_41c_retry.{txt,json,runs.jsonl}`. Cost: $5.44
+  for the first attempt and $1.42 for the retry.
+- *The merged run is the official Phase 3 result.* The first attempt is kept only
+  as the raw record.
+
+**Determination — Phase 3 acceptance (2026-10-04): NOT MET** against the
+pre-registered decision rule.
+
+| | M-low | B | target |
+|---|---|---|---|
+| risk tier: applicable / not_applicable / unresolved | 1.000 / **0.786** / 0.933 | 0.524 / 0.714 / 0.000 | ≥ 0.85 each |
+| prohibited: applicable / not_applicable / unresolved | 1.000 / **0.632** / 1.000 | 0.571 / 0.828 / 0.000 | ≥ 0.85 each |
+| macro: risk tier / prohibited | 0.906 / 0.877 | 0.413 / 0.466 | M-low ≥ B + 0.10 |
+| zero-tolerance violations | **1** | 9 | 0 |
+| rule path | 1.000 (123 checks) | | 1.00 |
+
+Condition 1 fails, and so does condition 2. Condition 3 fails on one sub-check only:
+prohibited `not_applicable`, where M-low is below B. The matcher is **not adopted**
+on this result. Root cause, from the recorded verdicts:
+
+- *Zero tolerance, D32#2.* Risk tier is labelled `unresolved` and came back
+  `not_applicable`. On that repeat the matcher returned `does_not_match` for Annex
+  III 1(c), where the other two repeats returned `insufficient`. This is run-to-run
+  variance; D32#0 and #1 are correct.
+- *prohibited `not_applicable` = 0.632 (32 misses out of 87).* All 32 came back
+  `unresolved`. In 30 of them, Article 5(1)(c) (social scoring) came back
+  `insufficient`, alone in 26. The cases are D02, D04, D05, D07, D11, D12, D33–D36
+  and D39, and none of them describes social scoring. A typical rationale (D04,
+  exam proctoring) is: "The description does not establish social scoring or the
+  nature and proportionality of any resulting treatment". The matcher treats an
+  absence of evidence *against* 5(1)(c) as missing information. The other 2 misses
+  are D08#2 (5(1)(a)–(b)) and one 5(1)(f)-only miss.
+- *risk tier `not_applicable` = 0.786 (9 misses out of 42).* These are D10, D26 and
+  D28, three repeats each. **Article 5(1)(c) over-caution does not cause them**:
+  - D26: the 5(1)(c) match is correct, and prohibited is correctly `applicable`. The
+    risk-tier miss comes from a further Annex III 4(a) match ("employers use the
+    scores to deny jobs").
+  - D28: prohibited is correctly `applicable` (5(1)(b)). The risk-tier miss is Annex
+    III 1(b) at `insufficient` ("does not say whether categorisation is based on
+    biometric data").
+  - D10: Annex III 4(b) at `insufficient` (are the loan officers monitored?), and the
+    6(3) profiling question also `insufficient`. Gold: Annex III 5(b) with the
+    derogation applied.
+
+**Determination — post-hoc intervention on Article 5(1)(c) (opened 2026-10-04).**
+This is a **POST-HOC** intervention, documented with the same discipline as Phase 2's
+`role-null-v1`. It differs from the decision rule's own instruction ("never a retune
+against this set") in one respect, and is labelled accordingly:
+
+- *The 41-case set becomes the DEV set for this intervention.* It has been inspected
+  and the error analysis above was done on it. Any further measurement on it is
+  **diagnostic only, never validation**. The official Phase 3 result above stays
+  NOT MET whatever the dev-set numbers show.
+- *Validation* happens only on a new held-out confirmation set built before the
+  iteration starts and not touched during it. It gets one pass, and its results are
+  reported separately from the dev set and never merged into a combined number.
+- *Scope:* the 5(1)(c) over-caution pattern only. The risk-tier misses above (D10,
+  D26, D28) and the D32#2 variance have different causes and are outside this
+  intervention.
+- *Held-out set, frozen before any matcher change (`6b98c76`).*
+  `data/eval/determination_heldout_5_1_c.json` has 8 cases, from angles not in the
+  failing dev cases:
+  - H01 payment fraud, H02 workplace productivity, H03 churn, H04 motor telematics
+    and H05 buy-now-pay-later credit: prohibited `not_applicable`.
+  - H06 an employer scoring private social-media behaviour: the positive control,
+    5(1)(c) `applicable`.
+  - H07 and H08: borderline, prohibited `unresolved`.
+
+  The rule-based labels were checked offline (24/24). **This set was never run**,
+  because the intervention stopped on the dev set. It stays untouched and could
+  serve as a confirmation set for a future, separately pre-registered change.
+- *Hard stop, set by the user before v2 ran:* v2 is the last dev iteration. A
+  zero-tolerance violation or a clear regression on the dev set ends the
+  intervention as NOT ADOPTED, with no v3.
+
+**Variant `social-scoring-v1` (`5b5d186`).** One rule was appended to the
+pre-registered system prompt. It said that an evaluation of people used for its
+own stated purpose, in the same context as its data, is lawful purpose-specific
+evaluation, not social scoring, so the answer is `does_not_match`. It added that
+the description need not rule out every element of the provision, and that
+`insufficient` is kept for cases where the use of the score or the resulting
+treatment is left open. No domain examples were given. The variant text is
+SHA-pinned in `tests/test_determination.py`.
+
+**Variant `social-scoring-v2` (`897c22e`).** v1's rule sat in the system prompt
+and spilled over to other provisions. For v2, the restriction was made structural:
+the system prompt is byte-identical to the pre-registered one, and the guidance is
+printed only as a `note:` line inside the Article 5(1)(c) candidate's block of the
+user message. The note opens with "Guidance for this candidate only, Article
+5(1)(c) social scoring; it does not apply to any other candidate". Its text is
+SHA-pinned, and a test checks that it appears exactly once, under
+`aiact:art_5:para_1:point_c`.
+
+**Dev-set results (41 × 3 M-low, diagnostic only, never validation).**
+
+| | official (pre-registered prompt) | v1 | v2 |
+|---|---|---|---|
+| risk tier: applicable / not_applicable / unresolved | 1.000 / 0.786 / 0.933 | 1.000 / 0.786 / 0.800 | 1.000 / 0.786 / 0.733 |
+| prohibited: applicable / not_applicable / unresolved | 1.000 / 0.632 / 1.000 | 1.000 / 0.931 / 1.000 | 1.000 / 0.954 / 0.667 |
+| 5(1)(c) `insufficient` on cases that are not social scoring | 30 runs | 1 of 105 | 3 of 105 |
+| zero-tolerance violations | 1 (D32 risk tier, 1/3) | 3 (D32 risk tier, 3/3) | **4 (D32 risk tier 2/3, D32 prohibited 2/3)** |
+| API errors | 0 after retry | 0 | 2 (D41#1–2, connection; not retried) |
+| cost | $6.86 | $6.89 (+ $0.78 for a 1-repeat subset run) | $6.83 |
+
+Results are in `data/eval/results/dev_social_scoring_v{1,2}_41c.*`, plus
+`dev_social_scoring_v1_iter1.*` (18 cases × 1 repeat). In v2, the 2 D41 errors count
+as wrong in the unresolved buckets. They were not retried because the D32
+violations already decide the outcome. The "decision rule" block in these files
+reads `decided: false` only because the harness looks for an arm named
+`matcher-low`. These runs are not a decision-rule evaluation.
+
+- *v1:* it fixed the target pattern (prohibited `not_applicable` 0.632 → 0.931), but
+  it spilled over. D32's Annex III 1(c) went `does_not_match` in 3/3 runs ("attention
+  is a cognitive state, not an emotion"), up from 1/3. D24's Article 5(1)(e) went
+  from `does_not_match` to `insufficient` in 3/3.
+- *v2:* D24 is clean in 3/3, but D32 is worse. The note misfires *inside its own
+  scope*. D32 ("estimates students' attention levels from webcam images during
+  online classes") states no use of the score, which is exactly the case the note
+  reserves for `insufficient`. Yet in 3/3 runs the model answered `does_not_match`
+  on 5(1)(c), citing the note: "purpose-specific attention evaluation using data
+  from the same classroom context, not social scoring under the supplied guidance".
+  In 2/3 runs, 5(1)(f) and Annex III 1(c) were also `does_not_match`, so both D32
+  determinations became `not_applicable`: two zero-tolerance violations per run.
+  Prohibited `unresolved` fell from 1.000 to 0.667, partly because of the D41
+  errors. Scoping the guidance to one candidate's block therefore did not stop the
+  general "purpose-specific, so negative" reading from spreading to the case as a
+  whole.
+- *Unchanged throughout:* D10, D26 and D28 (risk tier) and D04 (now on 5(1)(f)).
+
+**Verdict: `social-scoring-v1` and `social-scoring-v2` are NOT ADOPTED** (hard
+stop: v2 has zero-tolerance violations on the dev set). The pre-registered prompt
+stays the default. The variants remain in the code only behind
+`--prompt-variant`, as Phase 2 did with `role-null-v1`. **Phase 3 acceptance stays
+NOT MET**, as recorded above. What has been learned, for any future
+pre-registered attempt:
+
+- The 5(1)(c) over-caution is real and responds to guidance.
+- The guidance must not supply a reason to answer `does_not_match` that the model
+  can apply where the description is silent. Both phrasings did, by different
+  routes.
+- D32 (attention vs emotion recognition) is the most fragile case in the set, and
+  any change has to be measured against it.
 
 **End-to-end:**
 - Obligation correctness (right obligations, right roles, right union/dedup per §4.1)
@@ -1432,6 +2144,19 @@ to a specific stage, not just logged as "wrong answer."
     variants and citation handling each enter as a measured eval arm first; the
     reranker stayed off because it lost (§7.4, §18).
 
+**Updated (Phase 3 design) additions:**
+
+21. **The only LLM step between extraction and generation is the provision matcher**
+    (§4.2). It sees a closed, exhaustive candidate set, emits per-candidate verdicts
+    with verbatim quotes, and code verifies each verdict before use. Verification can
+    only downgrade a verdict, never upgrade it. How verdicts combine into a status is
+    code (§9.1).
+22. **Silence is not a negative.** `does_not_match` requires a case quote showing the
+    use case is something else. Absence of evidence is `insufficient`. Exception: an
+    exception the Act requires a party to positively establish, such as the Article
+    6(3) derogation, is recorded as `not_established` rather than `unresolved`. The
+    default applies, and the record says so (§9.1).
+
 ---
 
 ## 20. Rejected Alternatives
@@ -1450,6 +2175,10 @@ to a specific stage, not just logged as "wrong answer."
 | Plain RRF hybrid with no citation handling (Phase 1) | Measured: fusion with a vector ranking that cannot read "26(7)" dilutes BM25's exact match (bare-citation Recall@5 0.865 vs BM25 0.962). Replaced by exact-citation priority after RRF (§7.4). |
 | Cross-encoder reranking by default (Phase 1) | Measured: bge-reranker-base lowered hybrid Recall@5 (use case 0.946 → 0.875; bare citations 0.865 → 0.769). Kept as an eval arm; a larger reranker must win as an arm before adoption. |
 | Embedding whole provisions regardless of length (Phase 1) | Article 26(10) exceeds bge-base's 512-token window; its closing sentences would be silently truncated out of the embedding. |
+| Retrieval-score cutoff as the Annex III / Article 5 decision mechanism (Phase 3 design) | Similarity is not legal membership. An interview-scheduling chatbot scores as "recruitment". It cannot evaluate Article 5(1)(h)'s exceptions or the Article 6(3) conditions, cannot produce `unresolved`, and its threshold would be tuned on seen results. Kept as the baseline arm (§4.2, §18). |
+| Fixed keyword or category mapping per Annex III item (Phase 3 design) | Keyword lists break on free-text paraphrase. An extracted "Annex III area" field would be a legal conclusion and fail the zero-tolerance leakage check (§3.1). |
+| Top-k candidates for the matcher (Phase 3 design) | A retrieval miss would become a confident negative. The scopes are short closed lists, so exhaustive evaluation is affordable (§4.2). |
+| Extending `Case` with Article 6(3) / 6(1) facts (Phase 3 design) | Reopens the closed Phase 2 contract (labels, field rules, target, leakage check), and "performs profiling" is itself a defined legal term. The matcher reads the description instead (§9.1). |
 | Extraction step directly outputting legal conclusions (risk_tier, prohibited_practice, actor_roles, substantial_modification) | Leakage risk — the model would silently guess conclusions from surface pattern-matching before any retrieval or grounding occurs, defeating the point of a grounded, citable determination. |
 
 ---

@@ -1,0 +1,247 @@
+{
+  "scores": {
+    "matcher-low": {
+      "arm": "matcher-low",
+      "runs": 123,
+      "errors": 26,
+      "risk_tier": {
+        "per_state": {
+          "applicable": 0.873015873015873,
+          "not_applicable": 0.5714285714285714,
+          "unresolved": 0.4
+        },
+        "n": {
+          "applicable": 63,
+          "not_applicable": 42,
+          "unresolved": 15
+        },
+        "macro": 0.6148148148148148
+      },
+      "prohibited_practice": {
+        "per_state": {
+          "applicable": 1.0,
+          "not_applicable": 0.5517241379310345,
+          "unresolved": 0.08333333333333333
+        },
+        "n": {
+          "applicable": 21,
+          "not_applicable": 87,
+          "unresolved": 12
+        },
+        "macro": 0.5450191570881225
+      },
+      "not_in_force_deterministic": 1.0,
+      "propagated_rule_outputs": {
+        "actor_role": 1.0,
+        "aiact:art_16": 0.9042553191489362,
+        "aiact:art_26": 0.9042553191489362
+      },
+      "system_category": 0.9680851063829787,
+      "derogation": 0.8863636363636364,
+      "verification_downgrade_rate": 0.0,
+      "zero_tolerance_violations": [],
+      "misses": [
+        "D02#0 prohibited_practice: want not_applicable/conditions_not_met, got unresolved",
+        "D02#1 prohibited_practice: want not_applicable/conditions_not_met, got unresolved",
+        "D02#2 prohibited_practice: want not_applicable/conditions_not_met, got unresolved",
+        "D04#0 prohibited_practice: want not_applicable/conditions_not_met, got unresolved",
+        "D04#1 prohibited_practice: want not_applicable/conditions_not_met, got unresolved",
+        "D04#2 prohibited_practice: want not_applicable/conditions_not_met, got unresolved",
+        "D05#0 prohibited_practice: want not_applicable/conditions_not_met, got unresolved",
+        "D05#1 prohibited_practice: want not_applicable/conditions_not_met, got unresolved",
+        "D05#2 prohibited_practice: want not_applicable/conditions_not_met, got unresolved",
+        "D07#0 prohibited_practice: want not_applicable/conditions_not_met, got unresolved",
+        "D07#1 prohibited_practice: want not_applicable/conditions_not_met, got unresolved",
+        "D07#2 prohibited_practice: want not_applicable/conditions_not_met, got unresolved",
+        "D08#2 prohibited_practice: want not_applicable/conditions_not_met, got unresolved",
+        "D10#0 risk_tier: want not_applicable/conditions_not_met, got unresolved",
+        "D10#1 risk_tier: want not_applicable/conditions_not_met, got unresolved",
+        "D10#2 risk_tier: want not_applicable/conditions_not_met, got unresolved",
+        "D11#1 prohibited_practice: want not_applicable/conditions_not_met, got unresolved",
+        "D11#2 prohibited_practice: want not_applicable/conditions_not_met, got unresolved",
+        "D12#0 prohibited_practice: want not_applicable/conditions_not_met, got unresolved",
+        "D12#1 prohibited_practice: want not_applicable/conditions_not_met, got unresolved",
+        "D12#2 prohibited_practice: want not_applicable/conditions_not_met, got unresolved",
+        "D26#0 risk_tier: want not_applicable/conditions_not_met, got applicable",
+        "D26#1 risk_tier: want not_applicable/conditions_not_met, got applicable",
+        "D26#2 risk_tier: want not_applicable/conditions_not_met, got applicable",
+        "D28#0 risk_tier: want not_applicable/conditions_not_met, got unresolved",
+        "D28#1 risk_tier: want not_applicable/conditions_not_met, got unresolved",
+        "D28#2 risk_tier: want not_applicable/conditions_not_met, got unresolved",
+        "D30#1 risk_tier: want applicable, got error",
+        "D30#1 prohibited_practice: want unresolved, got error",
+        "D30#2 risk_tier: want applicable, got error",
+        "D30#2 prohibited_practice: want unresolved, got error",
+        "D31#0 risk_tier: want unresolved, got error",
+        "D31#0 prohibited_practice: want unresolved, got error",
+        "D31#1 risk_tier: want unresolved, got error",
+        "D31#1 prohibited_practice: want unresolved, got error",
+        "D31#2 risk_tier: want unresolved, got error",
+        "D31#2 prohibited_practice: want unresolved, got error",
+        "D32#0 risk_tier: want unresolved, got error",
+        "D32#0 prohibited_practice: want unresolved, got error",
+        "D32#1 risk_tier: want unresolved, got error",
+        "D32#1 prohibited_practice: want unresolved, got error",
+        "D32#2 risk_tier: want unresolved, got error",
+        "D32#2 prohibited_practice: want unresolved, got error",
+        "D33#0 prohibited_practice: want not_applicable/conditions_not_met, got unresolved",
+        "D33#1 prohibited_practice: want not_applicable/conditions_not_met, got unresolved",
+        "D33#2 prohibited_practice: want not_applicable/conditions_not_met, got unresolved",
+        "D34#0 risk_tier: want applicable, got error",
+        "D34#0 prohibited_practice: want not_applicable/conditions_not_met, got error",
+        "D34#1 risk_tier: want applicable, got error",
+        "D34#1 prohibited_practice: want not_applicable/conditions_not_met, got error",
+        "D34#2 prohibited_practice: want not_applicable/conditions_not_met, got unresolved",
+        "D35#0 prohibited_practice: want not_applicable/conditions_not_met, got unresolved",
+        "D35#1 prohibited_practice: want not_applicable/conditions_not_met, got unresolved",
+        "D35#2 risk_tier: want applicable, got error",
+        "D35#2 prohibited_practice: want not_applicable/conditions_not_met, got error",
+        "D36#0 risk_tier: want applicable, got error",
+        "D36#0 prohibited_practice: want not_applicable/conditions_not_met, got error",
+        "D36#1 risk_tier: want applicable, got error",
+        "D36#1 prohibited_practice: want not_applicable/conditions_not_met, got error",
+        "D36#2 risk_tier: want applicable, got error",
+        "D36#2 prohibited_practice: want not_applicable/conditions_not_met, got error",
+        "D37#0 risk_tier: want not_applicable/conditions_not_met, got error",
+        "D37#0 prohibited_practice: want not_applicable/conditions_not_met, got error",
+        "D37#1 risk_tier: want not_applicable/conditions_not_met, got error",
+        "D37#1 prohibited_practice: want not_applicable/conditions_not_met, got error",
+        "D37#2 risk_tier: want not_applicable/conditions_not_met, got error",
+        "D37#2 prohibited_practice: want not_applicable/conditions_not_met, got error",
+        "D39#0 risk_tier: want not_applicable/not_yet_applicable, got error",
+        "D39#0 prohibited_practice: want not_applicable/conditions_not_met, got error",
+        "D39#1 risk_tier: want not_applicable/not_yet_applicable, got error",
+        "D39#1 prohibited_practice: want not_applicable/conditions_not_met, got error",
+        "D39#2 risk_tier: want not_applicable/not_yet_applicable, got error",
+        "D39#2 prohibited_practice: want not_applicable/conditions_not_met, got error",
+        "D40#0 risk_tier: want not_applicable/not_yet_applicable, got error",
+        "D40#0 prohibited_practice: want not_applicable/not_yet_applicable, got error",
+        "D40#1 risk_tier: want not_applicable/not_yet_applicable, got error",
+        "D40#1 prohibited_practice: want not_applicable/not_yet_applicable, got error",
+        "D40#2 risk_tier: want not_applicable/not_yet_applicable, got error",
+        "D40#2 prohibited_practice: want not_applicable/not_yet_applicable, got error",
+        "D41#0 risk_tier: want unresolved, got error",
+        "D41#0 prohibited_practice: want unresolved, got error",
+        "D41#1 risk_tier: want unresolved, got error",
+        "D41#1 prohibited_practice: want unresolved, got error",
+        "D41#2 risk_tier: want unresolved, got error",
+        "D41#2 prohibited_practice: want unresolved, got error"
+      ]
+    },
+    "baseline": {
+      "arm": "baseline",
+      "runs": 41,
+      "errors": 0,
+      "risk_tier": {
+        "per_state": {
+          "applicable": 0.5238095238095238,
+          "not_applicable": 0.7142857142857143,
+          "unresolved": 0.0
+        },
+        "n": {
+          "applicable": 21,
+          "not_applicable": 14,
+          "unresolved": 5
+        },
+        "macro": 0.41269841269841273
+      },
+      "prohibited_practice": {
+        "per_state": {
+          "applicable": 0.5714285714285714,
+          "not_applicable": 0.8275862068965517,
+          "unresolved": 0.0
+        },
+        "n": {
+          "applicable": 7,
+          "not_applicable": 29,
+          "unresolved": 4
+        },
+        "macro": 0.46633825944170776
+      },
+      "not_in_force_deterministic": 1.0,
+      "propagated_rule_outputs": {
+        "actor_role": 0.975,
+        "aiact:art_16": 0.775,
+        "aiact:art_26": 0.625
+      },
+      "system_category": 0.55,
+      "derogation": 0.5142857142857142,
+      "verification_downgrade_rate": 0.0,
+      "zero_tolerance_violations": [
+        "D11#0 risk_tier: unresolved -> not_applicable/conditions_not_met",
+        "D20#0 risk_tier: unresolved -> applicable",
+        "D30#0 prohibited_practice: unresolved -> not_applicable/conditions_not_met",
+        "D31#0 risk_tier: unresolved -> applicable",
+        "D31#0 prohibited_practice: unresolved -> not_applicable/conditions_not_met",
+        "D32#0 risk_tier: unresolved -> not_applicable/conditions_not_met",
+        "D32#0 prohibited_practice: unresolved -> not_applicable/conditions_not_met",
+        "D41#0 risk_tier: unresolved -> applicable",
+        "D41#0 prohibited_practice: unresolved -> applicable"
+      ],
+      "misses": [
+        "D02#0 prohibited_practice: want not_applicable/conditions_not_met, got applicable",
+        "D03#0 prohibited_practice: want not_applicable/conditions_not_met, got applicable",
+        "D04#0 risk_tier: want applicable, got not_applicable/conditions_not_met",
+        "D05#0 risk_tier: want applicable, got not_applicable/conditions_not_met",
+        "D10#0 risk_tier: want not_applicable/conditions_not_met, got applicable",
+        "D11#0 risk_tier: want unresolved, got not_applicable/conditions_not_met",
+        "D16#0 risk_tier: want not_applicable/conditions_not_met, got applicable",
+        "D18#0 risk_tier: want not_applicable/not_yet_applicable, got applicable",
+        "D18#0 prohibited_practice: want not_applicable/conditions_not_met, got applicable",
+        "D20#0 risk_tier: want unresolved, got applicable",
+        "D21#0 risk_tier: want applicable, got not_applicable/conditions_not_met",
+        "D21#0 prohibited_practice: want applicable, got not_applicable/conditions_not_met",
+        "D22#0 prohibited_practice: want applicable, got not_applicable/conditions_not_met",
+        "D23#0 risk_tier: want applicable, got not_applicable/conditions_not_met",
+        "D24#0 risk_tier: want applicable, got not_applicable/conditions_not_met",
+        "D24#0 prohibited_practice: want not_applicable/conditions_not_met, got applicable",
+        "D25#0 risk_tier: want applicable, got not_applicable/conditions_not_met",
+        "D27#0 risk_tier: want applicable, got not_applicable/conditions_not_met",
+        "D28#0 prohibited_practice: want applicable, got not_applicable/conditions_not_met",
+        "D29#0 risk_tier: want applicable, got not_applicable/conditions_not_met",
+        "D30#0 risk_tier: want applicable, got not_applicable/conditions_not_met",
+        "D30#0 prohibited_practice: want unresolved, got not_applicable/conditions_not_met",
+        "D31#0 risk_tier: want unresolved, got applicable",
+        "D31#0 prohibited_practice: want unresolved, got not_applicable/conditions_not_met",
+        "D32#0 risk_tier: want unresolved, got not_applicable/conditions_not_met",
+        "D32#0 prohibited_practice: want unresolved, got not_applicable/conditions_not_met",
+        "D35#0 risk_tier: want applicable, got not_applicable/conditions_not_met",
+        "D39#0 risk_tier: want not_applicable/not_yet_applicable, got not_applicable/conditions_not_met",
+        "D40#0 prohibited_practice: want not_applicable/not_yet_applicable, got not_applicable/conditions_not_met",
+        "D41#0 risk_tier: want unresolved, got applicable",
+        "D41#0 prohibited_practice: want unresolved, got applicable"
+      ]
+    }
+  },
+  "rule_path": {
+    "checks": 123,
+    "accuracy": 1.0,
+    "failures": []
+  },
+  "decision": {
+    "decided": true,
+    "adopt_matcher": false,
+    "condition_1_zero_tolerance": true,
+    "condition_2_targets": false,
+    "condition_2_detail": {
+      "risk_tier.applicable": true,
+      "risk_tier.not_applicable": false,
+      "risk_tier.unresolved": false,
+      "prohibited_practice.applicable": true,
+      "prohibited_practice.not_applicable": false,
+      "prohibited_practice.unresolved": false,
+      "rule_path == 1.00": true,
+      "not_in_force == 1.00": true
+    },
+    "condition_3_beats_baseline": false,
+    "condition_3_detail": {
+      "risk_tier.macro >= B + 0.1": true,
+      "risk_tier.applicable >= B": true,
+      "risk_tier.not_applicable >= B": false,
+      "prohibited_practice.macro >= B + 0.1": false,
+      "prohibited_practice.applicable >= B": true,
+      "prohibited_practice.not_applicable >= B": false
+    },
+    "phase_3_acceptance_met": false
+  }
+}

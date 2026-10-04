@@ -46,6 +46,11 @@ problems — not another "chat with your PDFs" demo.
   what defines. Without it the rule layer depended on a concept whose defining
   provision was absent. This is the deferred-abstraction principle in §9 working as
   intended: the scope gap was found by corpus evidence, not speculation.
+  **[Scope extended in Phase 3 design, 2026-10-03]** **Annex I** joins the corpus for
+  the same reason. Article 6(1) is defined by reference to the legislation listed
+  there (SYSTEM_SPEC.md §9.1). **Article 3, points (3), (4) and (23) only** (the
+  provider, deployer and substantial-modification definitions) joins too, to ground
+  the actor-role rules (SYSTEM_SPEC.md §4.3).
 - Prohibited-practice determination against Article 5, represented as its own
   determination type (`prohibited_practice`), evaluated via the `ApplicabilityRule`
   engine where applicable-date conditions apply.
@@ -248,6 +253,49 @@ one rule-matching engine → cited, fail-closed output.
   - The post-hoc affected-persons re-score is not used for acceptance.
 
 **Phase 3 — Grounded determination stages**
+- Design decisions (2026-10-03, SYSTEM_SPEC.md §2, §4.2, §9.1):
+  - Annex III / Article 5 / Article 6 matching uses one constrained LLM provision
+    matcher. It sees a closed, exhaustive candidate set, returns per-candidate verdicts
+    with verbatim quotes, and code verifies each verdict. A retrieval-score cutoff runs
+    as the baseline arm.
+  - No `Case` schema change. Phase 2 stays closed. Article 6(3) is read from the
+    original description.
+  - Annex I is ingested for Article 6(1).
+  - Actor-role rules are written down (SYSTEM_SPEC.md §4.3): three-valued, with
+    Article 25 transfer only on high-risk systems.
+  - `unresolved_roles` keeps partial role knowledge.
+  - Article 3(3), (4) and (23) are ingested. Corpus: 110 provisions.
+- Deliverable (corpus, before any determination code): fix the dropped
+  trailing-subparagraph defect (Article 6(3) profiling override, Article 5(2) second
+  subparagraph), with a test that every V1 source fragment appears in some canonical
+  provision. Ingest Annex I. Re-run the Phase 0 validation and record any change in
+  Phase 1 retrieval numbers against the frozen results.
+  **Delivered (2026-10-03):**
+  - 107 provisions (was 85); the 85 existing ones are unchanged; 76 rules.
+  - The two dropped subparagraphs are now their own provisions at a new subparagraph
+    level.
+  - Annex I is ingested: 20 entries across Sections A and B.
+  - A second Phase 0 defect was found and fixed: five false internal cross-reference
+    edges caused by regex backtracking.
+  - All invariants hold. The Phase 1 regression guards still hold on the re-run
+    (`data/eval/results/corpus_v2_107p_98q.*`; SYSTEM_SPEC.md §9.1, §18).
+- Deliverable: provision matcher with code verification, plus the score-cutoff
+  baseline arm, compared under a pre-registered decision rule (SYSTEM_SPEC.md §18).
+  **Pre-registered (2026-10-03), before any determination run:**
+  - 41-case eval set (`9cb9bd2`).
+  - Determination code, matcher prompt (SHA-pinned) and τ values (next commit).
+  - The rule path reproduces all 123 rule-based labels offline.
+  - **First run (2026-10-04): acceptance NOT MET** (SYSTEM_SPEC.md §18). 26 of 123
+    calls failed with connection errors and only those were retried. On the merged
+    run, M-low beats the baseline on both macros but fails zero tolerance (D32) and
+    the per-state targets on `not_applicable`. Prohibited is 0.632, mostly from
+    Article 5(1)(c) over-caution. Risk tier is 0.786, from D10, D26 and D28.
+  - **Post-hoc 5(1)(c) intervention: NOT ADOPTED.** The 41 cases became a dev set, and
+    an 8-case held-out set was frozen first (never run). Two prompt variants were
+    tried. `social-scoring-v1` fixed 5(1)(c) but spilled over (D32, D24).
+    `social-scoring-v2`, scoped to the 5(1)(c) candidate, still produced
+    zero-tolerance violations on D32. The user's hard stop ended the intervention.
+    The pre-registered prompt stays the default.
 - Deliverable: `GroundedDetermination` component implemented once, parameterized for
   risk-tier, prohibited-practice, actor-role, and obligation-applicability use.
 - Deliverable: `ApplicabilityRule` matching engine (the evaluation logic; the rule
@@ -266,6 +314,22 @@ one rule-matching engine → cited, fail-closed output.
   `not_in_force`) correctly produced on eval set; `unresolved` never silently collapsed
   to `not_applicable`; `not_in_force` never silently collapsed to `not_applicable`
   (SYSTEM_SPEC.md §14).
+  **"Correctly produced" defined before the first run (2026-10-03,
+  SYSTEM_SPEC.md §18):**
+  - Scored on gold `Case` inputs.
+  - Rule-based outputs (actor role, obligations, `not_in_force`, `not_applicable`
+    reason) must score 1.00.
+  - Matcher-backed outputs (risk tier, prohibited practice) need per-state accuracy
+    ≥ 0.85 on each of `applicable` / `not_applicable` / `unresolved`, and the matcher
+    must beat the score-cutoff baseline.
+  - Zero-tolerance checks as before, plus: no positive conclusion from a verdict that
+    failed code verification.
+  - These are pre-registered, unlike the Phase 1–2 targets.
+- Phase-in dates and unknown inputs (SYSTEM_SPEC.md §14.2):
+  - A date before a rule's `applicable_from` gives `not_applicable` with
+    `not_applicable_reason: not_yet_applicable`, never `not_in_force`.
+  - Unresolved upstream determinations feed the rule engine as unknown, using
+    three-valued logic.
 
 **Phase 4 — Generation and citation**
 - Deliverable: final generation stage producing tier + obligations + explanation +
