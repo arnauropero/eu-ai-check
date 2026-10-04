@@ -1,0 +1,166 @@
+{
+  "scores": {
+    "matcher-low+social-scoring-v2": {
+      "arm": "matcher-low+social-scoring-v2",
+      "runs": 123,
+      "errors": 2,
+      "risk_tier": {
+        "per_state": {
+          "applicable": 1.0,
+          "not_applicable": 0.7857142857142857,
+          "unresolved": 0.7333333333333333
+        },
+        "n": {
+          "applicable": 63,
+          "not_applicable": 42,
+          "unresolved": 15
+        },
+        "macro": 0.8396825396825397
+      },
+      "prohibited_practice": {
+        "per_state": {
+          "applicable": 1.0,
+          "not_applicable": 0.9540229885057471,
+          "unresolved": 0.6666666666666666
+        },
+        "n": {
+          "applicable": 21,
+          "not_applicable": 87,
+          "unresolved": 12
+        },
+        "macro": 0.8735632183908045
+      },
+      "not_in_force_deterministic": 1.0,
+      "propagated_rule_outputs": {
+        "actor_role": 1.0,
+        "aiact:art_16": 0.9067796610169492,
+        "aiact:art_26": 0.9067796610169492
+      },
+      "system_category": 0.9745762711864406,
+      "derogation": 0.8857142857142857,
+      "verification_downgrade_rate": 0.0,
+      "zero_tolerance_violations": [
+        "D32#0 risk_tier: unresolved -> not_applicable/conditions_not_met",
+        "D32#0 prohibited_practice: unresolved -> not_applicable/conditions_not_met",
+        "D32#2 risk_tier: unresolved -> not_applicable/conditions_not_met",
+        "D32#2 prohibited_practice: unresolved -> not_applicable/conditions_not_met"
+      ],
+      "misses": [
+        "D02#0 prohibited_practice: want not_applicable/conditions_not_met, got unresolved",
+        "D04#0 prohibited_practice: want not_applicable/conditions_not_met, got unresolved",
+        "D04#1 prohibited_practice: want not_applicable/conditions_not_met, got unresolved",
+        "D04#2 prohibited_practice: want not_applicable/conditions_not_met, got unresolved",
+        "D10#0 risk_tier: want not_applicable/conditions_not_met, got unresolved",
+        "D10#1 risk_tier: want not_applicable/conditions_not_met, got unresolved",
+        "D10#2 risk_tier: want not_applicable/conditions_not_met, got unresolved",
+        "D26#0 risk_tier: want not_applicable/conditions_not_met, got applicable",
+        "D26#1 risk_tier: want not_applicable/conditions_not_met, got applicable",
+        "D26#2 risk_tier: want not_applicable/conditions_not_met, got applicable",
+        "D28#0 risk_tier: want not_applicable/conditions_not_met, got unresolved",
+        "D28#1 risk_tier: want not_applicable/conditions_not_met, got unresolved",
+        "D28#2 risk_tier: want not_applicable/conditions_not_met, got unresolved",
+        "D32#0 risk_tier: want unresolved, got not_applicable/conditions_not_met",
+        "D32#0 prohibited_practice: want unresolved, got not_applicable/conditions_not_met",
+        "D32#2 risk_tier: want unresolved, got not_applicable/conditions_not_met",
+        "D32#2 prohibited_practice: want unresolved, got not_applicable/conditions_not_met",
+        "D41#1 risk_tier: want unresolved, got error",
+        "D41#1 prohibited_practice: want unresolved, got error",
+        "D41#2 risk_tier: want unresolved, got error",
+        "D41#2 prohibited_practice: want unresolved, got error"
+      ]
+    },
+    "baseline": {
+      "arm": "baseline",
+      "runs": 41,
+      "errors": 0,
+      "risk_tier": {
+        "per_state": {
+          "applicable": 0.5238095238095238,
+          "not_applicable": 0.7142857142857143,
+          "unresolved": 0.0
+        },
+        "n": {
+          "applicable": 21,
+          "not_applicable": 14,
+          "unresolved": 5
+        },
+        "macro": 0.41269841269841273
+      },
+      "prohibited_practice": {
+        "per_state": {
+          "applicable": 0.5714285714285714,
+          "not_applicable": 0.8275862068965517,
+          "unresolved": 0.0
+        },
+        "n": {
+          "applicable": 7,
+          "not_applicable": 29,
+          "unresolved": 4
+        },
+        "macro": 0.46633825944170776
+      },
+      "not_in_force_deterministic": 1.0,
+      "propagated_rule_outputs": {
+        "actor_role": 0.975,
+        "aiact:art_16": 0.775,
+        "aiact:art_26": 0.625
+      },
+      "system_category": 0.55,
+      "derogation": 0.5142857142857142,
+      "verification_downgrade_rate": 0.0,
+      "zero_tolerance_violations": [
+        "D11#0 risk_tier: unresolved -> not_applicable/conditions_not_met",
+        "D20#0 risk_tier: unresolved -> applicable",
+        "D30#0 prohibited_practice: unresolved -> not_applicable/conditions_not_met",
+        "D31#0 risk_tier: unresolved -> applicable",
+        "D31#0 prohibited_practice: unresolved -> not_applicable/conditions_not_met",
+        "D32#0 risk_tier: unresolved -> not_applicable/conditions_not_met",
+        "D32#0 prohibited_practice: unresolved -> not_applicable/conditions_not_met",
+        "D41#0 risk_tier: unresolved -> applicable",
+        "D41#0 prohibited_practice: unresolved -> applicable"
+      ],
+      "misses": [
+        "D02#0 prohibited_practice: want not_applicable/conditions_not_met, got applicable",
+        "D03#0 prohibited_practice: want not_applicable/conditions_not_met, got applicable",
+        "D04#0 risk_tier: want applicable, got not_applicable/conditions_not_met",
+        "D05#0 risk_tier: want applicable, got not_applicable/conditions_not_met",
+        "D10#0 risk_tier: want not_applicable/conditions_not_met, got applicable",
+        "D11#0 risk_tier: want unresolved, got not_applicable/conditions_not_met",
+        "D16#0 risk_tier: want not_applicable/conditions_not_met, got applicable",
+        "D18#0 risk_tier: want not_applicable/not_yet_applicable, got applicable",
+        "D18#0 prohibited_practice: want not_applicable/conditions_not_met, got applicable",
+        "D20#0 risk_tier: want unresolved, got applicable",
+        "D21#0 risk_tier: want applicable, got not_applicable/conditions_not_met",
+        "D21#0 prohibited_practice: want applicable, got not_applicable/conditions_not_met",
+        "D22#0 prohibited_practice: want applicable, got not_applicable/conditions_not_met",
+        "D23#0 risk_tier: want applicable, got not_applicable/conditions_not_met",
+        "D24#0 risk_tier: want applicable, got not_applicable/conditions_not_met",
+        "D24#0 prohibited_practice: want not_applicable/conditions_not_met, got applicable",
+        "D25#0 risk_tier: want applicable, got not_applicable/conditions_not_met",
+        "D27#0 risk_tier: want applicable, got not_applicable/conditions_not_met",
+        "D28#0 prohibited_practice: want applicable, got not_applicable/conditions_not_met",
+        "D29#0 risk_tier: want applicable, got not_applicable/conditions_not_met",
+        "D30#0 risk_tier: want applicable, got not_applicable/conditions_not_met",
+        "D30#0 prohibited_practice: want unresolved, got not_applicable/conditions_not_met",
+        "D31#0 risk_tier: want unresolved, got applicable",
+        "D31#0 prohibited_practice: want unresolved, got not_applicable/conditions_not_met",
+        "D32#0 risk_tier: want unresolved, got not_applicable/conditions_not_met",
+        "D32#0 prohibited_practice: want unresolved, got not_applicable/conditions_not_met",
+        "D35#0 risk_tier: want applicable, got not_applicable/conditions_not_met",
+        "D39#0 risk_tier: want not_applicable/not_yet_applicable, got not_applicable/conditions_not_met",
+        "D40#0 prohibited_practice: want not_applicable/not_yet_applicable, got not_applicable/conditions_not_met",
+        "D41#0 risk_tier: want unresolved, got applicable",
+        "D41#0 prohibited_practice: want unresolved, got applicable"
+      ]
+    }
+  },
+  "rule_path": {
+    "checks": 123,
+    "accuracy": 1.0,
+    "failures": []
+  },
+  "decision": {
+    "decided": false,
+    "reason": "primary or baseline arm not run"
+  }
+}
