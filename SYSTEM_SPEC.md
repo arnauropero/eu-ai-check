@@ -1920,6 +1920,61 @@ scoring rule or case changed.
 - *The merged run is the official Phase 3 result.* The first attempt is kept only
   as the raw record.
 
+**Determination — Phase 3 acceptance (2026-10-04): NOT MET** against the
+pre-registered decision rule.
+
+| | M-low | B | target |
+|---|---|---|---|
+| risk tier: applicable / not_applicable / unresolved | 1.000 / **0.786** / 0.933 | 0.524 / 0.714 / 0.000 | ≥ 0.85 each |
+| prohibited: applicable / not_applicable / unresolved | 1.000 / **0.632** / 1.000 | 0.571 / 0.828 / 0.000 | ≥ 0.85 each |
+| macro: risk tier / prohibited | 0.906 / 0.877 | 0.413 / 0.466 | M-low ≥ B + 0.10 |
+| zero-tolerance violations | **1** | 9 | 0 |
+| rule path | 1.000 (123 checks) | | 1.00 |
+
+Condition 1 fails, and so does condition 2. Condition 3 fails on one sub-check only:
+prohibited `not_applicable`, where M-low is below B. The matcher is **not adopted**
+on this result. Root cause, from the recorded verdicts:
+
+- *Zero tolerance, D32#2.* Risk tier is labelled `unresolved` and came back
+  `not_applicable`. On that repeat the matcher returned `does_not_match` for Annex
+  III 1(c), where the other two repeats returned `insufficient`. This is run-to-run
+  variance; D32#0 and #1 are correct.
+- *prohibited `not_applicable` = 0.632 (32 misses out of 87).* All 32 came back
+  `unresolved`. In 30 of them, Article 5(1)(c) (social scoring) came back
+  `insufficient`, alone in 26. The cases are D02, D04, D05, D07, D11, D12, D33–D36
+  and D39, and none of them describes social scoring. A typical rationale (D04,
+  exam proctoring) is: "The description does not establish social scoring or the
+  nature and proportionality of any resulting treatment". The matcher treats an
+  absence of evidence *against* 5(1)(c) as missing information. The other 2 misses
+  are D08#2 (5(1)(a)–(b)) and one 5(1)(f)-only miss.
+- *risk tier `not_applicable` = 0.786 (9 misses out of 42).* These are D10, D26 and
+  D28, three repeats each. **Article 5(1)(c) over-caution does not cause them**:
+  - D26: the 5(1)(c) match is correct, and prohibited is correctly `applicable`. The
+    risk-tier miss comes from a further Annex III 4(a) match ("employers use the
+    scores to deny jobs").
+  - D28: prohibited is correctly `applicable` (5(1)(b)). The risk-tier miss is Annex
+    III 1(b) at `insufficient` ("does not say whether categorisation is based on
+    biometric data").
+  - D10: Annex III 4(b) at `insufficient` (are the loan officers monitored?), and the
+    6(3) profiling question also `insufficient`. Gold: Annex III 5(b) with the
+    derogation applied.
+
+**Determination — post-hoc intervention on Article 5(1)(c) (opened 2026-10-04).**
+This is a **POST-HOC** intervention, documented with the same discipline as Phase 2's
+`role-null-v1`. It differs from the decision rule's own instruction ("never a retune
+against this set") in one respect, and is labelled accordingly:
+
+- *The 41-case set becomes the DEV set for this intervention.* It has been inspected
+  and the error analysis above was done on it. Any further measurement on it is
+  **diagnostic only, never validation**. The official Phase 3 result above stays
+  NOT MET whatever the dev-set numbers show.
+- *Validation* happens only on a new held-out confirmation set built before the
+  iteration starts and not touched during it. It gets one pass, and its results are
+  reported separately from the dev set and never merged into a combined number.
+- *Scope:* the 5(1)(c) over-caution pattern only. The risk-tier misses above (D10,
+  D26, D28) and the D32#2 variance have different causes and are outside this
+  intervention.
+
 **End-to-end:**
 - Obligation correctness (right obligations, right roles, right union/dedup per §4.1)
 - Citation correctness (right `versioned_provision_id` per claim)
