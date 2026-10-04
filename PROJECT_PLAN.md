@@ -285,7 +285,17 @@ one rule-matching engine → cited, fail-closed output.
   - 41-case eval set (`9cb9bd2`).
   - Determination code, matcher prompt (SHA-pinned) and τ values (next commit).
   - The rule path reproduces all 123 rule-based labels offline.
-  - The first API run awaits user approval.
+  - **First run (2026-10-04): acceptance NOT MET** (SYSTEM_SPEC.md §18). 26 of 123
+    calls failed with connection errors and only those were retried. On the merged
+    run, M-low beats the baseline on both macros but fails zero tolerance (D32) and
+    the per-state targets on `not_applicable`. Prohibited is 0.632, mostly from
+    Article 5(1)(c) over-caution. Risk tier is 0.786, from D10, D26 and D28.
+  - **Post-hoc 5(1)(c) intervention: NOT ADOPTED.** The 41 cases became a dev set, and
+    an 8-case held-out set was frozen first (never run). Two prompt variants were
+    tried. `social-scoring-v1` fixed 5(1)(c) but spilled over (D32, D24).
+    `social-scoring-v2`, scoped to the 5(1)(c) candidate, still produced
+    zero-tolerance violations on D32. The user's hard stop ended the intervention.
+    The pre-registered prompt stays the default.
 - Deliverable: `GroundedDetermination` component implemented once, parameterized for
   risk-tier, prohibited-practice, actor-role, and obligation-applicability use.
 - Deliverable: `ApplicabilityRule` matching engine (the evaluation logic; the rule

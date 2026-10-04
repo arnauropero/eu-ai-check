@@ -1974,6 +1974,89 @@ against this set") in one respect, and is labelled accordingly:
 - *Scope:* the 5(1)(c) over-caution pattern only. The risk-tier misses above (D10,
   D26, D28) and the D32#2 variance have different causes and are outside this
   intervention.
+- *Held-out set, frozen before any matcher change (`6b98c76`).*
+  `data/eval/determination_heldout_5_1_c.json` has 8 cases, from angles not in the
+  failing dev cases:
+  - H01 payment fraud, H02 workplace productivity, H03 churn, H04 motor telematics
+    and H05 buy-now-pay-later credit: prohibited `not_applicable`.
+  - H06 an employer scoring private social-media behaviour: the positive control,
+    5(1)(c) `applicable`.
+  - H07 and H08: borderline, prohibited `unresolved`.
+
+  The rule-based labels were checked offline (24/24). **This set was never run**,
+  because the intervention stopped on the dev set. It stays untouched and could
+  serve as a confirmation set for a future, separately pre-registered change.
+- *Hard stop, set by the user before v2 ran:* v2 is the last dev iteration. A
+  zero-tolerance violation or a clear regression on the dev set ends the
+  intervention as NOT ADOPTED, with no v3.
+
+**Variant `social-scoring-v1` (`5b5d186`).** One rule was appended to the
+pre-registered system prompt. It said that an evaluation of people used for its
+own stated purpose, in the same context as its data, is lawful purpose-specific
+evaluation, not social scoring, so the answer is `does_not_match`. It added that
+the description need not rule out every element of the provision, and that
+`insufficient` is kept for cases where the use of the score or the resulting
+treatment is left open. No domain examples were given. The variant text is
+SHA-pinned in `tests/test_determination.py`.
+
+**Variant `social-scoring-v2` (`897c22e`).** v1's rule sat in the system prompt
+and spilled over to other provisions. For v2, the restriction was made structural:
+the system prompt is byte-identical to the pre-registered one, and the guidance is
+printed only as a `note:` line inside the Article 5(1)(c) candidate's block of the
+user message. The note opens with "Guidance for this candidate only, Article
+5(1)(c) social scoring; it does not apply to any other candidate". Its text is
+SHA-pinned, and a test checks that it appears exactly once, under
+`aiact:art_5:para_1:point_c`.
+
+**Dev-set results (41 × 3 M-low, diagnostic only, never validation).**
+
+| | official (pre-registered prompt) | v1 | v2 |
+|---|---|---|---|
+| risk tier: applicable / not_applicable / unresolved | 1.000 / 0.786 / 0.933 | 1.000 / 0.786 / 0.800 | 1.000 / 0.786 / 0.733 |
+| prohibited: applicable / not_applicable / unresolved | 1.000 / 0.632 / 1.000 | 1.000 / 0.931 / 1.000 | 1.000 / 0.954 / 0.667 |
+| 5(1)(c) `insufficient` on cases that are not social scoring | 30 runs | 1 of 105 | 3 of 105 |
+| zero-tolerance violations | 1 (D32 risk tier, 1/3) | 3 (D32 risk tier, 3/3) | **4 (D32 risk tier 2/3, D32 prohibited 2/3)** |
+| API errors | 0 after retry | 0 | 2 (D41#1–2, connection; not retried) |
+| cost | $6.86 | $6.89 (+ $0.78 for a 1-repeat subset run) | $6.83 |
+
+Results are in `data/eval/results/dev_social_scoring_v{1,2}_41c.*`, plus
+`dev_social_scoring_v1_iter1.*` (18 cases × 1 repeat). In v2, the 2 D41 errors count
+as wrong in the unresolved buckets. They were not retried because the D32
+violations already decide the outcome. The "decision rule" block in these files
+reads `decided: false` only because the harness looks for an arm named
+`matcher-low`. These runs are not a decision-rule evaluation.
+
+- *v1:* it fixed the target pattern (prohibited `not_applicable` 0.632 → 0.931), but
+  it spilled over. D32's Annex III 1(c) went `does_not_match` in 3/3 runs ("attention
+  is a cognitive state, not an emotion"), up from 1/3. D24's Article 5(1)(e) went
+  from `does_not_match` to `insufficient` in 3/3.
+- *v2:* D24 is clean in 3/3, but D32 is worse. The note misfires *inside its own
+  scope*. D32 ("estimates students' attention levels from webcam images during
+  online classes") states no use of the score, which is exactly the case the note
+  reserves for `insufficient`. Yet in 3/3 runs the model answered `does_not_match`
+  on 5(1)(c), citing the note: "purpose-specific attention evaluation using data
+  from the same classroom context, not social scoring under the supplied guidance".
+  In 2/3 runs, 5(1)(f) and Annex III 1(c) were also `does_not_match`, so both D32
+  determinations became `not_applicable`: two zero-tolerance violations per run.
+  Prohibited `unresolved` fell from 1.000 to 0.667, partly because of the D41
+  errors. Scoping the guidance to one candidate's block therefore did not stop the
+  general "purpose-specific, so negative" reading from spreading to the case as a
+  whole.
+- *Unchanged throughout:* D10, D26 and D28 (risk tier) and D04 (now on 5(1)(f)).
+
+**Verdict: `social-scoring-v1` and `social-scoring-v2` are NOT ADOPTED** (hard
+stop: v2 has zero-tolerance violations on the dev set). The pre-registered prompt
+stays the default. The variants remain in the code only behind
+`--prompt-variant`, as Phase 2 did with `role-null-v1`. **Phase 3 acceptance stays
+NOT MET**, as recorded above. What has been learned, for any future
+pre-registered attempt:
+
+- The 5(1)(c) over-caution is real and responds to guidance.
+- The guidance must not supply a reason to answer `does_not_match` that the model
+  can apply where the description is silent. Both phrasings did, by different
+  routes.
+- D32 (attention vs emotion recognition) is the most fragile case in the set, and
+  any change has to be measured against it.
 
 **End-to-end:**
 - Obligation correctness (right obligations, right roles, right union/dedup per §4.1)
