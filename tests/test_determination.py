@@ -426,3 +426,20 @@ def test_social_scoring_v1_variant_is_frozen() -> None:
     assert hashlib.sha256(SOCIAL_SCORING_V1.encode("utf-8")).hexdigest() == SOCIAL_SCORING_V1_SHA
     assert system_prompt() == SYSTEM_PROMPT  # the default stays the pre-registered prompt
     assert system_prompt("social-scoring-v1") == SYSTEM_PROMPT + SOCIAL_SCORING_V1
+
+
+#: SHA-256 of the POST-HOC `social-scoring-v2` note, frozen before its dev-set run.
+SOCIAL_SCORING_V2_SHA = "43695d7096a72d23fbe8c5fe861bb204a4811154ff38b544cc5559e74ddc4a05"
+
+
+def test_social_scoring_v2_is_frozen_and_scoped_to_5_1_c() -> None:
+    from eu_ai_check.determination.matcher import (
+        SOCIAL_SCORING_V2, OpenAIMatcher, provision_notes, user_message)
+
+    assert hashlib.sha256(SOCIAL_SCORING_V2.encode("utf-8")).hexdigest() == SOCIAL_SCORING_V2_SHA
+    assert provision_notes("social-scoring-v2") == {"aiact:art_5:para_1:point_c": SOCIAL_SCORING_V2}
+    request = OpenAIMatcher(object(), prompt_variant="social-scoring-v2").request("d", CANDS)
+    assert request["input"][0]["content"] == SYSTEM_PROMPT  # nothing added to the system prompt
+    assert request["input"][1]["content"] == user_message("d", CANDS, provision_notes("social-scoring-v2"))
+    assert request["input"][1]["content"].count("  note: ") == 1
+    assert user_message("d", CANDS, {}) == user_message("d", CANDS)  # baseline unchanged

@@ -81,16 +81,44 @@ SOCIAL_SCORING_V1 = """\
   follows.
 """
 
+#: POST-HOC variant v2 (SYSTEM_SPEC.md §18, 2026-10-04). v1's rule sat in the system
+#: prompt and spilled over to other provisions on the dev set (D32 Annex III 1(c),
+#: D24 Article 5(1)(e)). v2 changes nothing in the system prompt: the guidance is
+#: printed only inside the Article 5(1)(c) candidate's own block of the user message,
+#: so it is never in view as an instruction for any other candidate.
+SOCIAL_SCORING_V2_ID = "aiact:art_5:para_1:point_c"
+SOCIAL_SCORING_V2 = (
+    "Guidance for this candidate only, Article 5(1)(c) social scoring; it does not "
+    "apply to any other candidate. An evaluation of people that the description shows "
+    "is used for its own stated purpose, with data from that same context, and with no "
+    "stated use of the score in an unrelated social context and no stated unjustified "
+    "or disproportionate treatment, is purpose-specific evaluation, not social scoring "
+    "under this point: answer \"does_not_match\" and quote the span stating that purpose. "
+    "For this point, answer \"insufficient\" only when the description shows people "
+    "being scored or classified on their social behaviour or personal characteristics "
+    "and leaves open how the score is used, by whom, or what treatment follows."
+)
+
 #: Prompt variants. "baseline" is the pre-registered prompt (SHA-pinned in
-#: tests/test_determination.py) and the default everywhere.
-PROMPT_VARIANTS = {"baseline": "", "social-scoring-v1": SOCIAL_SCORING_V1}
+#: tests/test_determination.py) and the default everywhere. Each variant is
+#: (system-prompt suffix, {provision_id: note printed in that candidate's block}).
+PROMPT_VARIANTS: dict[str, tuple[str, dict[str, str]]] = {
+    "baseline": ("", {}),
+    "social-scoring-v1": (SOCIAL_SCORING_V1, {}),
+    "social-scoring-v2": ("", {SOCIAL_SCORING_V2_ID: SOCIAL_SCORING_V2}),
+}
 DEFAULT_PROMPT_VARIANT = "baseline"
 
 
 def system_prompt(variant: str = DEFAULT_PROMPT_VARIANT) -> str:
     if variant not in PROMPT_VARIANTS:
         raise ValueError(f"unknown prompt variant {variant!r} ({sorted(PROMPT_VARIANTS)})")
-    return SYSTEM_PROMPT + PROMPT_VARIANTS[variant]
+    return SYSTEM_PROMPT + PROMPT_VARIANTS[variant][0]
+
+
+def provision_notes(variant: str = DEFAULT_PROMPT_VARIANT) -> dict[str, str]:
+    system_prompt(variant)  # validates the variant name
+    return PROMPT_VARIANTS[variant][1]
 
 
 def response_schema() -> dict[str, Any]:
@@ -120,7 +148,8 @@ def response_schema() -> dict[str, Any]:
     }
 
 
-def user_message(description: str, candidates: dict[str, list[Provision]]) -> str:
+def user_message(description: str, candidates: dict[str, list[Provision]],
+                 notes: dict[str, str] | None = None) -> str:
     parts = ["USE CASE DESCRIPTION:", description.strip(), "", "CANDIDATE PROVISIONS:"]
     for scope in SCOPES:
         provisions = candidates.get(scope.name) or []
@@ -130,6 +159,8 @@ def user_message(description: str, candidates: dict[str, list[Provision]]) -> st
         for p in provisions:
             parts += [f"- provision_id: {p.logical_provision_id}",
                       f"  citation: {p.citation()}", f"  text: {p.text}"]
+            if notes and p.logical_provision_id in notes:
+                parts.append(f"  note: {notes[p.logical_provision_id]}")
     return "\n".join(parts)
 
 
@@ -255,7 +286,8 @@ class OpenAIMatcher:
             "model": self.model,
             "input": [
                 {"role": "system", "content": system_prompt(self.prompt_variant)},
-                {"role": "user", "content": user_message(description, candidates)},
+                {"role": "user", "content": user_message(
+                    description, candidates, provision_notes(self.prompt_variant))},
             ],
             "reasoning": {"effort": EFFORT_MAP[self.effort]},
             "max_output_tokens": 32000,
