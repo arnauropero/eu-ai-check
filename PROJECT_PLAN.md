@@ -395,6 +395,13 @@ deliverable (§10), not an afterthought.
   implementation. Demonstrated in Phase 0 by checking Article 5/16/26/Annex III
   structure before finalizing the chunking model — this caught the fixed-depth
   structural-path assumption before it became a schema migration.
+- **A phase tag means its acceptance criteria were met.** Each phase is merged to
+  `master` through a pull request with a merge commit, so the branch history stays
+  intact. Only a phase whose acceptance criteria were met is tagged `phase-N`. A
+  phase that ends with a documented not-met verdict is still merged, because its
+  code and findings are real and final, but it is not tagged. Its verdict is
+  recorded in the relevant SYSTEM_SPEC.md section. Phase 3 is the first example:
+  merged in `d7d45ad`, untagged, with the NOT MET verdict in §18.
 
 ## 10. Data / Evaluation Assets to Create
 
