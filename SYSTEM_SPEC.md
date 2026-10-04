@@ -1894,6 +1894,32 @@ precedent; see "Pre-registration completed" below).
   can sink the bucket. That is accepted as the price of a hand-built set, and is said
   here so it cannot be discovered conveniently later.
 
+**Determination — Phase 3 first run (pre-registered, 2026-10-04).** A one-call smoke
+test with `eu-ai-check match` on a made-up description outside the eval set came
+first. The API accepted the strict schema, and all 59 candidates were
+`does_not_match`, which is correct. That call cost $0.057. The pre-registered run
+then went ahead as amended: M-low × 3 (123 calls) plus B, with no label, prompt,
+scoring rule or case changed.
+
+- *Raw first attempt, frozen unchanged:*
+  `data/eval/results/determination_v1_41c.{txt,json,runs.jsonl}`. 26 of the 123
+  M-low calls (21%) failed with `APIConnectionError: Connection error.`. They are
+  D30#1–2, D31, D32, D34#0–1, D35#2, D36, D37, D39, D40 and D41, all repeats unless
+  marked. They fall in the last stretch of the run, which points to a network
+  outage. The harness scored each one as wrong. B had no errors.
+- *Retry of the API-failed calls only (user decision, 2026-10-04).* The
+  pre-registration did not say how to handle transport failures. Only the 26 failed
+  (case, repeat) pairs were re-called, once each, with the same model, effort,
+  prompt and labels. The 97 successful M-low runs were not re-called: they were
+  replayed through the pipeline from their recorded verdicts, and the script stops
+  unless each replay reproduces its original record exactly. B was recomputed under
+  the same exact-match check. All 26 retries succeeded. Script:
+  `scripts/retry_determination_failed.py`. Merged result:
+  `data/eval/results/determination_v1_41c_retry.{txt,json,runs.jsonl}`. Cost: $5.44
+  for the first attempt and $1.42 for the retry.
+- *The merged run is the official Phase 3 result.* The first attempt is kept only
+  as the raw record.
+
 **End-to-end:**
 - Obligation correctness (right obligations, right roles, right union/dedup per §4.1)
 - Citation correctness (right `versioned_provision_id` per claim)

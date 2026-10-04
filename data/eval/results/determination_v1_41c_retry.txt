@@ -1,0 +1,137 @@
+Phase 3 determination evaluation (pre-registered, SYSTEM_SPEC.md §18)
+==============================================================================
+
+-- risk_tier: per-state accuracy (exact status incl. reason)
+  arm                   applicable  not_applicable      unresolved     macro
+  matcher-low          1.000 (n= 63)     0.786 (n= 42)     0.933 (n= 15)     0.906
+  baseline             0.524 (n= 21)     0.714 (n= 14)     0.000 (n=  5)     0.413
+
+-- prohibited_practice: per-state accuracy (exact status incl. reason)
+  arm                   applicable  not_applicable      unresolved     macro
+  matcher-low          1.000 (n= 21)     0.632 (n= 87)     1.000 (n= 12)     0.877
+  baseline             0.571 (n=  7)     0.828 (n= 29)     0.000 (n=  4)     0.466
+
+-- other measures
+  matcher-low      not_in_force 1.000  system_category 0.975  derogation 0.905  downgrade rate 0.000  errors 0
+                  propagated (from predicted risk tier): actor_role 1.000  aiact:art_16 0.917  aiact:art_26 0.917
+  baseline         not_in_force 1.000  system_category 0.550  derogation 0.514  downgrade rate 0.000  errors 0
+                  propagated (from predicted risk tier): actor_role 0.975  aiact:art_16 0.775  aiact:art_26 0.625
+
+-- rule-based outputs on labelled risk tier (target 1.00): 1.000 over 123 checks
+
+-- zero-tolerance violations
+  matcher-low: 1
+     D32#2 risk_tier: unresolved -> not_applicable/conditions_not_met
+  baseline: 9
+     D11#0 risk_tier: unresolved -> not_applicable/conditions_not_met
+     D20#0 risk_tier: unresolved -> applicable
+     D30#0 prohibited_practice: unresolved -> not_applicable/conditions_not_met
+     D31#0 risk_tier: unresolved -> applicable
+     D31#0 prohibited_practice: unresolved -> not_applicable/conditions_not_met
+     D32#0 risk_tier: unresolved -> not_applicable/conditions_not_met
+     D32#0 prohibited_practice: unresolved -> not_applicable/conditions_not_met
+     D41#0 risk_tier: unresolved -> applicable
+     D41#0 prohibited_practice: unresolved -> applicable
+
+-- decision rule
+{
+  "decided": true,
+  "adopt_matcher": false,
+  "condition_1_zero_tolerance": false,
+  "condition_2_targets": false,
+  "condition_2_detail": {
+    "risk_tier.applicable": true,
+    "risk_tier.not_applicable": false,
+    "risk_tier.unresolved": true,
+    "prohibited_practice.applicable": true,
+    "prohibited_practice.not_applicable": false,
+    "prohibited_practice.unresolved": true,
+    "rule_path == 1.00": true,
+    "not_in_force == 1.00": true
+  },
+  "condition_3_beats_baseline": false,
+  "condition_3_detail": {
+    "risk_tier.macro >= B + 0.1": true,
+    "risk_tier.applicable >= B": true,
+    "risk_tier.not_applicable >= B": true,
+    "prohibited_practice.macro >= B + 0.1": true,
+    "prohibited_practice.applicable >= B": true,
+    "prohibited_practice.not_applicable >= B": false
+  },
+  "phase_3_acceptance_met": false
+}
+
+-- misses
+  [matcher-low] D02#0 prohibited_practice: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D02#1 prohibited_practice: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D02#2 prohibited_practice: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D04#0 prohibited_practice: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D04#1 prohibited_practice: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D04#2 prohibited_practice: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D05#0 prohibited_practice: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D05#1 prohibited_practice: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D05#2 prohibited_practice: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D07#0 prohibited_practice: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D07#1 prohibited_practice: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D07#2 prohibited_practice: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D08#2 prohibited_practice: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D10#0 risk_tier: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D10#1 risk_tier: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D10#2 risk_tier: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D11#1 prohibited_practice: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D11#2 prohibited_practice: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D12#0 prohibited_practice: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D12#1 prohibited_practice: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D12#2 prohibited_practice: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D26#0 risk_tier: want not_applicable/conditions_not_met, got applicable
+  [matcher-low] D26#1 risk_tier: want not_applicable/conditions_not_met, got applicable
+  [matcher-low] D26#2 risk_tier: want not_applicable/conditions_not_met, got applicable
+  [matcher-low] D28#0 risk_tier: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D28#1 risk_tier: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D28#2 risk_tier: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D32#2 risk_tier: want unresolved, got not_applicable/conditions_not_met
+  [matcher-low] D33#0 prohibited_practice: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D33#1 prohibited_practice: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D33#2 prohibited_practice: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D34#0 prohibited_practice: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D34#1 prohibited_practice: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D34#2 prohibited_practice: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D35#0 prohibited_practice: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D35#1 prohibited_practice: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D35#2 prohibited_practice: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D36#0 prohibited_practice: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D36#1 prohibited_practice: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D36#2 prohibited_practice: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D39#0 prohibited_practice: want not_applicable/conditions_not_met, got unresolved
+  [matcher-low] D39#2 prohibited_practice: want not_applicable/conditions_not_met, got unresolved
+  [baseline] D02#0 prohibited_practice: want not_applicable/conditions_not_met, got applicable
+  [baseline] D03#0 prohibited_practice: want not_applicable/conditions_not_met, got applicable
+  [baseline] D04#0 risk_tier: want applicable, got not_applicable/conditions_not_met
+  [baseline] D05#0 risk_tier: want applicable, got not_applicable/conditions_not_met
+  [baseline] D10#0 risk_tier: want not_applicable/conditions_not_met, got applicable
+  [baseline] D11#0 risk_tier: want unresolved, got not_applicable/conditions_not_met
+  [baseline] D16#0 risk_tier: want not_applicable/conditions_not_met, got applicable
+  [baseline] D18#0 risk_tier: want not_applicable/not_yet_applicable, got applicable
+  [baseline] D18#0 prohibited_practice: want not_applicable/conditions_not_met, got applicable
+  [baseline] D20#0 risk_tier: want unresolved, got applicable
+  [baseline] D21#0 risk_tier: want applicable, got not_applicable/conditions_not_met
+  [baseline] D21#0 prohibited_practice: want applicable, got not_applicable/conditions_not_met
+  [baseline] D22#0 prohibited_practice: want applicable, got not_applicable/conditions_not_met
+  [baseline] D23#0 risk_tier: want applicable, got not_applicable/conditions_not_met
+  [baseline] D24#0 risk_tier: want applicable, got not_applicable/conditions_not_met
+  [baseline] D24#0 prohibited_practice: want not_applicable/conditions_not_met, got applicable
+  [baseline] D25#0 risk_tier: want applicable, got not_applicable/conditions_not_met
+  [baseline] D27#0 risk_tier: want applicable, got not_applicable/conditions_not_met
+  [baseline] D28#0 prohibited_practice: want applicable, got not_applicable/conditions_not_met
+  [baseline] D29#0 risk_tier: want applicable, got not_applicable/conditions_not_met
+  [baseline] D30#0 risk_tier: want applicable, got not_applicable/conditions_not_met
+  [baseline] D30#0 prohibited_practice: want unresolved, got not_applicable/conditions_not_met
+  [baseline] D31#0 risk_tier: want unresolved, got applicable
+  [baseline] D31#0 prohibited_practice: want unresolved, got not_applicable/conditions_not_met
+  [baseline] D32#0 risk_tier: want unresolved, got not_applicable/conditions_not_met
+  [baseline] D32#0 prohibited_practice: want unresolved, got not_applicable/conditions_not_met
+  [baseline] D35#0 risk_tier: want applicable, got not_applicable/conditions_not_met
+  [baseline] D39#0 risk_tier: want not_applicable/not_yet_applicable, got not_applicable/conditions_not_met
+  [baseline] D40#0 prohibited_practice: want not_applicable/not_yet_applicable, got not_applicable/conditions_not_met
+  [baseline] D41#0 risk_tier: want unresolved, got applicable
+  [baseline] D41#0 prohibited_practice: want unresolved, got applicable
