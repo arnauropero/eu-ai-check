@@ -1,0 +1,128 @@
+{
+  "notice": "Phase 4 blind pairwise rating sample, frozen before any generation existed. Do not edit. The A/B key is in a separate gitignored file.",
+  "method": {
+    "seed": 20261007,
+    "size": 20,
+    "min_per_class": 2,
+    "max_per_case": 2,
+    "population": "held-out records",
+    "class_sizes": {
+      "not_in_force": 3,
+      "unresolved": 21,
+      "applicable": 6,
+      "not_applicable": 9
+    },
+    "allocation": {
+      "not_in_force": 2,
+      "unresolved": 9,
+      "applicable": 4,
+      "not_applicable": 5
+    }
+  },
+  "samples": [
+    {
+      "class": "not_in_force",
+      "record": "D38#2",
+      "sample_id": "R01"
+    },
+    {
+      "class": "not_in_force",
+      "record": "D38#1",
+      "sample_id": "R02"
+    },
+    {
+      "class": "unresolved",
+      "record": "D36#1",
+      "sample_id": "R03"
+    },
+    {
+      "class": "unresolved",
+      "record": "D36#2",
+      "sample_id": "R04"
+    },
+    {
+      "class": "unresolved",
+      "record": "D20#0",
+      "sample_id": "R05"
+    },
+    {
+      "class": "unresolved",
+      "record": "D28#1",
+      "sample_id": "R06"
+    },
+    {
+      "class": "unresolved",
+      "record": "D35#0",
+      "sample_id": "R07"
+    },
+    {
+      "class": "unresolved",
+      "record": "D31#1",
+      "sample_id": "R08"
+    },
+    {
+      "class": "unresolved",
+      "record": "D05#2",
+      "sample_id": "R09"
+    },
+    {
+      "class": "unresolved",
+      "record": "D35#2",
+      "sample_id": "R10"
+    },
+    {
+      "class": "unresolved",
+      "record": "D02#0",
+      "sample_id": "R11"
+    },
+    {
+      "class": "applicable",
+      "record": "D06#0",
+      "sample_id": "R12"
+    },
+    {
+      "class": "applicable",
+      "record": "D27#1",
+      "sample_id": "R13"
+    },
+    {
+      "class": "applicable",
+      "record": "D27#0",
+      "sample_id": "R14"
+    },
+    {
+      "class": "applicable",
+      "record": "D06#1",
+      "sample_id": "R15"
+    },
+    {
+      "class": "not_applicable",
+      "record": "D13#1",
+      "sample_id": "R16"
+    },
+    {
+      "class": "not_applicable",
+      "record": "D22#0",
+      "sample_id": "R17"
+    },
+    {
+      "class": "not_applicable",
+      "record": "D22#2",
+      "sample_id": "R18"
+    },
+    {
+      "class": "not_applicable",
+      "record": "D15#2",
+      "sample_id": "R19"
+    },
+    {
+      "class": "not_applicable",
+      "record": "D13#2",
+      "sample_id": "R20"
+    }
+  ],
+  "key": {
+    "path": "data/eval/private/generation_rating_key.json",
+    "sha256": "41231e32052b969d273b56c339f6a7acc344d59c3bcd45872437501d36c01222"
+  }
+}

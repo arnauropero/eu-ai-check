@@ -347,8 +347,7 @@ one rule-matching engine → cited, fail-closed output.
     held-out split is frozen in `data/eval/generation_split.json`.
 - Acceptance: every claim in generated output traceable to a specific
   `versioned_provision_id`; no obligation stated without a citation.
-  **PROPOSED replacement, to be pre-registered before the first generator call
-  (SYSTEM_SPEC.md §18):**
+  **Pre-registered 2026-10-06, before any Phase 4 API call (SYSTEM_SPEC.md §18):**
   - Every shipped answer passes checks C0–C8 (1.00).
   - The input status is reproduced in 100% of held-out records whose determination
     differs from gold.
@@ -358,8 +357,13 @@ one rule-matching engine → cited, fail-closed output.
     - there are zero status-changing (C4) and zero `not_in_force`-as-`not_applicable`
       (C8) violations;
     - grounded-explanation coverage is ≥ 0.90;
-    - it is preferred in ≥ 15/20 blind pairwise comparisons with the template.
-  - Spend cap: $5 for all Phase 4 API calls.
+    - it is preferred in ≥ 15/20 blind pairwise comparisons with the template
+      (frozen rating sample, sealed A/B key; ties go to the template).
+    Otherwise the template ships as the Phase 4 generator.
+  - Hard rule: the held-out pass runs exactly once, and nothing changes after it
+    has been looked at.
+  - Spend cap: $5 for all Phase 4 API calls, with held-out reserved first.
+  - H01–H08 are not used in Phase 4. They are reserved for Phase 5.
 
 **Phase 5 — End-to-end evaluation and polish**
 - Deliverable: end-to-end eval set with full expected outputs.
