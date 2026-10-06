@@ -356,6 +356,16 @@ and the template satisfies it.
   text. They will tie, and ties go to the template, so the effective bar is 15 of the
   18 informative pairs. The pre-registered rule (≥ 15/20) is unchanged. Scoring reports
   both: `llm_wins_of_20` and `llm_wins_of_informative` (x/18).
+- **[Deviation, 2026-10-06, before any rating exists] LLM rater, human validation
+  sample.** All 20 pairs are rated by an independent LLM rater (Claude in the
+  claude.ai chat, not the Phase 4 session). The result is labelled "LLM-rated
+  (Claude)", and never "human-rated". The rule (≥ 15/20, ties to the template) and
+  the 15/20 and x/18 reporting are unchanged. The user rates a validation sample of 6
+  of the 18 informative pairs: R04, R05, R06, R07, R12, R17. They were drawn with
+  `random.Random(20261008).sample(sorted(ids), 6)` (Python 3.12), with R01/R02
+  excluded, before any rating existed and without opening the key or the sheet.
+  Agreement with the LLM rater is reported only. See the SYSTEM_SPEC §18 deviation
+  note.
 - **Limitation: blinding is partial.** The template contains no model sentences,
   only code-rendered status lines, lists and citations. The LLM answer adds
   explanatory prose. Stylistic differences can therefore reveal which side is which,

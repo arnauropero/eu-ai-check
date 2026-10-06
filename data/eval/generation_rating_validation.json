@@ -1,0 +1,17 @@
+{
+  "notice": "Phase 4 rating validation sample, drawn 2026-10-06 before any rating existed. The user rates these pairs; the LLM rater (Claude, claude.ai chat) rates all 20. Agreement is reported only and never changes the adoption decision. Do not edit.",
+  "method": {
+    "seed": 20261008,
+    "population": "the 18 informative sample ids (all but the 2 not_in_force pairs R01, R02)",
+    "draw": "random.Random(20261008).sample(sorted(ids), 6), then sorted (Python 3.12)",
+    "size": 6
+  },
+  "sample_ids": [
+    "R04",
+    "R05",
+    "R06",
+    "R07",
+    "R12",
+    "R17"
+  ]
+}

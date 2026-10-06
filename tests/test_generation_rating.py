@@ -159,3 +159,64 @@ def test_frozen_sample_has_exactly_two_identical_not_in_force_pairs() -> None:
     sample = json.loads(Path("data/eval/generation_rating_sample.json").read_text(encoding="utf-8"))
     nif = [s["record"] for s in sample["samples"] if s["class"] == "not_in_force"]
     assert len(sample["samples"]) == 20 and sorted(nif) == ["D38#1", "D38#2"]
+
+
+def _rated(prefs):
+    return {sid: {"preference": p, "faithful_A": True, "faithful_B": True, "note": ""}
+            for sid, p in prefs.items()}
+
+
+def test_validation_agreement_is_reported_only(files, tmp_path) -> None:
+    make_sheet(**sheet_kwargs(files))
+    main = _rated({"R01": "B", "R02": "B", "R03": "tie"})
+    files["ratings_path"].write_text(json.dumps(main), encoding="utf-8")
+    vpath = tmp_path / "validation.json"
+    vpath.write_text(json.dumps({"sample_ids": ["R01", "R03"]}), encoding="utf-8")
+    vr = tmp_path / "validation_ratings.json"
+    kw = {"sample_path": files["sample_path"], "ratings_path": files["ratings_path"],
+          "key_path": files["key_path"], "validation_path": vpath,
+          "validation_ratings_path": vr}
+    base = score(**{**kw, "validation_ratings_path": None})
+    vr.write_text(json.dumps(_rated({"R01": "B", "R03": "A"})), encoding="utf-8")
+    out = score(**kw)
+    assert out["rater"] == "LLM-rated (Claude)"
+    v = out["validation_agreement"]
+    assert v["reported_only"] and v["preference_agreement"] == "1/2"
+    assert v["per_pair"]["R03"] == {"user": "A", "llm": "tie"}
+    # the adoption numbers do not move with the validation ratings
+    for k in ("llm_wins", "template_wins", "ties", "pairwise_ok", "llm_wins_of_20",
+              "llm_wins_of_informative"):
+        assert out[k] == base[k]
+
+
+def test_validation_blank_partial_and_wrong_ids(files, tmp_path) -> None:
+    make_sheet(**sheet_kwargs(files))
+    files["ratings_path"].write_text(json.dumps(_rated({"R01": "B", "R02": "A", "R03": "tie"})),
+                                     encoding="utf-8")
+    vpath = tmp_path / "validation.json"
+    vpath.write_text(json.dumps({"sample_ids": ["R01", "R03"]}), encoding="utf-8")
+    vr = tmp_path / "vr.json"
+    kw = {"sample_path": files["sample_path"], "ratings_path": files["ratings_path"],
+          "key_path": files["key_path"], "validation_path": vpath, "validation_ratings_path": vr}
+    vr.write_text(json.dumps({s: {"preference": None, "faithful_A": None, "faithful_B": None}
+                              for s in ("R01", "R03")}), encoding="utf-8")
+    assert score(**kw)["validation_agreement"]["status"] == "not rated"
+    vr.write_text(json.dumps({**_rated({"R01": "B"}),
+                              "R03": {"preference": None, "faithful_A": None, "faithful_B": None}}),
+                  encoding="utf-8")
+    with pytest.raises(RatingError):
+        score(**kw)
+    vr.write_text(json.dumps(_rated({"R01": "B", "R02": "B"})), encoding="utf-8")
+    with pytest.raises(RatingError):
+        score(**kw)
+
+
+def test_frozen_validation_sample() -> None:
+    import random
+
+    v = json.loads(Path("data/eval/generation_rating_validation.json").read_text(encoding="utf-8"))
+    sample = json.loads(Path("data/eval/generation_rating_sample.json").read_text(encoding="utf-8"))
+    informative = sorted(s["sample_id"] for s in sample["samples"] if s["class"] != "not_in_force")
+    assert v["method"]["seed"] == 20261008 and len(informative) == 18
+    assert v["sample_ids"] == sorted(random.Random(20261008).sample(informative, 6))
+    assert v["sample_ids"] == ["R04", "R05", "R06", "R07", "R12", "R17"]

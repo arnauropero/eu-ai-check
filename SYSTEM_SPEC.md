@@ -2410,6 +2410,25 @@ It is binding. As with Phase 3, a miss is reported as a miss and is not retuned.
     (2 hidden retries), and none of their 62 calls returned an error.
   - The summaries report `retries` and `retry_cost_usd`.
 
+- **[Deviation, 2026-10-06, after the held-out pass, before any rating exists] The
+  pairwise rating is done by an LLM rater.** This is the user's decision. The
+  pre-registration is not edited.
+  - *Rater.* The pre-registered human rater (the user) will not rate all 20 pairs.
+    An independent LLM rater, Claude in the claude.ai chat (not the session that built
+    and ran Phase 4), rates all 20 blinded pairs from the committed sheet. The result
+    is labelled **"LLM-rated (Claude)"** everywhere, and never "human-rated".
+  - *Rule unchanged.* Blind pairwise preference ≥ 15/20, ties to the template.
+    Scoring still reports both 15/20 and x/18 (the 2 not_in_force pairs are
+    identical by construction).
+  - *Human validation, reported only.* The user rates 6 of the 18 informative pairs:
+    R04, R05, R06, R07, R12, R17, drawn with seed 20261008. The R01/R02 pairs are
+    excluded. Their agreement with the LLM rater is reported (preference x/6,
+    faithfulness x/6) and never changes the adoption decision. With 6 pairs the
+    agreement estimate is coarse, and 4 of the 6 are unresolved-class pairs.
+  - *Files.* `data/eval/generation_rating_validation.json` (the frozen ids and seed)
+    and `data/eval/results/generation_ratings_validation.json` (the user's ratings).
+    The A/B key is opened only by the scorer, after both rating files are complete.
+
 **End-to-end:**
 - Obligation correctness (right obligations, right roles, right union/dedup per §4.1)
 - Citation correctness (right `versioned_provision_id` per claim)
