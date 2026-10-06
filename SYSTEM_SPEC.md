@@ -2383,6 +2383,14 @@ It is binding. As with Phase 3, a miss is reported as a miss and is not retuned.
     SHA in `generation/system_language.py`, and legal uses such as "conformity
     assessment" do not count. It is not a gate. Dev pass 1 baseline: 70 of 179 claims.
 
+- **[Note, 2026-10-06, after dev pass 2, before any held-out call] Prompt v2 frozen
+  for the held-out pass.** This note does not edit the pre-registration. Prompt v2
+  (`prompt_sha` `a6b4a491da53588b40fd575d34756d0432068fb9f87d7bbc4313cdd68aece0f6`) is
+  the held-out prompt. There will be no further prompt versions in Phase 4. Dev pass 2
+  (v2, 31 calls, $0.5057) had a raw pass rate of 1.00, fallback 0.00, coverage 1.00,
+  0 truncated, 0 C4/C8, and a system-language rate of 0/205. Phase 4 spend before the
+  held-out pass is $1.0114.
+
 **End-to-end:**
 - Obligation correctness (right obligations, right roles, right union/dedup per §4.1)
 - Citation correctness (right `versioned_provision_id` per claim)
