@@ -1,0 +1,48 @@
+{
+  "rater": "LLM-rated (Claude)",
+  "pairs": 20,
+  "llm_wins": 17,
+  "template_wins": 0,
+  "ties": 3,
+  "pairwise_ok": true,
+  "llm_wins_of_20": "17/20",
+  "informative_pairs": 18,
+  "llm_wins_of_informative": "17/18",
+  "identical_pairs_rated_tie": 2,
+  "faithful_llm": 20,
+  "faithful_template": 20,
+  "validation_agreement": {
+    "reported_only": true,
+    "pairs": 6,
+    "preference_agreement": "6/6",
+    "preference_agreement_rate": 1.0,
+    "faithful_A_agreement": "6/6",
+    "faithful_B_agreement": "6/6",
+    "per_pair": {
+      "R04": {
+        "user": "B",
+        "llm": "B"
+      },
+      "R05": {
+        "user": "B",
+        "llm": "B"
+      },
+      "R06": {
+        "user": "B",
+        "llm": "B"
+      },
+      "R07": {
+        "user": "B",
+        "llm": "B"
+      },
+      "R12": {
+        "user": "A",
+        "llm": "A"
+      },
+      "R17": {
+        "user": "A",
+        "llm": "A"
+      }
+    }
+  }
+}

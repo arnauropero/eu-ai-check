@@ -514,3 +514,25 @@ matcher):
 
 **Next step:** the smoke test (one call on a made-up input). It waits for the user's
 go-ahead after they check the OpenAI balance.
+
+## Outcome (2026-10-06)
+
+Rating was LLM-rated (Claude), with a 6-pair human validation (6/6 agreement,
+reported only).
+- **Pairwise.** The model arm was preferred in 17/20 pairs (17/18 informative), the
+  template in 0, with 3 ties.
+- **Faithfulness.** 20/20 for each arm.
+- **Decision.** All three adoption conditions hold, so the LLM generator (prompt v2)
+  is adopted and the template stays as the fallback.
+- **Spend.** $1.6931 of the $5 cap.
+
+Limitations:
+- LLM rater instead of the human rater, a documented deviation.
+- Human validation of only 6 pairs, with no statistical value.
+- Partial blinding: the template arm is recognisable.
+- Both arms list high-risk obligations even when a prohibited practice applies,
+  unflagged. This comes from the shared determinations and renderer.
+- Minor imprecision about the Art. 6(3) subparagraphs in some claims (R04, R07),
+  within tolerance.
+
+See the SYSTEM_SPEC §18 notes.

@@ -364,6 +364,17 @@ one rule-matching engine → cited, fail-closed output.
     has been looked at.
   - Spend cap: $5 for all Phase 4 API calls, with held-out reserved first.
   - H01–H08 are not used in Phase 4. They are reserved for Phase 5.
+- **Status (2026-10-06): complete, acceptance met, LLM generator adopted.**
+  - *Dev.* Two dev prompt iterations. v2 was frozen before the held-out pass.
+  - *Held-out pass (once, 39 records).* Raw pass 1.00, fallback 0.00, 0 truncated,
+    0 C4/C8, coverage 1.00, status reproduced 15/15, 0 API errors.
+  - *Pairwise.* LLM-rated (Claude), a documented deviation from the human rater:
+    17/20 (17/18 informative), 0 template wins, 3 ties. Human validation agreed on
+    6/6 pairs (reported only).
+  - *Spend.* $1.6931 of $5.
+  - *Limitations.* LLM rater; a 6-pair validation; partial blinding; high-risk
+    obligations still listed when a prohibited practice applies (both arms);
+    minor Art. 6(3) imprecision (R04, R07). See SYSTEM_SPEC.md §18.
 
 **Phase 5 — End-to-end evaluation and polish**
 - Deliverable: end-to-end eval set with full expected outputs.
