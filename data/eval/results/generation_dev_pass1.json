@@ -1,0 +1,42 @@
+{
+  "records": 31,
+  "api_errors": 0,
+  "raw_pass_rate": 0.9677,
+  "fallback_rate": 0.0323,
+  "raw_failed_by_check": {
+    "C0": 0,
+    "C1": 0,
+    "C2": 0,
+    "C3": 0,
+    "C4": 0,
+    "C5": 1,
+    "C6": 0,
+    "C7": 0,
+    "C8": 0
+  },
+  "finish_reasons": {
+    "completed": 31
+  },
+  "truncated": 0,
+  "content_failures": 1,
+  "c4_c8_diagnostic_hits": {},
+  "c4_violations": 0,
+  "c8_violations": 0,
+  "shipped_pass_rate": 1.0,
+  "grounded_explanation_coverage": 0.9773,
+  "gold_differs_records": 8,
+  "faithful_reproduction_rate": 1.0,
+  "status_reproduced_all": true,
+  "input_tokens": 117762,
+  "reasoning_tokens": 1100,
+  "output_tokens": 22951,
+  "stopped_by_budget": null,
+  "spent_usd": 0.5057,
+  "model": "gpt-6.1-sol",
+  "effort": "low",
+  "max_output_tokens": 5000,
+  "prompt_sha": "583a2ba7b45654b65d1ae52699cd51304ee50976e874f20c1d1341d5e28303c1",
+  "prompt_version": "v1",
+  "prompt_note": "system prompt and schema unchanged from v0; adapter explanations reworded without internal ids or None (smoke showed them echoed as 'The code identifies')",
+  "split_content_sha256": "8300d7cc71658ce2fbaad7202363878be74afc6c32d477184cc0f436b519eb28"
+}
