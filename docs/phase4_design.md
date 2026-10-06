@@ -1,10 +1,9 @@
 # Phase 4 — Generation and citation: design note
 
-Status: **design approved in part; round 2 awaiting approval** (2026-10-06, branch
-`phase-4/generation`). No generator code exists, and no Phase 4 API call has been made.
-The decisions taken so far are listed in §8. Items still marked **PROPOSED** (the
-decision rule, the targets and the spend cap) need approval. Earlier **[PROPOSAL]**
-tags in §0–§4 were approved unless §8 says otherwise.
+Status: **APPROVED and pre-registered** (2026-10-06, branch `phase-4/generation`).
+No generator code exists, and no Phase 4 API call has been made. The decisions are
+listed in §8. The **[PROPOSAL]** tags in §0–§4 were approved unless §8 says otherwise.
+SYSTEM_SPEC §18 holds the binding text.
 
 Grounded in:
 - SYSTEM_SPEC §14 (four-state join), §16 (output contract) and §18 (evaluation, including
@@ -287,12 +286,12 @@ C4(b), C5(b–c) and C8 are lexical. They can miss a paraphrase, so a pass does 
 faithfulness. That is why a small human-read sample is proposed below (reported, not
 gated).
 
-### Acceptance criteria and the template baseline (round 2; PROPOSED, see SYSTEM_SPEC §18)
+### Acceptance criteria and the template baseline (APPROVED, pre-registered; SYSTEM_SPEC §18 is binding)
 
 A **template renderer** (no LLM, $0) is the Phase 4 baseline. It uses the same
 adapter, renderer and checks, with no model claims. It therefore passes C0–C8 *by
 construction*, and check pass rates cannot tell it apart from the LLM. The LLM's
-added value has to be measured separately, as follows.
+added value is measured separately, as follows.
 
 **Acceptance (both arms):**
 1. Every shipped answer passes C0–C8: **1.00**.
@@ -300,36 +299,74 @@ added value has to be measured separately, as follows.
    gold (D02, D05, D28, D35, D36: 15 records), the rendered status equals the input
    status in **100%** of them. D32#2 is pinned separately by a regression test (it
    is in dev).
-3. Reported, not gated (decided): a human faithfulness read of 20 sampled answers.
+3. Reported, not gated: a human faithfulness read of the 20 rated answers.
 
-**PROPOSED decision rule: adopt the LLM generator over the template only if all of
-the following hold on the held-out set.**
+**Decision rule: adopt the LLM generator over the template only if all of the
+following hold on the held-out set.**
 1. *Hygiene:*
    - raw first-attempt pass rate ≥ 0.95;
    - fallback rate ≤ 0.05;
    - zero C4 violations;
    - zero C8 violations.
-2. ***Grounded-explanation coverage ≥ 0.90*** (the improvement metric, deterministic).
-   Count the explainable determinations: risk tier and prohibited practice when
-   `applicable` or `not_applicable`, obligation articles when `applicable` or
-   `not_yet_applicable`, and every `unresolved` determination. Coverage is the share of
-   them that carry at least one model claim passing C0–C8. The template scores 0.00 by
-   construction. This metric shows that the LLM adds *verified* content. It does not
-   show that the content is better. Hence 3.
-3. ***Blind pairwise preference ≥ 15 / 20*** (the improvement metric, quality). The user
-   rates 20 held-out pairs (template vs LLM, same input), sampled with a fixed seed and
-   stratified by input state, with order randomised and the arm hidden. Ties count for
-   the template. This can run in the same sitting as the faithfulness read.
+2. ***Grounded-explanation coverage ≥ 0.90*** (deterministic). Count the
+   explainable determinations: risk tier and prohibited practice when `applicable` or
+   `not_applicable`, obligation articles when `applicable` or `not_yet_applicable`,
+   and every `unresolved` determination. Coverage is the share of them that carry at
+   least one model claim passing C0–C8. The template scores 0.00 by construction.
+   This metric shows that the LLM adds *verified* content. It does not show that the
+   content is better. Hence 3.
+3. ***Blind pairwise preference ≥ 15 / 20***, with ties going to the template. The
+   protocol is below.
 
-If the rule fails, the **template ships** as the Phase 4 generator. Phase 4
+If any condition fails, the **template ships** as the Phase 4 generator. Phase 4
 acceptance (1–2) is then still met, because traceability is the acceptance property
-and the template satisfies it. The cost of the LLM is justified only by 2 and 3.
+and the template satisfies it.
 
-Note on 3: you decided the faithfulness read is reported, not gated. Criterion 3 is a
-different human judgement, and it gates *adoption of the LLM*, not Phase 4
-acceptance. If you want no human gate at all, drop 3 and raise 2 to ≥ 0.95. The cost
-is that adoption would then rest on a metric that only measures presence, not
-quality.
+### Rating protocol (frozen before any generation)
+
+- **The sample:** `data/eval/generation_rating_sample.json`, built by
+  `scripts/make_generation_rating_sample.py` and SHA-pinned. It holds 20 held-out
+  records, drawn with seed 20261007. Records are stratified by class, with
+  proportional allocation, at least 2 per class and at most 2 per case.
+
+  | Class | Held-out records | Sampled |
+  |---|---|---|
+  | `not_in_force` (D38) | 3 | 2 |
+  | any determination `unresolved` | 21 | 9 |
+  | an obligation article applies (now or later) | 6 | 4 |
+  | otherwise `not_applicable` | 9 | 5 |
+
+  Records: D38#2, D38#1, D36#1, D36#2, D20#0, D28#1, D35#0, D31#1, D05#2, D35#2, D02#0,
+  D06#0, D27#1, D27#0, D06#1, D13#1, D22#0, D22#2, D15#2, D13#2.
+- **The A/B key:** one A/B assignment per sample, drawn from a fresh secret seed (not
+  derivable from the committed script). It is written only to
+  `data/eval/private/generation_rating_key.json`, which is gitignored, and it has not
+  been opened or printed. The sample file commits its SHA-256
+  (`41231e32…01222`), and a test checks the key against it whenever the file is
+  present. That makes the key fixed now and verifiable at unblinding. The key exists
+  only on this machine, so back the file up **without opening it**. If it is lost,
+  the pairwise rating cannot be unblinded.
+- **Procedure:** the rating sheets show A and B for each sample, with no arm names.
+  The user rates every pair (A / B / tie) and the faithfulness of both, and
+  commits the ratings. Only then is the key opened, its hash checked and the result
+  computed.
+- **Limitation: blinding is partial.** The template contains no model sentences,
+  only code-rendered status lines, lists and citations. The LLM answer adds
+  explanatory prose. Stylistic differences can therefore reveal which side is which,
+  often at a glance. The seeded assignment removes label and order effects, but not
+  this one. The result should be read as "preferred, knowing roughly which is which".
+  This is why criterion 2 is a deterministic gate in its own right.
+
+### Hard rule (APPROVED)
+
+- The held-out pass runs **exactly once**.
+- No prompt, check, lexicon or renderer change is made after any held-out output
+  has been looked at.
+- If the hygiene criterion fails, that is recorded and the template ships as the
+  Phase 4 generator. There is no retry.
+- API failures during the held-out pass count as failures. They are not re-run,
+  unless the user decides otherwise before the results are looked at (the Phase 3
+  precedent).
 
 ---
 
@@ -338,8 +375,8 @@ quality.
 - **No pipeline re-run.** Inputs come from replaying cached verdicts through
   `Pipeline` and then the adapter. `scripts/verify_generation_inputs.py` confirms the
   replay is exact for all 123 M-low records.
-- **Input derivability (verified, item 5).** For every cited provision of every
-  record, `versioned_provision_id` and the excerpt follow from the corpus plus
+- **Input derivability (verified).** For every cited provision of every record,
+  `versioned_provision_id` and the excerpt follow from the corpus plus
   `relevant_date`. Each of the 110 provisions has exactly one version (valid from
   2024-08-01, open-ended): 4,295 lookups derived, and the pipeline's own
   `ProvisionStatus.versioned_provision_id` agrees in every case. **Not derivable:**
@@ -347,47 +384,48 @@ quality.
   `relevant_date` is 2024-06-15, before any text was in force. This is correct
   `not_in_force` behaviour, not a data gap. Those determinations carry no
   `EvidenceItem` (SYSTEM_SPEC §16.2).
-- **Split (decided, frozen in `a105e66`, before any generator prompt).**
-  `data/eval/generation_split.json`, produced by `scripts/make_generation_split.py`
-  and SHA-pinned in `tests/test_generation_split.py`. It is split by case id,
-  stratified on gold risk tier, with seed 20261006. D38 is forced into held-out
-  because it is the only `not_in_force` case.
+- **Split (frozen before any generator prompt).** `data/eval/generation_split.json`,
+  produced by `scripts/make_generation_split.py` and SHA-pinned in
+  `tests/test_generation_split.py`. It is split by case id, stratified on gold risk
+  tier, with seed 20261006. D38 is forced into held-out because it is the only
+  `not_in_force` case.
 
   | Side | Cases | Records | Input determinations |
   |---|---|---|---|
-  | dev | D01 D03 D04 D07 D08 D09 D10 D11 D12 D14 D16 D17 D18 D19 D21 D23 D24 D25 D26 D29 D30 D32 D33 D34 D37 D39 D40 D41 (28) | 84 | 114 applicable, 154 not_applicable, 80 unresolved, 0 not_in_force |
+  | dev | D01 D03 D04 D07 D08 D09 D10 D11 D12 D14 D16 D17 D18 D19 D21 D23 D24 D25 D26 D29 D30 D32 D33 D34 D37 D39 D40 D41 (28) | 84 | 114 applicable, 154 not_applicable, 80 unresolved |
+  | dev, **synthetic** | S01 (D01 @ 2024-07-31), S02 (D21 @ 2024-03-13), S03 (D30 @ 2023-06-01) | 3 | 15 not_in_force |
   | held-out | D02 D05 D06 D13 D15 D20 D22 D27 D28 D31 D35 D36 D38 (13) | 39 | 60 applicable, 45 not_applicable, 42 unresolved, 15 not_in_force |
-  | extra held-out | H01–H08 | none yet | **no cached determinations** (see below) |
+  | not in Phase 4 | H01–H08, reserved untouched for Phase 5 end-to-end | — | — |
 
-  Dev has no `not_in_force`. That state is covered by deterministic tests on D38-shaped
-  fixtures, and by held-out.
-- **H01–H08 have no determinations (needs your decision).** The 5(1)(c) held-out set
-  was never run, so there is nothing cached to generate from. The options are:
-  - **(a) M-low, baseline prompt, 1 repeat:** 8 matcher calls, ≈ $0.46. This uses up
-    the set's status as an *untouched* confirmation set for any future 5(1)(c)
-    matcher change (SYSTEM_SPEC §18 kept it for that purpose).
-  - **(b) Score-cutoff baseline B:** $0, local embedder only. New descriptions, and
-    the H set stays untouched for the matcher. But B cannot produce `unresolved`, so
-    H07/H08 come out wrong. That is still a valid faithful-reproduction test, since
-    the generator must render B's status as given.
-  - **(c) Drop H from Phase 4.**
-
-  **Recommendation: (b).** It keeps the H set's matcher value, costs nothing, and
-  held-out already has 42 `unresolved` determinations from the D cases.
-- **Model:** `gpt-6.1-sol`, effort `low` (decided). It is configurable, with a fake
-  generator for tests. The cheaper-model comparison happens in Phase 5.
+- **Synthetic `not_in_force` dev cases (feasible, done).** Without them, the
+  `not_in_force` wording would first be seen in the one-shot held-out pass. The dev
+  cases are re-dated before entry into force (2024-08-01). `candidates()` then
+  returns no provision in force, so `Pipeline.determine` never calls the matcher, and
+  every determination is `not_in_force`. The split script and a test both replay
+  them with a matcher that raises if called, and both pass. They are marked
+  `synthetic: true`, they are not Phase 3 results, they are used only for dev, and
+  they are never scored as held-out. One record each, because they are deterministic.
+  - *Limit:* every corpus provision has the same start date, so a pre-entry date
+    makes *everything* `not_in_force`. A case where some provisions are in force and
+    others are not cannot be built from this corpus. S01–S03 differ from D38 only in
+    date and case. That is enough to exercise the wording and the entry-into-force
+    date rendering.
+- **H01–H08: not used in Phase 4 (decision Q7(c)).** They are kept untouched for
+  the Phase 5 end-to-end evaluation, which needs new descriptions.
+- **Model:** `gpt-6.1-sol`, effort `low`. It is configurable, with a fake generator
+  for tests. The cheaper-model comparison happens in Phase 5.
 - **Tests first, at zero cost:** the adapter, both renderers and C0–C8 are tested on
-  hand-written `GeneratedAnswer` fixtures, including adversarial ones.
+  hand-written `GeneratedAnswer` fixtures, including adversarial ones. The C4/C5/C8
+  lexicons are fixed in code and tests before the smoke test.
 - **Do not touch:** the Phase 3 prompts, the SHA pins, the cached results, and
   `DEFAULT_PROMPT_VARIANT = "baseline"`.
 
-### Cost breakdown (corrected)
+### Cost breakdown
 
 **Why the first estimate said $12–21.** It was not $0.02–0.035 × 41. It assumed
 about 574 calls: 8 dev rounds × 41 cases (328), plus a final pass over 246 records
-(123 dev + 123 `social-scoring-v1` held-out). That is 574 × $0.02–0.035. You have
-since excluded that held-out set and capped the spend. The per-call figure was also
-too low, as the measurements below show.
+(123 dev + 123 `social-scoring-v1` held-out), at the then per-call figure. That
+held-out set has since been excluded, and the per-call figure was too low.
 
 **Per call, measured inputs.** Prices are from `cli.py`: Sol costs $2 / $10 per
 million input / output tokens. That reproduces the matcher's $0.057 per call
@@ -402,60 +440,61 @@ million input / output tokens. That reproduces the matcher's $0.057 per call
 - **Total ≈ $0.03 typical, $0.05 upper. The plan below uses $0.05.** The smoke test
   measures the real figure.
 
-**Plan under the PROPOSED $5 cap** (1 generation per record; Phase 4 never re-runs
-the matcher):
+**Plan under the APPROVED $5 cap** (1 generation per record; Phase 4 never calls the
+matcher):
 
 | Item | Calls per pass | Passes | Calls | At $0.05 | At $0.03 |
 |---|---|---|---|---|---|
 | Smoke test (made-up input) | 1 | 1 | 1 | $0.05 | $0.03 |
-| Dev iteration: repeat 0 of each dev case | 28 | ≤ 1.9 (budget-limited) | ≤ 52 | ≤ $2.60 | ≤ $1.56 |
-| Held-out, pre-registered, all 3 repeats | 39 | 1 | 39 | $1.95 | $1.17 |
-| H01–H08 generator (option b) | 8 | 1 | 8 | $0.40 | $0.24 |
-| **Total** | | | **≤ 100** | **≤ $5.00** | **≤ $3.00** |
+| Dev iteration: repeat 0 of each dev case + S01–S03 | 31 | ≤ 1.7 (budget-limited) | ≤ 52 | ≤ $2.60 | ≤ $1.56 |
+| Held-out, pre-registered, all 3 repeats, exactly once | 39 | 1 | 39 | $1.95 | $1.17 |
+| **Total (worst case)** | | | **≤ 92** | **≈ $4.60** | **≈ $2.76** |
 
 - *Repeats:* dev uses repeat 0 only, because repeats mostly share a determination.
   Held-out uses all 3 repeats, because the records differ (matcher variance), which
   also partly exposes generator variance.
-- *Reserve first:* the held-out and H passes ($2.35 at the planning price) are
-  reserved before dev starts. Dev iteration stops when spend + reserve reaches $5.
-  The harness keeps a spend ledger from response usage.
-- With option (a) for H, add 8 matcher calls (≈ $0.46). Dev then drops to about 43
-  calls.
-- $0: the adapter, the template baseline, the checks, the split, the tests and all
-  replay work.
+- *Reserve first:* the held-out pass ($1.95 at the planning price) is reserved
+  before dev starts. Dev iteration stops when spend + reserve would exceed $5. The
+  harness keeps a spend ledger from response usage.
+- $0: the adapter, the template baseline, the checks, the split, the rating sample,
+  the tests and all replay work.
 
 ---
 
 ## 7. Edits to SYSTEM_SPEC and PROJECT_PLAN
 
-Applied in `34acd2a`, separately from this note:
-- SYSTEM_SPEC §16 as-built note and §16.1 (what Phase 3 really produces);
-- §16.2 (adapter input, per-article obligations);
-- §16.3 (claims-first output, template renderer);
-- §18 Generation block (split, C0–C8, baseline, PROPOSED rule / targets / cap, known
-  limitation);
-- §19 invariants 23–26 (= G1–G4);
-- PROJECT_PLAN Phase 4 deliverables and PROPOSED acceptance, and the Phase 5 model
-  comparison.
+- `34acd2a`:
+  - SYSTEM_SPEC §16 as-built note and §16.1 (what Phase 3 really produces);
+  - §16.2 (adapter input, per-article obligations);
+  - §16.3 (claims-first output, template renderer);
+  - §19 invariants 23–26 (= G1–G4);
+  - PROJECT_PLAN Phase 4 deliverables and the Phase 5 model comparison.
+- The pre-registration commit:
+  - §18 Generation block rewritten as APPROVED (split with synthetic dev cases, H
+    reserved for Phase 5, checks, decision rule, targets, rating protocol, hard
+    rule, cap);
+  - PROJECT_PLAN Phase 4 acceptance marked pre-registered.
 
 ---
 
-## 8. Decisions and open questions
+## 8. Decisions
 
-**Decided (2026-10-06):**
+**Round 1 (2026-10-06):**
 - Option B.
 - `gpt-6.1-sol` at `low`.
 - No verbatim user quotes in the input.
 - Matcher rationales only for unanswered verdicts.
 - Obligations grouped per article.
 - The faithfulness sample is reported, not gated.
-- The split is by case id, with H01–H08 as extra held-out.
+- The split is by case id.
 - The template baseline.
 
-**Open:**
-- **Q7.** H01–H08 determinations: (a) M-low, (b) baseline B (recommended), or (c) drop.
-- **Q8.** Approve the decision rule: coverage ≥ 0.90 plus pairwise preference ≥ 15/20.
-  Or no human gate, with coverage ≥ 0.95.
-- **Q9.** Approve the $5 cap and the reserve-first spending plan.
-- **Q10.** Once Q7–Q9 are answered, the PROPOSED items in SYSTEM_SPEC §18 and
-  PROJECT_PLAN become the Phase 4 pre-registration, committed before the smoke test.
+**Round 2 (2026-10-06):**
+- **Q7:** (c). H01–H08 are dropped from Phase 4 and reserved for Phase 5.
+- **Q8:** the decision rule is adopted as proposed, with sealed-key blinding. The
+  partial-unblinding limitation is documented above.
+- **Q9:** the $5 cap, with held-out reserved first, plus the hard rule.
+- **Addition:** synthetic `not_in_force` dev cases S01–S03.
+
+**Next step:** the smoke test (one call on a made-up input). It waits for the user's
+go-ahead after they check the OpenAI balance.

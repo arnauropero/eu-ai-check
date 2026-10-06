@@ -2185,11 +2185,10 @@ pre-registered attempt:
 - D32 (attention vs emotion recognition) is the most fragile case in the set, and
   any change has to be measured against it.
 
-**Generation — Phase 4 design (2026-10-06).** Design: `docs/phase4_design.md`;
-contract: §16.2–16.3. Items marked **PROPOSED** await the user's approval. They become
-binding when committed as the Phase 4 pre-registration, before the first generator
-API call. As with Phase 3, a miss against them is then reported as a miss and is not
-retuned.
+**Generation — Phase 4 pre-registration (APPROVED 2026-10-06).** Design:
+`docs/phase4_design.md`; contract: §16.2–16.3. Everything below was approved by the
+user and committed **before any Phase 4 API call** (no smoke test, no generation).
+It is binding. As with Phase 3, a miss is reported as a miss and is not retuned.
 
 - **Inputs, not a pipeline run.** The generator is developed and scored on the cached
   official Phase 3 run (`determination_v1_41c_retry`, M-low), replayed through
@@ -2203,15 +2202,20 @@ retuned.
   on one side.
   - *Dev, 28 cases / 84 records:* D01, D03, D04, D07–D12, D14, D16–D19, D21, D23–D26,
     D29, D30, D32–D34, D37, D39–D41.
+  - *Dev, synthetic, 3 records:* S01 (D01 at 2024-07-31), S02 (D21 at 2024-03-13)
+    and S03 (D30 at 2023-06-01). These are dev cases re-dated before entry into
+    force. `Pipeline` finds no candidate in force and never calls the matcher, so
+    every determination is `not_in_force`, deterministically and at no cost (a test
+    replays them with a matcher that raises). They are marked `synthetic`, are not
+    Phase 3 results, and exist only so that `not_in_force` wording is seen in dev.
+    Every provision has one start date, so they are all-`not_in_force`, like D38.
   - *Held-out, 13 cases / 39 records:* D02, D05, D06, D13, D15, D20, D22, D27, D28,
     D31, D35, D36, D38. Input determinations: 60 `applicable`, 45 `not_applicable`,
     42 `unresolved`, 15 `not_in_force`, plus 33 known role sets. Five of these cases
     (D02, D05, D28, D35, D36, all 15 of their records) carry at least one
     determination that differs from gold.
-  - *Extra held-out:* H01–H08. They have no determinations yet (see the open
-    decision in the design note).
-  - Dev has no `not_in_force` record. That state is covered by deterministic tests
-    and by the held-out set.
+  - *Not used in Phase 4:* H01–H08 are reserved, untouched, for the Phase 5
+    end-to-end evaluation.
 - **Deterministic checks (no LLM), run on every answer.**
 
   | ID | Check |
@@ -2228,40 +2232,69 @@ retuned.
 
   C4, C5 and C8 are partly lexical, so a pass does not prove faithfulness. A failing
   answer is never shown: the template rendering replaces it, and the replacement is
-  counted.
+  counted. The exact lexicons and regexes are fixed in code and tests before the
+  smoke test.
 - **Baseline: the template renderer** (no LLM, $0). It uses the same adapter, the same
   renderer and the same checks, with no model claims. It passes C0–C8 by construction,
-  so check pass rates cannot tell the two arms apart. **PROPOSED decision rule** for
-  adopting the LLM generator over the template. All three must hold on the held-out
-  set:
-  1. The generator meets the acceptance targets below.
+  so check pass rates cannot tell the two arms apart.
+- **Decision rule (APPROVED): adopt the LLM generator over the template only if all
+  three hold on the held-out set.**
+  1. *Hygiene:*
+     - raw first-attempt pass rate on C0–C8 ≥ 0.95;
+     - fallback rate ≤ 0.05;
+     - zero C4 violations;
+     - zero C8 violations.
   2. *Grounded-explanation coverage ≥ 0.90.* This is the share of explainable
      determinations that carry at least one model claim passing C0–C8. The
      explainable determinations are risk tier and prohibited practice when
      `applicable` or `not_applicable`, obligation articles when `applicable` or
      `not_yet_applicable`, and every `unresolved` determination. The template scores
      0.00 by construction. This criterion is deterministic.
-  3. *Blind pairwise preference ≥ 15 of 20.* The user rates 20 held-out pairs,
-     sampled with a fixed seed and stratified by input state, with order randomised
-     and the arm hidden. Ties count for the template.
+  3. *Blind pairwise preference ≥ 15 of 20.* Ties count for the template. The
+     protocol follows below.
 
-  If the rule fails, the template ships as the Phase 4 generator.
-- **PROPOSED acceptance targets.**
+  If any condition fails, the template ships as the Phase 4 generator, and the
+  failure is recorded here.
+- **Acceptance targets (APPROVED).**
   - Every shipped answer passes C0–C8: 1.00.
-  - Input status reproduced in 100% of the held-out records whose determination
-    differs from gold.
-  - For the LLM generator, on the held-out set:
-    - raw first-attempt pass rate ≥ 0.95;
-    - fallback rate ≤ 0.05;
-    - zero C4 violations;
-    - zero C8 violations.
-  - Reported, not gated: a human faithfulness read of 20 sampled answers.
+  - Input status reproduced in 100% of the 15 held-out records whose determination
+    differs from gold. D32#2 (dev) is pinned by a regression test.
+  - Reported, not gated: a human faithfulness read of the same 20 rated answers.
+- **Rating protocol (frozen).** `data/eval/generation_rating_sample.json`, built by
+  `scripts/make_generation_rating_sample.py` and SHA-pinned:
+  - *The sample:* 20 held-out records, drawn before any generation existed with
+    seed 20261007. Records are stratified by class, with proportional allocation,
+    at least 2 per class and at most 2 per case. The classes are `not_in_force`,
+    any `unresolved`, an obligation article that applies now or later, and
+    otherwise `not_applicable`. The allocation is 2 / 9 / 4 / 5.
+  - *Each pair:* the template and the LLM answer for the same input, labelled A and
+    B. The A/B assignment was drawn from a fresh secret seed and written only to
+    `data/eval/private/generation_rating_key.json`. That file is gitignored and is
+    not opened until rating is finished. Its SHA-256 is committed in the sample
+    file, and a test checks it, so the key is fixed now and can be verified at
+    unblinding.
+  - *Limitation, stated in advance:* blinding is partial. The template contains no
+    model sentences, so stylistic differences can reveal which side is the LLM.
+    Blinding removes label and order effects, not that one.
+- **Hard rule (APPROVED).**
+  - The held-out pass runs **exactly once**.
+  - No prompt, check, lexicon or renderer change is made after any held-out output
+    has been looked at.
+  - If the hygiene criterion fails, that is recorded and the template ships as the
+    Phase 4 generator. There is no retry.
+  - API failures during the held-out pass count as failures. They are not re-run,
+    unless the user decides otherwise before the results are looked at, as in
+    Phase 3.
 - **Model:** `gpt-6.1-sol` at effort `low`, configurable. The comparison with cheaper
   models is deferred to Phase 5 as a pre-registered comparison.
-- **PROPOSED spend cap: $5 for all Phase 4 API calls.** Spend is tracked from response
-  usage at $2 / $10 per million input / output tokens. The held-out pass is budgeted
-  first, and dev iteration stops before it would eat into that reserve. Adapter,
-  template baseline and checks cost $0.
+- **Spend cap (APPROVED): $5 for all Phase 4 API calls.** Spend is tracked from
+  response usage at $2 / $10 per million input / output tokens.
+  - The held-out pass (39 calls, ≤ $1.95 at the $0.05 planning price) is reserved
+    first, before dev starts.
+  - Dev iteration stops when spend plus that reserve would exceed the cap.
+  - Planned worst case: smoke test $0.05, plus dev ≤ 52 calls ($2.60), plus
+    held-out $1.95, for ≈ $4.60.
+  - Adapter, template baseline, checks and replay cost $0.
 - **Known limitation: upstream errors are reproduced faithfully (invariant 26).**
   D32#2 (dev) has gold risk tier `unresolved`. The determination is
   `not_applicable/conditions_not_met`, because the matcher returned `does_not_match`
