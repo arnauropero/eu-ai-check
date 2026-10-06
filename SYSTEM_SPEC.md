@@ -8,7 +8,9 @@ places — exact-citation priority (§7.4), reranker off by default (§7.4), and
 payload indexes as a hard index requirement (§13.2) — and closed the §21
 filtered-HNSW open question. **Phase 3 design (2026-10-03)** added the provision
 matcher (§2, §4.2), the Article 6 route combination and Annex I (§9.1), and found a
-corpus defect: trailing paragraph-level text was dropped (§9.1). This document is the
+corpus defect: trailing paragraph-level text was dropped (§9.1). **Phase 4 design
+(2026-10-06)** records what Phase 3 actually outputs (§16.1), then defines the
+generation input and output (§16.2–16.3) and the generation checks (§18). This document is the
 technical source of truth for implementation in Claude Code. Where a decision rests on
 assumption rather than verified source material, it is marked **[ASSUMPTION]**. Where a
 decision has been checked against the actual EUR-Lex / AI Act Explorer text, it is marked
@@ -1337,6 +1339,10 @@ filterable occurrences exist") and must not be conflated.
 
 ## 16. Output Contract: Citations and Fail-Closed States
 
+> **As-built note (2026-10-06).** Phase 3 does not emit this shape directly. §16.1
+> records what it actually produces, and §16.2 the Phase 4 adapter that maps it onto
+> this contract.
+
 The evidence/citation shape is shared across **all four top-level determinations**
 (risk-tier, prohibited-practice, actor-role, obligation applicability), not defined
 only for obligations. Each determination's evidence items reference both identities:
@@ -1406,6 +1412,127 @@ internal logs — a compliance tool that silently omits gaps in its own rule cov
 silently conflates "no rule was in force" with "this doesn't apply to you," is more
 dangerous than one that admits uncertainty. See §14 for the precise definition of each
 state.
+
+### 16.1 What Phase 3 actually produces (as-built, recorded 2026-10-06)
+
+The shape above is the **contract**. Phase 3 does not emit it directly. The Phase 4
+design audit (`docs/phase4_design.md` §0) compared it with the code and the cached
+results, and found these differences. They are recorded here so this section describes
+what exists rather than what was intended.
+
+- **No `EvidenceItem` type exists in Phase 3.** Evidence is spread across
+  `ProvisionStatus.versioned_provision_id` (obligations), `RoleResult.evidence`
+  (logical ids only) and the matcher's `Verdict`s (`provision_quote`, `case_quote`,
+  `rationale`).
+- **One composite object, not one `Determination` per type.** `pipeline.Determination`
+  holds `risk_tier: RiskTier`, `prohibited: Prohibition`, `roles: RoleResult | None`,
+  `obligations: {article: [ProvisionStatus]}` and the `MatchResult`. There is no
+  `determination_type` field.
+- **Status and reason share one string.** `logic.py` uses
+  `"not_applicable/conditions_not_met"` and `"not_applicable/not_yet_applicable"`.
+  The pair maps one-to-one onto `applicability_status` + `not_applicable_reason`.
+- **No `explanation` field.** The only prose is the matcher's per-candidate
+  `rationale`. Rule-based outcomes have none.
+- **Actor role is not four-state.** `RoleResult` holds a three-valued value per role,
+  and its status is `known` / `unresolved`. `role_label()` reports `not_in_force` when
+  roles were not computed.
+- **The cached `*.runs.jsonl` records keep less than this.** `Run.record()` drops
+  `versioned_provision_id`, excerpts and per-provision obligation statuses. It keeps
+  one status per obligation article (`group_status`). For the matcher, it keeps every
+  verdict with its quotes and rationale.
+- **`case_quote` is user text.** It is a code-verified verbatim span of the user's
+  description.
+
+**The full in-memory object is recoverable at zero cost.** Replaying the recorded
+verdicts through `Pipeline` reproduces every one of the 123 M-low records of the
+official run exactly (`scripts/verify_generation_inputs.py`). Every cited
+`versioned_provision_id` and excerpt follows from the corpus and `relevant_date`
+alone: each of the 110 provisions has exactly one version, valid from 2024-08-01 with
+no end date. The exceptions are D38#0–2 (`relevant_date` 2024-06-15). They are
+`not_in_force` throughout, so by definition they have no valid version to cite (§16.2).
+
+### 16.2 Generation input: the Phase 4 adapter (design approved 2026-10-06)
+
+A deterministic adapter (no LLM) maps the replayed `pipeline.Determination` onto the
+contract above and adds three fields. This is everything the generator ever receives
+(invariant 23).
+
+```yaml
+GenerationInput:
+  case_ref: str                     # e.g. "D10#0"; opaque to the model
+  relevant_date: date
+  determinations: [Determination]
+
+Determination:                      # the contract above, plus:
+  determination_id: str             # "risk_tier", "prohibited_practice",
+                                    # "actor_role:provider", "obligation:aiact:art_26"
+  unresolved_inputs: [MissingInput] # non-empty iff applicability_status is unresolved
+
+EvidenceItem:                       # the contract above, plus:
+  evidence_id: str                  # unique within one GenerationInput
+
+MissingInput:
+  kind: matcher_question | case_fact | upstream_determination
+  ref: str                          # provision id, CaseFacts field, or determination_id
+  question: str                     # code-owned text (scope question, field description)
+  rationale: str | null             # matcher rationale, for insufficient verdicts only
+```
+
+Mapping rules:
+- **Status:** the compound string is split into `applicability_status` +
+  `not_applicable_reason`.
+- **Actor role:** one `Determination` per role. `True` → `applicable`, `False` →
+  `not_applicable` / `conditions_not_met`, unknown → `unresolved`, roles not computed
+  → `not_in_force`.
+- **Obligations:** one `Determination` per article (`aiact:art_16`, `aiact:art_26`),
+  with the article's `group_status`. The cached data holds one status per article, and
+  V1's rules are uniform within an article. The output must not suggest a finer
+  granularity than that. A `mixed` group status makes the adapter raise an error
+  rather than choose a status. The evidence is the article's provisions. Their
+  excerpts are included only when the article is `applicable` or
+  `not_yet_applicable`, and otherwise the citation alone is given.
+- **Risk tier / prohibited practice:** these cite the provisions whose verdict is
+  `matches`, the route provisions (Article 6(1)/6(2)), and the Article 6(3)
+  provisions when assessed.
+- **`unresolved_inputs`:** these list only the `insufficient` verdicts whose flip to
+  true or false would change the outcome under the fixed §9.1 combination, together
+  with the `CaseFacts` fields that are null and feed a role formula (§4.3) and the
+  unknown rule conditions (`rule_outcomes`), each with its upstream determination.
+- **Excluded from the input:** the user's description and `CaseFacts` free text,
+  every `case_quote`, rationales other than those of `insufficient` verdicts in
+  `unresolved_inputs`, uncited `does_not_match` verdicts, and all eval labels.
+- **`not_in_force`:** a `not_in_force` determination carries no `EvidenceItem`, because
+  no version was valid on the date. The renderer states the date the text entered
+  into force (from the corpus) as a plain fact, not as evidence.
+- **`explanation`:** built by code from structured state (route states, derogation,
+  failing condition). It is never written by an LLM.
+
+### 16.3 Generation output (design approved 2026-10-06)
+
+**Claims first, prose rendered by code.** The model returns strict JSON:
+
+```yaml
+GeneratedAnswer:
+  claims:
+    - claim_id: str
+      determination_id: str      # an input determination_id
+      text: str
+      evidence_ids: [str]        # >= 1, all from that determination's supporting_evidence
+      quote: str | null          # optional verbatim span of one cited excerpt
+      quote_evidence_id: str | null
+```
+
+Code renders the answer in a fixed order: risk tier, prohibited practice, roles,
+obligations per article. For each determination, the **status line is written by
+code** from the input status. The model's claims for that determination follow, with
+citations rendered by code from the `EvidenceItem`s. For `unresolved`, code renders
+"To decide this, we would need to know:" from `unresolved_inputs`, worded as missing
+information, never as a system failure. `not_in_force` lines are never worded as
+`not_applicable`. The schema has no status field, so a model cannot change a status.
+
+A deterministic **template renderer** produces the same rendering with no model
+claims at all. It is the Phase 4 baseline (§18), and also the fallback for any
+generated answer that fails a check.
 
 ---
 
@@ -2058,6 +2185,91 @@ pre-registered attempt:
 - D32 (attention vs emotion recognition) is the most fragile case in the set, and
   any change has to be measured against it.
 
+**Generation — Phase 4 design (2026-10-06).** Design: `docs/phase4_design.md`;
+contract: §16.2–16.3. Items marked **PROPOSED** await the user's approval. They become
+binding when committed as the Phase 4 pre-registration, before the first generator
+API call. As with Phase 3, a miss against them is then reported as a miss and is not
+retuned.
+
+- **Inputs, not a pipeline run.** The generator is developed and scored on the cached
+  official Phase 3 run (`determination_v1_41c_retry`, M-low), replayed through
+  `Pipeline` and the adapter at zero cost. Phase 4 metrics are measured against the
+  **input** determination, never the gold label (invariant 26).
+- **Split, frozen before any generator prompt existed.**
+  `data/eval/generation_split.json`, SHA-pinned in `tests/test_generation_split.py`
+  and built by `scripts/make_generation_split.py`. The 41 cases are split by case
+  id, stratified on the gold risk-tier state, with seed 20261006. D38 is forced into
+  held-out because it is the only `not_in_force` case. Every repeat of a case stays
+  on one side.
+  - *Dev, 28 cases / 84 records:* D01, D03, D04, D07–D12, D14, D16–D19, D21, D23–D26,
+    D29, D30, D32–D34, D37, D39–D41.
+  - *Held-out, 13 cases / 39 records:* D02, D05, D06, D13, D15, D20, D22, D27, D28,
+    D31, D35, D36, D38. Input determinations: 60 `applicable`, 45 `not_applicable`,
+    42 `unresolved`, 15 `not_in_force`, plus 33 known role sets. Five of these cases
+    (D02, D05, D28, D35, D36, all 15 of their records) carry at least one
+    determination that differs from gold.
+  - *Extra held-out:* H01–H08. They have no determinations yet (see the open
+    decision in the design note).
+  - Dev has no `not_in_force` record. That state is covered by deterministic tests
+    and by the held-out set.
+- **Deterministic checks (no LLM), run on every answer.**
+
+  | ID | Check |
+  |---|---|
+  | C0 | The response parses against the strict `GeneratedAnswer` schema; a refusal or an incomplete response fails. |
+  | C1 | Every cited `evidence_id` exists in the input. |
+  | C2 | Every cited `evidence_id` belongs to the claim's own determination, and that `determination_id` exists. |
+  | C3 | A `quote` is a verbatim substring (after whitespace normalisation) of its cited excerpt. Every excerpt equals the corpus text of its `versioned_provision_id`. |
+  | C4 | The rendered status equals the input status and reason (by construction, and tested). Claim text contains no status phrase from another state's lexicon. |
+  | C5 | Every obligation article is rendered with its own evidence (by construction). Claim text names no provision it does not cite, and uses obligation language ("must", "shall", "is required to") only when it cites an obligation provision. |
+  | C6 | Every input determination is rendered exactly once, and no claim references an id outside the input. |
+  | C7 | Every `unresolved` determination renders its `unresolved_inputs` as a non-empty "we would need to know" list. |
+  | C8 | No claim on a `not_in_force` determination uses the `not_applicable` lexicon. |
+
+  C4, C5 and C8 are partly lexical, so a pass does not prove faithfulness. A failing
+  answer is never shown: the template rendering replaces it, and the replacement is
+  counted.
+- **Baseline: the template renderer** (no LLM, $0). It uses the same adapter, the same
+  renderer and the same checks, with no model claims. It passes C0–C8 by construction,
+  so check pass rates cannot tell the two arms apart. **PROPOSED decision rule** for
+  adopting the LLM generator over the template. All three must hold on the held-out
+  set:
+  1. The generator meets the acceptance targets below.
+  2. *Grounded-explanation coverage ≥ 0.90.* This is the share of explainable
+     determinations that carry at least one model claim passing C0–C8. The
+     explainable determinations are risk tier and prohibited practice when
+     `applicable` or `not_applicable`, obligation articles when `applicable` or
+     `not_yet_applicable`, and every `unresolved` determination. The template scores
+     0.00 by construction. This criterion is deterministic.
+  3. *Blind pairwise preference ≥ 15 of 20.* The user rates 20 held-out pairs,
+     sampled with a fixed seed and stratified by input state, with order randomised
+     and the arm hidden. Ties count for the template.
+
+  If the rule fails, the template ships as the Phase 4 generator.
+- **PROPOSED acceptance targets.**
+  - Every shipped answer passes C0–C8: 1.00.
+  - Input status reproduced in 100% of the held-out records whose determination
+    differs from gold.
+  - For the LLM generator, on the held-out set:
+    - raw first-attempt pass rate ≥ 0.95;
+    - fallback rate ≤ 0.05;
+    - zero C4 violations;
+    - zero C8 violations.
+  - Reported, not gated: a human faithfulness read of 20 sampled answers.
+- **Model:** `gpt-6.1-sol` at effort `low`, configurable. The comparison with cheaper
+  models is deferred to Phase 5 as a pre-registered comparison.
+- **PROPOSED spend cap: $5 for all Phase 4 API calls.** Spend is tracked from response
+  usage at $2 / $10 per million input / output tokens. The held-out pass is budgeted
+  first, and dev iteration stops before it would eat into that reserve. Adapter,
+  template baseline and checks cost $0.
+- **Known limitation: upstream errors are reproduced faithfully (invariant 26).**
+  D32#2 (dev) has gold risk tier `unresolved`. The determination is
+  `not_applicable/conditions_not_met`, because the matcher returned `does_not_match`
+  on Annex III 1(c). The answer must say "does not apply". Rendering it as uncertain
+  would be a generator defect. A regression test pins this. An answer is only as
+  correct as the Phase 3 determination behind it, and Phase 3 acceptance was NOT MET
+  (above).
+
 **End-to-end:**
 - Obligation correctness (right obligations, right roles, right union/dedup per §4.1)
 - Citation correctness (right `versioned_provision_id` per claim)
@@ -2156,6 +2368,21 @@ to a specific stage, not just logged as "wrong answer."
     exception the Act requires a party to positively establish, such as the Article
     6(3) derogation, is recorded as `not_established` rather than `unresolved`. The
     default applies, and the record says so (§9.1).
+
+**Updated (Phase 4 design) additions:**
+
+23. **The generator sees only determinations.** Its only input is the adapter's
+    `GenerationInput` (§16.2). It never sees the user's description or free-text
+    facts, any `case_quote`, unfiltered retrieval or candidate lists, or eval labels.
+24. **The generator never changes an `applicability_status`.** The status and reason
+    are copied by code into a code-rendered status line, and the output schema has no
+    status field (§16.3).
+25. **Generation cannot add a determination.** The answer covers exactly the input
+    determinations. There is no obligation, provision or conclusion that the input
+    did not contain, and no obligation is rendered without its citation.
+26. **Upstream determinations are reproduced faithfully, even when wrong.** The
+    generator does not correct them, so every end-to-end error stays attributable to
+    the stage that made it (§18).
 
 ---
 
