@@ -87,6 +87,11 @@ def test_dev_run_writes_results_and_scores(tmp_path, inputs) -> None:
     assert s["shipped_pass_rate"] == 1.0
     assert (tmp_path / "generation_dev_test.runs.jsonl").exists()
     assert t.calls("dev") == 31
+    from eu_ai_check.generation.generator import PROMPT_HISTORY, PROMPT_VERSION, prompt_sha
+    for e in t.entries:                              # every call is versioned in the ledger
+        assert (e["prompt_version"], e["prompt_sha"], e["prompt_note"]) == (
+            PROMPT_VERSION, prompt_sha(), PROMPT_HISTORY[PROMPT_VERSION])
+    assert s["prompt_version"] == PROMPT_VERSION
 
 
 def test_contradicting_claims_fall_back_to_the_template(tmp_path, inputs) -> None:
@@ -191,5 +196,8 @@ def test_amended_reserve_matches_the_tracker(inputs) -> None:
     assert "`max_output_tokens` = 5,000 per call" in text and MAX_OUTPUT_TOKENS == 5000
     assert "**That gives $2.3875.**" in text
     t = ev.make_tracker(inputs, MAX_OUTPUT_TOKENS, ledger=Path("does-not-exist.jsonl"))
-    assert round(t.heldout_worst_case, 4) == 2.3875
+    # The 2026-10-06 note (plain-word explanations) moved it by $0.0010; the rule
+    # is unchanged and can only make the reserve stricter.
+    assert "$2.3875 to $2.3885" in text
+    assert round(t.heldout_worst_case, 4) == 2.3885
     assert round(t.dev_budget_left(), 2) == 2.61

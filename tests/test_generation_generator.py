@@ -138,3 +138,24 @@ def test_finish_reason_and_reasoning_tokens_are_captured() -> None:
         load_input("D01#0"))
     assert cut.finish_reason == "incomplete:max_output_tokens" and cut.reasoning_tokens == 4990
     assert cut.answer is None
+
+
+def test_raw_usage_response_id_and_request_sha_are_kept() -> None:
+    from eu_ai_check.generation.generator import request_sha
+
+    response = fake_response(json.dumps(GOOD))
+    raw = {"input_tokens": 4000, "output_tokens": 2500,
+           "output_tokens_details": {"reasoning_tokens": 1800}}
+    response.usage.model_dump = lambda: raw
+    response.id = "resp_123"
+    client = MockClient(response)
+    gen = OpenAIGenerator(client, model="m")
+    r = gen.generate(load_input("D01#0"))
+    assert (r.usage_raw, r.response_id) == (raw, "resp_123")
+    assert r.request_sha == request_sha(client.calls[0]) and len(r.request_sha) == 64
+
+
+def test_every_prompt_version_has_a_note() -> None:
+    from eu_ai_check.generation.generator import PROMPT_HISTORY, PROMPT_VERSION
+
+    assert PROMPT_VERSION in PROMPT_HISTORY and all(n.strip() for n in PROMPT_HISTORY.values())
