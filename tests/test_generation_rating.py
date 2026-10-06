@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from pathlib import Path
 
 import pytest
 
@@ -135,3 +136,26 @@ def test_cli_api_modes_need_a_real_client_which_tests_cannot_get(mode) -> None:
     from eu_ai_check.cli import main
     with pytest.raises(RealClientInstantiated):
         main(["eval-generation", "--mode", mode])
+
+
+def test_score_reports_wins_over_all_and_over_informative_pairs(files) -> None:
+    """not_in_force pairs are identical in both arms; scoring reports x/20 and x/18."""
+    sample = json.loads(files["sample_path"].read_text(encoding="utf-8"))
+    sample["samples"][2]["class"] = "not_in_force"          # R03
+    files["sample_path"].write_text(json.dumps(sample), encoding="utf-8")
+    make_sheet(**sheet_kwargs(files))
+    ratings = {"R01": {"preference": "B", "faithful_A": True, "faithful_B": True, "note": ""},
+               "R02": {"preference": "A", "faithful_A": True, "faithful_B": True, "note": ""},
+               "R03": {"preference": "tie", "faithful_A": True, "faithful_B": True, "note": ""}}
+    files["ratings_path"].write_text(json.dumps(ratings), encoding="utf-8")
+    out = score(sample_path=files["sample_path"], ratings_path=files["ratings_path"],
+                key_path=files["key_path"])
+    assert out["llm_wins_of_20"] == "2/3" and out["llm_wins_of_informative"] == "2/2"
+    assert (out["informative_pairs"], out["identical_pairs_rated_tie"]) == (2, 1)
+    assert out["pairwise_ok"] is False          # the pre-registered bar is unchanged
+
+
+def test_frozen_sample_has_exactly_two_identical_not_in_force_pairs() -> None:
+    sample = json.loads(Path("data/eval/generation_rating_sample.json").read_text(encoding="utf-8"))
+    nif = [s["record"] for s in sample["samples"] if s["class"] == "not_in_force"]
+    assert len(sample["samples"]) == 20 and sorted(nif) == ["D38#1", "D38#2"]
