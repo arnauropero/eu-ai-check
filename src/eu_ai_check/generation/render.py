@@ -36,7 +36,7 @@ def title(d: Determination) -> str:
     if d.determination_id == PROHIBITED:
         return "Prohibited practices (Article 5)"
     if d.determination_type == ACTOR_ROLE:
-        return f"Role: {d.determination_id.split(':', 1)[1]}"
+        return f"Role ({d.determination_id.split(':', 1)[1]})"
     if d.determination_type == OBLIGATION:
         return f"Article {d.determination_id.rsplit('art_', 1)[1]}"
     raise ValueError(d.determination_id)
