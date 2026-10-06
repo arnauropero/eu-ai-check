@@ -71,6 +71,10 @@ FORBIDDEN_BY_STATUS: dict[str, tuple[re.Pattern, ...]] = {
     "not_in_force": (APPLIES_LEX, HEDGE_LEX, UNDECIDED_LEX),
 }
 
+#: Lexicon names, for diagnostics only (the lexicons themselves are frozen).
+LEXICON_NAMES = {id(v): k for k, v in dict(globals()).items()
+                 if k.endswith(("_LEX", "_LANG")) and isinstance(v, re.Pattern)}
+
 # Provision references in free text (C5(b)).
 _ARTICLE_REF = re.compile(r"\b(?:Article|Art\.?)\s*(\d+)((?:\s*\([0-9a-z]+\))*)", re.IGNORECASE)
 _ANNEX_REF = re.compile(
@@ -106,6 +110,9 @@ class CheckReport:
     failures: dict[str, list[str]] = field(default_factory=lambda: {c: [] for c in CHECKS})
     #: claim_id -> checks that claim fails (for coverage: a claim "passes" when empty)
     claim_failures: dict[str, set[str]] = field(default_factory=dict)
+    #: C4/C8 diagnostics, reported only: the exact phrase and the claim it came from,
+    #: so false positives can be told from real contradictions after the run.
+    diagnostics: list[dict] = field(default_factory=list)
 
     def fail(self, check: str, message: str, claim_id: str | None = None) -> None:
         self.failures[check].append(message)
@@ -154,14 +161,23 @@ def _claim_checks(claim: Claim, inp: GenerationInput, report: CheckReport) -> No
             report.fail("C3", f"{cid}: quote is not verbatim in {source.provision_citation}", cid)
 
     # C4(b) and C8: status vocabulary in the claim text.
+    def diagnose(check: str, lexicon: re.Pattern, m: re.Match) -> None:
+        report.diagnostics.append({
+            "check": check, "kind": "claim_lexicon", "claim_id": cid,
+            "determination_id": det.determination_id, "status": det.status_key,
+            "lexicon": LEXICON_NAMES.get(id(lexicon), "?"), "phrase": m.group(0),
+            "span": [m.start(), m.end()], "claim_text": claim.text})
+
     for lexicon in FORBIDDEN_BY_STATUS[det.status_key]:
         m = lexicon.search(claim.text)
         if m:
             report.fail("C4", f"{cid}: {m.group(0)!r} contradicts status {det.status_key}", cid)
+            diagnose("C4", lexicon, m)
     if det.applicability_status == NOT_IN_FORCE:
         m = NOT_APPLICABLE_LEX.search(claim.text)
         if m:
             report.fail("C8", f"{cid}: not_in_force worded as not_applicable ({m.group(0)!r})", cid)
+            diagnose("C8", NOT_APPLICABLE_LEX, m)
 
     # C5(b): every provision named in the text is one this claim cites.
     cited = [evidence[e].provision_citation for e in claim.evidence_ids if e in evidence]
@@ -229,8 +245,15 @@ def run_checks(inp: GenerationInput, rendered: RenderedAnswer,
         if (s.status, s.reason) != (d.applicability_status, d.not_applicable_reason):
             report.fail("C4", f"{d.determination_id}: rendered status {s.status}/{s.reason} "
                               f"!= input {d.status_key}")
+            report.diagnostics.append({"check": "C4", "kind": "rendered_status",
+                                       "determination_id": d.determination_id,
+                                       "status": d.status_key,
+                                       "rendered": f"{s.status}/{s.reason}"})
         if s.status_line != status_line(d, inp.relevant_date):
             report.fail("C4", f"{d.determination_id}: status line is not the code wording")
+            report.diagnostics.append({"check": "C4", "kind": "status_line",
+                                       "determination_id": d.determination_id,
+                                       "status": d.status_key, "rendered": s.status_line})
         # C5(a): every obligation article carries its own citations.
         if d.determination_type == "obligation_applicability" and d.applicability_status != NOT_IN_FORCE:
             own = tuple((e.provision_citation, e.versioned_provision_id)

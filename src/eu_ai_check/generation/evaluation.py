@@ -14,17 +14,12 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections import Counter
 from dataclasses import asdict, dataclass, field
-from datetime import date
 from pathlib import Path
 from typing import Any
 
-from ..corpus.models import Corpus
-from ..determination.matcher import DOES_NOT_MATCH, MATCHES, MatchResult, Verdict
-from ..determination.pipeline import Pipeline
-from ..determination.scopes import candidates
-from ..extraction.schema import CaseFacts
-from .adapter import GenerationInput, adapt
+from .adapter import GenerationInput
 from .checks import CHECKS, coverage_counts, run_checks
 from .generator import SYSTEM_PROMPT, OpenAIGenerator, prompt_sha, user_message
 from .inputs import Inputs, Item
@@ -62,6 +57,10 @@ class ItemResult:
     explainable: int = 0
     input_tokens: int = 0
     output_tokens: int = 0
+    reasoning_tokens: int | None = None
+    finish_reason: str | None = None
+    #: C4/C8 matched phrases with their claims (reported only, §18 amendment).
+    c4_diagnostics: list[dict] = field(default_factory=list)
     raw: str | None = None
     template_text: str = ""
     shipped_text: str = ""
@@ -86,8 +85,11 @@ def evaluate_item(item: Item, generator: OpenAIGenerator, tracker: SpendTracker,
         raw_report = None
     else:
         tracker.record(phase, item.ref, result.served_model or generator.model,
-                       result.input_tokens, result.output_tokens, error=result.error)
+                       result.input_tokens, result.output_tokens, error=result.error,
+                       finish_reason=result.finish_reason,
+                       reasoning_tokens=result.reasoning_tokens)
         out.input_tokens, out.output_tokens = result.input_tokens, result.output_tokens
+        out.reasoning_tokens, out.finish_reason = result.reasoning_tokens, result.finish_reason
         out.raw, out.generation_error, answer = result.raw, result.error, result.answer
         raw_report = run_checks(inp, render(inp, answer) if answer else render(inp), answer,
                                 parse_error=result.error if answer is None else None,
@@ -95,6 +97,7 @@ def evaluate_item(item: Item, generator: OpenAIGenerator, tracker: SpendTracker,
         if answer is None and result.error is None:  # pragma: no cover - defensive
             raw_report.fail("C0", "no answer and no error")
         out.raw_failures = {c: v for c, v in raw_report.failures.items() if v}
+        out.c4_diagnostics = raw_report.diagnostics
         out.raw_failed_checks = raw_report.failed_checks()
         out.raw_passed = raw_report.passed and out.api_error is None
     shipped_answer = answer if out.raw_passed else None
@@ -121,6 +124,11 @@ def summarise(results: list[ItemResult]) -> dict[str, Any]:
         return round(sum(xs) / len(xs), 4) if xs else None
 
     failed_by_check = {c: sum(c in r.raw_failed_checks for r in results) for c in CHECKS}
+    finish = Counter(r.finish_reason or ("api_error" if r.api_error else "none") for r in results)
+    truncated = sum((r.finish_reason or "").startswith("incomplete:max_output_tokens")
+                    for r in results)
+    lexicon_hits = Counter(f"{d['check']}:{d.get('lexicon', d['kind'])}"
+                           for r in results for d in r.c4_diagnostics)
     explainable = sum(r.explainable for r in scored)
     gold = [r for r in results if r.gold_differs]
     return {
@@ -129,6 +137,11 @@ def summarise(results: list[ItemResult]) -> dict[str, Any]:
         "raw_pass_rate": rate([r.raw_passed for r in results]),
         "fallback_rate": rate([r.fallback for r in results]),
         "raw_failed_by_check": failed_by_check,
+        "finish_reasons": dict(finish),
+        "truncated": truncated,
+        "content_failures": sum(not r.raw_passed and r.finish_reason == "completed"
+                                for r in results),
+        "c4_c8_diagnostic_hits": dict(lexicon_hits),
         "c4_violations": failed_by_check["C4"],
         "c8_violations": failed_by_check["C8"],
         "shipped_pass_rate": rate([r.shipped_passed for r in results]),
@@ -138,6 +151,7 @@ def summarise(results: list[ItemResult]) -> dict[str, Any]:
         "faithful_reproduction_rate": rate([r.status_reproduced for r in gold]),
         "status_reproduced_all": all(r.status_reproduced for r in results),
         "input_tokens": sum(r.input_tokens for r in results),
+        "reasoning_tokens": sum(r.reasoning_tokens or 0 for r in results),
         "output_tokens": sum(r.output_tokens for r in results),
     }
 
@@ -191,43 +205,18 @@ def make_tracker(inputs: Inputs, max_output_tokens: int, ledger: Path | None = N
 
 
 # --------------------------------------------------------------------------
-# Smoke test: one made-up input, not in any eval set
+# Smoke test: one call on the real dev record with the most determinations and
+# the largest request (amendment 2026-10-06, §18). It counts against dev budget.
 # --------------------------------------------------------------------------
 
-SMOKE_DATE = date(2026, 10, 6)
-SMOKE_MATCH = "aiact:anx_III:area_4:item_a"
-
-
-class _SmokeVerdicts:
-    """Hand-written verdicts for a made-up recruitment screener. No model call."""
-
-    name = "smoke"
-
-    def match(self, description, cands) -> MatchResult:
-        verdicts = {}
-        for ps in cands.values():
-            for p in ps:
-                pid = p.logical_provision_id
-                verdicts[pid] = Verdict(pid, MATCHES if pid == SMOKE_MATCH else DOES_NOT_MATCH)
-        return MatchResult(verdicts)
-
-
-def smoke_input(corpus: Corpus) -> GenerationInput:
-    pipeline = Pipeline(corpus.provisions, corpus.applicability_rules)
-    facts = CaseFacts(intended_purpose="made-up smoke test", ai_functionality="made-up",
-                      relevant_date=None, role_in_decision_making=None, develops_system=False,
-                      uses_system=True, puts_own_name_or_trademark=False,
-                      modifies_intended_purpose=False, modifies_safety_relevant_components=False,
-                      jurisdiction=None, affected_persons=None)
-    assert any(candidates(corpus.provisions, SMOKE_DATE).values())
-    det = pipeline.determine(facts, "made-up", SMOKE_DATE, _SmokeVerdicts())
-    return adapt(det, facts, SMOKE_DATE, corpus, pipeline, "smoke")
+def smoke_item(inputs: Inputs) -> Item:
+    items = inputs.side("dev", repeats=None, synthetic=False)
+    return max(items, key=lambda i: (len(i.input.determinations), request_chars(i.input), i.ref))
 
 
 def run_smoke(generator: OpenAIGenerator, tracker: SpendTracker,
               inputs: Inputs) -> ItemResult:
-    item = Item("smoke", smoke_input(inputs.corpus), False, False)
-    return evaluate_item(item, generator, tracker, "smoke", inputs.corpus_texts())
+    return evaluate_item(smoke_item(inputs), generator, tracker, "smoke", inputs.corpus_texts())
 
 
 # --------------------------------------------------------------------------
@@ -305,6 +294,7 @@ def run_heldout(generator: OpenAIGenerator, tracker: SpendTracker, inputs: Input
 
 def counts_only(summary: dict[str, Any]) -> str:
     keep = ("records", "api_errors", "raw_pass_rate", "fallback_rate", "raw_failed_by_check",
+            "finish_reasons", "truncated", "content_failures", "c4_c8_diagnostic_hits",
             "c4_violations", "c8_violations", "shipped_pass_rate",
             "grounded_explanation_coverage", "faithful_reproduction_rate", "spent_usd",
             "decision", "stopped_by_budget", "budget_stop")

@@ -105,12 +105,14 @@ class SpendTracker:
 
     # -- log ---------------------------------------------------------------
     def record(self, phase: str, ref: str, model: str | None, input_tokens: int,
-               output_tokens: int, error: str | None = None) -> dict:
+               output_tokens: int, error: str | None = None, *,
+               finish_reason: str | None = None, reasoning_tokens: int | None = None) -> dict:
         c = cost(input_tokens, output_tokens)
         entry = {
             "ts": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "phase": phase, "ref": ref, "model": model,
             "input_tokens": input_tokens, "output_tokens": output_tokens,
+            "reasoning_tokens": reasoning_tokens, "finish_reason": finish_reason,
             "cost_usd": round(c, 6), "cumulative_usd": round(self.spent + c, 6),
             "error": error,
         }
