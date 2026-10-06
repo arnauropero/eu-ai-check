@@ -86,7 +86,7 @@ def test_score_refuses_to_unblind_before_rating_is_complete(files) -> None:
     make_sheet(**sheet_kwargs(files))
     with pytest.raises(RatingError, match="before unblinding"):
         score(sample_path=files["sample_path"], ratings_path=files["ratings_path"],
-              key_path=files["key_path"])
+              key_path=files["key_path"], validation_ratings_path=None)
 
 
 def test_score_counts_wins_with_ties_to_the_template(files) -> None:
@@ -96,7 +96,7 @@ def test_score_counts_wins_with_ties_to_the_template(files) -> None:
                "R03": {"preference": "tie", "faithful_A": True, "faithful_B": True, "note": ""}}
     files["ratings_path"].write_text(json.dumps(ratings), encoding="utf-8")
     out = score(sample_path=files["sample_path"], ratings_path=files["ratings_path"],
-                key_path=files["key_path"])
+                key_path=files["key_path"], validation_ratings_path=None)
     assert (out["llm_wins"], out["template_wins"], out["ties"]) == (1, 1, 1)
     assert out["faithful_llm"] == 2 and out["faithful_template"] == 3
     assert out["pairwise_ok"] is False
@@ -149,7 +149,7 @@ def test_score_reports_wins_over_all_and_over_informative_pairs(files) -> None:
                "R03": {"preference": "tie", "faithful_A": True, "faithful_B": True, "note": ""}}
     files["ratings_path"].write_text(json.dumps(ratings), encoding="utf-8")
     out = score(sample_path=files["sample_path"], ratings_path=files["ratings_path"],
-                key_path=files["key_path"])
+                key_path=files["key_path"], validation_ratings_path=None)
     assert out["llm_wins_of_20"] == "2/3" and out["llm_wins_of_informative"] == "2/2"
     assert (out["informative_pairs"], out["identical_pairs_rated_tie"]) == (2, 1)
     assert out["pairwise_ok"] is False          # the pre-registered bar is unchanged
