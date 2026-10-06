@@ -1,0 +1,156 @@
+"""The Phase 4 harness with fake generators only (no client, no API, no spend).
+
+Results and the ledger go to a temporary directory. The real results directory is
+never written by the test suite.
+"""
+
+from __future__ import annotations
+
+import json
+
+import pytest
+
+from eu_ai_check.generation import evaluation as ev
+from eu_ai_check.generation.checks import is_explainable
+from eu_ai_check.generation.generator import GenerationResult
+from eu_ai_check.generation.inputs import Inputs
+from eu_ai_check.generation.schema import Claim, GeneratedAnswer
+from eu_ai_check.generation.spend import SpendTracker
+
+
+class FakeGenerator:
+    """Stands in for OpenAIGenerator: same attributes, no client."""
+
+    def __init__(self, mode: str = "explain", fail_refs: set[str] = frozenset()):
+        self.model, self.effort, self.max_output_tokens = "fake-model", "low", 5000
+        self.mode, self.fail_refs, self.calls = mode, set(fail_refs), 0
+
+    def generate(self, inp) -> GenerationResult:
+        self.calls += 1
+        if inp.case_ref in self.fail_refs:
+            raise ConnectionError("simulated APIConnectionError")
+        claims = []
+        if self.mode == "explain":
+            for d in inp.determinations:
+                if is_explainable(d) and d.supporting_evidence:
+                    e = d.supporting_evidence[-1]
+                    claims.append(Claim(claim_id=f"c{len(claims) + 1}",
+                                        determination_id=d.determination_id,
+                                        text=f"{e.provision_citation} is the provision behind "
+                                             "this line.", evidence_ids=[e.evidence_id],
+                                        quote=None, quote_evidence_id=None))
+        if self.mode == "contradict":
+            d = inp.determinations[0]
+            claims.append(Claim(claim_id="c1", determination_id=d.determination_id,
+                                text="This could not be determined and is not applicable.",
+                                evidence_ids=[d.supporting_evidence[0].evidence_id]
+                                if d.supporting_evidence else [], quote=None,
+                                quote_evidence_id=None))
+        return GenerationResult(GeneratedAnswer(claims=claims), "{}", None, "fake-model",
+                                4000, 2000)
+
+
+@pytest.fixture(scope="module")
+def inputs() -> Inputs:
+    return Inputs()
+
+
+def tracker(tmp_path, inputs, cap=5.0) -> SpendTracker:
+    t = ev.make_tracker(inputs, 5000, ledger=tmp_path / "spend.jsonl")
+    t.cap = cap
+    return t
+
+
+def test_smoke_input_is_made_up_and_complete(inputs) -> None:
+    inp = ev.smoke_input(inputs.corpus)
+    by_id = {d.determination_id: d.status_key for d in inp.determinations}
+    assert by_id["risk_tier"] == "applicable"
+    assert by_id["obligation:aiact:art_26"] == "applicable"
+    assert by_id["actor_role:deployer"] == "applicable"
+    assert inp.case_ref == "smoke"
+
+
+def test_smoke_run_with_fake_generator(tmp_path, inputs) -> None:
+    t = tracker(tmp_path, inputs)
+    r = ev.run_smoke(FakeGenerator(), t, inputs)
+    assert r.raw_passed and r.shipped_passed and not r.fallback
+    assert t.calls("smoke") == 1
+
+
+def test_dev_run_writes_results_and_scores(tmp_path, inputs) -> None:
+    t = tracker(tmp_path, inputs)
+    s = ev.run_dev(FakeGenerator(), t, inputs, "test", out_dir=tmp_path)
+    assert s["records"] == 31                       # 28 dev cases at repeat 0 + S01-S03
+    assert s["raw_pass_rate"] == 1.0 and s["fallback_rate"] == 0.0
+    assert s["grounded_explanation_coverage"] == 1.0
+    assert s["shipped_pass_rate"] == 1.0
+    assert (tmp_path / "generation_dev_test.runs.jsonl").exists()
+    assert t.calls("dev") == 31
+
+
+def test_contradicting_claims_fall_back_to_the_template(tmp_path, inputs) -> None:
+    s = ev.run_dev(FakeGenerator("contradict"), tracker(tmp_path, inputs), inputs, "bad",
+                   refs=["D01#0", "D10#0"], out_dir=tmp_path)
+    assert s["raw_pass_rate"] == 0.0 and s["fallback_rate"] == 1.0
+    assert s["c4_violations"] == 2
+    assert s["shipped_pass_rate"] == 1.0            # the template is what ships
+
+
+def test_dev_stops_hard_before_eating_the_reserve(tmp_path, inputs) -> None:
+    t = tracker(tmp_path, inputs, cap=2.6)          # reserve ~$2.4 leaves room for ~3 calls
+    gen = FakeGenerator()
+    s = ev.run_dev(gen, t, inputs, "budget", out_dir=tmp_path)
+    assert s["stopped_by_budget"] and s["records"] < 31
+    assert t.spent + t.reserve() <= 2.6
+
+
+def test_heldout_needs_confirmation(tmp_path, inputs) -> None:
+    with pytest.raises(ev.HeldoutAlreadyRun):
+        ev.run_heldout(FakeGenerator(), tracker(tmp_path, inputs), inputs, confirm=False,
+                       results_dir=tmp_path)
+
+
+def test_heldout_runs_exactly_once_and_counts_api_failures(tmp_path, inputs) -> None:
+    t = tracker(tmp_path, inputs)
+    gen = FakeGenerator(fail_refs={"D02#0", "D38#1"})
+    out = ev.run_heldout(gen, t, inputs, confirm=True, results_dir=tmp_path)
+    assert gen.calls == 39 and out["records"] == 39
+    assert out["api_errors"] == 2
+    assert out["raw_pass_rate"] == round(37 / 39, 4)
+    assert out["fallback_rate"] == round(2 / 39, 4)
+    assert out["shipped_pass_rate"] == 1.0
+    assert out["gold_differs_records"] == 15 and out["faithful_reproduction_rate"] == 1.0
+    assert out["decision"]["hygiene"]["raw_pass_rate>=0.95"] is False
+    assert out["decision"]["phase4_generator"] == "template"
+    assert (tmp_path / "generation_heldout.started").exists()
+    with pytest.raises(ev.HeldoutAlreadyRun):
+        ev.run_heldout(gen, t, inputs, confirm=True, results_dir=tmp_path)
+    assert gen.calls == 39
+
+
+def test_heldout_marker_alone_blocks_a_rerun(tmp_path, inputs) -> None:
+    (tmp_path / "generation_heldout.started").write_text("{}", encoding="utf-8")
+    with pytest.raises(ev.HeldoutAlreadyRun):
+        ev.run_heldout(FakeGenerator(), tracker(tmp_path, inputs), inputs, confirm=True,
+                       results_dir=tmp_path)
+
+
+def test_counts_only_never_contains_answer_text(tmp_path, inputs) -> None:
+    out = ev.run_heldout(FakeGenerator(), tracker(tmp_path, inputs), inputs, confirm=True,
+                         results_dir=tmp_path)
+    printed = ev.counts_only(out)
+    assert "Sources:" not in printed and "##" not in printed
+    assert json.loads(printed)["records"] == 39
+
+
+def test_decision_rule() -> None:
+    good = {"raw_pass_rate": 0.97, "fallback_rate": 0.03, "c4_violations": 0,
+            "c8_violations": 0, "grounded_explanation_coverage": 0.92,
+            "shipped_pass_rate": 1.0, "faithful_reproduction_rate": 1.0}
+    assert ev.decide(good)["phase4_generator"] == "pending pairwise rating"
+    assert ev.decide(good, pairwise_llm_wins=15)["phase4_generator"] == "llm"
+    assert ev.decide(good, pairwise_llm_wins=14)["phase4_generator"] == "template"
+    assert ev.decide({**good, "c8_violations": 1}, 20)["phase4_generator"] == "template"
+    assert ev.decide({**good, "grounded_explanation_coverage": 0.89}, 20)["adopt_llm"] is False
+    assert ev.decide({**good, "fallback_rate": 0.051}, 20)["adopt_llm"] is False
+    assert ev.decide(good, 20)["phase4_acceptance_met"] is True
