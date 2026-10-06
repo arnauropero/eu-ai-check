@@ -22,6 +22,7 @@ from typing import Any
 from .adapter import GenerationInput
 from .checks import CHECKS, coverage_counts, run_checks
 from .generator import (
+    PROMPT_DIFFS,
     PROMPT_HISTORY,
     PROMPT_VERSION,
     SYSTEM_PROMPT,
@@ -32,6 +33,7 @@ from .generator import (
 from .inputs import Inputs, Item
 from .render import render
 from .spend import BudgetExceeded, SpendTracker
+from .system_language import claims_of, system_language
 
 PREREGISTERED_MODEL = "gpt-6.1-sol"
 PREREGISTERED_EFFORT = "low"
@@ -81,6 +83,7 @@ def _audit(result) -> dict[str, Any]:
     """What the ledger keeps per call besides spend (prompt versioning, raw usage)."""
     return {"prompt_version": PROMPT_VERSION, "prompt_sha": prompt_sha(),
             "prompt_note": PROMPT_HISTORY[PROMPT_VERSION],
+            "prompt_diff": PROMPT_DIFFS.get(PROMPT_VERSION),
             "request_sha": getattr(result, "request_sha", None),
             "response_id": getattr(result, "response_id", None),
             "usage_raw": getattr(result, "usage_raw", None)}
@@ -167,6 +170,8 @@ def summarise(results: list[ItemResult]) -> dict[str, Any]:
         "gold_differs_records": len(gold),
         "faithful_reproduction_rate": rate([r.status_reproduced for r in gold]),
         "status_reproduced_all": all(r.status_reproduced for r in results),
+        # Reported only, never a gate (system_language.py).
+        "system_language": system_language(claims_of(asdict(r) for r in results)),
         "input_tokens": sum(r.input_tokens for r in results),
         "reasoning_tokens": sum(r.reasoning_tokens or 0 for r in results),
         "output_tokens": sum(r.output_tokens for r in results),
@@ -316,4 +321,8 @@ def counts_only(summary: dict[str, Any]) -> str:
             "c4_violations", "c8_violations", "shipped_pass_rate",
             "grounded_explanation_coverage", "faithful_reproduction_rate", "spent_usd",
             "decision", "stopped_by_budget", "budget_stop")
-    return json.dumps({k: summary[k] for k in keep if k in summary}, indent=2)
+    out = {k: summary[k] for k in keep if k in summary}
+    if "system_language" in summary:   # counts only: no phrases of held-out claims
+        out["system_language"] = {k: v for k, v in summary["system_language"].items()
+                                  if k != "affected"}
+    return json.dumps(out, indent=2)

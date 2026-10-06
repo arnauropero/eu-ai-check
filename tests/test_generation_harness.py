@@ -199,5 +199,7 @@ def test_amended_reserve_matches_the_tracker(inputs) -> None:
     # The 2026-10-06 note (plain-word explanations) moved it by $0.0010; the rule
     # is unchanged and can only make the reserve stricter.
     assert "$2.3875 to $2.3885" in text
-    assert round(t.heldout_worst_case, 4) == 2.3885
-    assert round(t.dev_budget_left(), 2) == 2.61
+    # Prompt v2 (longer system prompt) moved it again, same rule (§18 note).
+    assert "$2.3963 under the unchanged reserve rule" in text
+    assert round(t.heldout_worst_case, 4) == 2.3963
+    assert round(t.dev_budget_left(), 2) == 2.60

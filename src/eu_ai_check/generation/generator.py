@@ -26,17 +26,18 @@ MAX_OUTPUT_TOKENS = 5000
 
 SYSTEM_PROMPT = """\
 You write the explanatory claims of an EU AI Act (Regulation (EU) 2024/1689) compliance
-answer. Every determination in the input has already been decided by code. Code prints
-each determination's status line, its sources and, for an unresolved determination,
-the list of missing information. You add short claims that explain the determinations,
-grounded only in the evidence given. You never decide, change, restate or question a
-status.
+analysis of the user's AI system. Every determination in the input is final. Each
+determination's status line, its sources and, for an unresolved determination, the
+list of missing information are printed separately. You add short claims that explain
+the determinations, grounded only in the evidence given. You never decide, change,
+restate or question a status.
 
 Input: a JSON object with "determinations". Each has a determination_id, a type, an
 applicability_status (applicable / not_applicable / unresolved / not_in_force), a
-not_applicable_reason, an explanation written by code, its evidence (evidence_id,
-citation and, for some items, the provision's excerpt) and, when unresolved, the
-unresolved_inputs (the question that could not be answered, sometimes with a rationale).
+not_applicable_reason, an analysis (a short summary of the findings for the user's
+system), its evidence (evidence_id, citation and, for some items, the provision's text)
+and, when unresolved, the unresolved_inputs (the question that could not be answered,
+sometimes with a rationale).
 
 Output: {"claims": [...]}. Each claim has:
 - claim_id: "c1", "c2", ... unique.
@@ -44,18 +45,23 @@ Output: {"claims": [...]}. Each claim has:
 - text: one or two plain-language sentences.
 - evidence_ids: one or more evidence_ids taken only from that same determination's
   evidence. Never cite another determination's evidence.
-- quote: null, or a short span copied character for character from the excerpt of one
+- quote: null, or a short span copied character for character from the text of one
   cited evidence item; then quote_evidence_id is that item's evidence_id. Otherwise
-  both are null. Never quote an item that has no excerpt.
+  both are null. Never quote an item that has no text.
 
 What to write:
 - Write at least one claim for every determination that has evidence and is either
   unresolved, or is the risk tier or prohibited practice determination, or is an
   obligation article that is applicable or not yet applicable. Other claims are
   optional. Write no claim for a determination that has no evidence.
-- Explain what the cited provisions say and how the code's explanation connects them.
-  For an applicable obligation article, summarise what its provisions require, citing
-  the provisions you summarise.
+- Explain what the cited provisions say and how the analysis connects them to the
+  user's system. For an applicable obligation article, summarise what its provisions
+  require, citing the provisions you summarise.
+- Write about the law and the user's system, never about how the analysis was produced:
+  do not mention code, software, records, recording, matching, the input, or an
+  assessment carried out by the analysis.
+- Some evidence items are citations without text. Cite them as usual, but do not
+  mention excerpts, supplied evidence or the absence of text.
 - For an unresolved determination, explain why each missing piece of information
   matters to the cited provision. Do not guess the answer and do not suggest which
   way it would go.
@@ -79,12 +85,18 @@ cites an obligation provision of that determination.
 #: ledger records the label, `prompt_sha()` and the note with every call, plus the
 #: SHA of the exact request sent. v0 was used only for the smoke test (its ledger
 #: line predates these fields).
-PROMPT_VERSION = "v1"
+PROMPT_VERSION = "v2"
 PROMPT_HISTORY = {
     "v0": "pre-registered system prompt and schema (33cf62c); smoke test only",
     "v1": "system prompt and schema unchanged from v0; adapter explanations reworded "
           "without internal ids or None (smoke showed them echoed as 'The code identifies')",
+    "v2": "system prompt and input labels describe an analysis of the user's system (no "
+          "'code'), citation-only items not to be discussed, derogation 'not_assessed' "
+          "worded as not reached; dev pass 1 had 70/179 claims with system language "
+          "(diff: data/eval/prompts/generator_v1_to_v2.diff)",
 }
+#: The committed diff of what the model sees, per version after v1 (ledger: prompt_diff).
+PROMPT_DIFFS = {"v2": "data/eval/prompts/generator_v1_to_v2.diff"}
 
 
 def prompt_sha() -> str:

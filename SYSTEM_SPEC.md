@@ -2361,6 +2361,28 @@ It is binding. As with Phase 3, a miss is reported as a miss and is not retuned.
   version, its SHA and a one-line note, the SHA of the exact request, the response id
   and the raw usage object.
 
+- **[Note, 2026-10-06, after dev pass 1, before any v2 call] Prompt v2 and a
+  reported-only metric.** This note edits neither the pre-registration nor the
+  amendment, and changes no check, word list, threshold or pass rate.
+  - *Prompt v2.* The system prompt and the input labels describe an analysis of the
+    user's system: `explanation` is shown to the model as `analysis` and `excerpt` as
+    `text`. The words "code", "matched" and "rule outcomes" are gone from the
+    model-facing strings. Two instructions are added: write about the law and the
+    system, never about how the analysis was produced; and, for citation-only evidence,
+    do not mention excerpts, supplied evidence or the absence of text. The prompt's
+    forbidden-word list is unchanged. The diff is `data/eval/prompts/generator_v1_to_v2.diff`.
+  - *Derogation wording.* `combine.risk_tier` sets `not_assessed` only on the path where
+    the Annex III route is not met (every other path overwrites it), and Article 6(3)
+    derogates only from Article 6(2). The model now sees "not reached (the Annex III
+    route is not met)", and the adapter refuses any other pairing.
+  - *Reserve.* The longer system prompt moves the held-out worst case from $2.3885 to
+    $2.3963 under the unchanged reserve rule.
+  - *System-language rate, reported only.* This is the share of claims that describe
+    how the analysis was produced ("code", "recorded", "matched", "supplied evidence",
+    "excerpt", system-side "assessment", "the cited", ...). It uses a lexicon pinned by
+    SHA in `generation/system_language.py`, and legal uses such as "conformity
+    assessment" do not count. It is not a gate. Dev pass 1 baseline: 70 of 179 claims.
+
 **End-to-end:**
 - Obligation correctness (right obligations, right roles, right union/dedup per §4.1)
 - Citation correctness (right `versioned_provision_id` per claim)
