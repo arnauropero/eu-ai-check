@@ -159,3 +159,14 @@ def test_every_prompt_version_has_a_note() -> None:
     from eu_ai_check.generation.generator import PROMPT_HISTORY, PROMPT_VERSION
 
     assert PROMPT_VERSION in PROMPT_HISTORY and all(n.strip() for n in PROMPT_HISTORY.values())
+
+
+def test_prompt_v2_is_pinned_and_its_diff_is_committed() -> None:
+    from pathlib import Path
+
+    from eu_ai_check.generation.generator import PROMPT_DIFFS, PROMPT_VERSION
+
+    assert PROMPT_VERSION == "v2"
+    assert prompt_sha() == "a6b4a491da53588b40fd575d34756d0432068fb9f87d7bbc4313cdd68aece0f6"
+    diff = Path(PROMPT_DIFFS["v2"]).read_text(encoding="utf-8")
+    assert "+analysis of the user's AI system." in diff and '+   "analysis":' in diff

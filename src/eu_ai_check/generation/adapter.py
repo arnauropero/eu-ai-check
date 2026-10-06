@@ -72,6 +72,18 @@ OUTCOME_WORDS = {
 }
 
 
+#: Plain wording of `RiskTier.derogation` (combine.risk_tier). "not_assessed" is set
+#: only when the Annex III route is not met, and Article 6(3) derogates only from
+#: Article 6(2), so the derogation is not reached.
+DEROGATION_WORDS = {
+    "not_assessed": "not reached (the Annex III route is not met)",
+    "not_established": "not established",
+    "applied": "applied",
+    "overridden_by_profiling": "overridden by profiling",
+    None: "undetermined",
+}
+
+
 class AdapterError(ValueError):
     """The record cannot be mapped without choosing something the data does not say."""
 
@@ -146,10 +158,10 @@ class GenerationInput:
                     "determination_type": d.determination_type,
                     "applicability_status": d.applicability_status,
                     "not_applicable_reason": d.not_applicable_reason,
-                    "explanation": d.explanation,
+                    "analysis": d.explanation,
                     "evidence": [
                         {"evidence_id": e.evidence_id, "citation": e.provision_citation,
-                         "excerpt": e.excerpt}
+                         "text": e.excerpt}
                         for e in d.supporting_evidence
                     ],
                     "unresolved_inputs": [
@@ -323,14 +335,17 @@ def _risk_tier(det: PipelineDetermination, b: _Builder) -> Determination:
         applicable_from = min(engine.route_start(ROUTE_PROVISION[c])
                               for c in tier.system_category)
 
+    if tier.derogation == "not_assessed" and tier.routes.get(ANNEX_III) is not False:
+        raise AdapterError("derogation not_assessed although the Annex III route is not 'not met'")
+
     def route(state) -> str:
         return {True: "established", False: "not met", None: "undetermined"}[state]
 
     explanation = (
         f"Annex III route (Article 6(2)): {route(tier.routes.get(ANNEX_III))}; "
         f"product route (Article 6(1)): {route(tier.routes.get(ARTICLE_6_1))}; "
-        f"Article 6(3) derogation: {tier.derogation or 'undetermined'}; "
-        f"matched provisions: "
+        f"Article 6(3) derogation: {DEROGATION_WORDS[tier.derogation]}; "
+        f"provisions that fit the described system: "
         f"{', '.join(short_citation(b.provisions[p]) for p in sorted(tier.matched) if scope_of(p) in RISK_TIER_SCOPES) or 'none'}"
     )
     return Determination(RISK_TIER, RISK_TIER, status, reason, explanation,
@@ -370,7 +385,7 @@ def _prohibited(det: PipelineDetermination, b: _Builder) -> Determination:
     if reason == "not_yet_applicable":
         applicable_from = min(r.applicable_from for pid in matched
                               for r in engine.rules[pid])
-    explanation = ("matched Article 5(1) points: "
+    explanation = ("Article 5(1) points that fit the described practice: "
                    f"{', '.join(short_citation(b.provisions[p]) for p in matched) or 'none'}")
     return Determination(PROHIBITED, PROHIBITED, status, reason, explanation,
                          tuple(evidence), tuple(missing), applicable_from=applicable_from)
@@ -472,7 +487,7 @@ def _obligations(det: PipelineDetermination, b: _Builder) -> list[Determination]
                       for r in engine.rules[s.logical_provision_id] if r.rule_id == o.rule_id]
             applicable_from = min(starts)
         outcomes = sorted({OUTCOME_WORDS[o.outcome] for s in statuses for o in s.rule_outcomes})
-        explanation = (f"Article {group.rsplit('art_', 1)[1]}: rule outcomes: "
+        explanation = (f"Article {group.rsplit('art_', 1)[1]}: "
                        f"{', '.join(outcomes) or 'none'}")
         if missing:
             explanation += "; depends on: " + ", ".join(
