@@ -1,0 +1,151 @@
+"""The claims-first LLM generator (SYSTEM_SPEC.md §16.3). Model configurable.
+
+The model receives only `GenerationInput.as_prompt_data()` (invariant 23) and
+returns strict JSON claims. It has no way to set a status (invariant 24): status
+lines, citations and missing-information lists are rendered by code. Anything
+that is not a schema-valid answer comes back as `answer=None` with an error, and
+check C0 then fails it. Transport errors from the client propagate to the caller,
+which records them (the harness counts them as failures in the held-out pass).
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+from dataclasses import dataclass
+from typing import Any
+
+from .adapter import GenerationInput
+from .schema import SCHEMA_NAME, GeneratedAnswer, parse_answer, response_schema
+
+EFFORTS = ("low", "medium", "high")
+MAX_OUTPUT_TOKENS = 8000
+
+SYSTEM_PROMPT = """\
+You write the explanatory claims of an EU AI Act (Regulation (EU) 2024/1689) compliance
+answer. Every determination in the input has already been decided by code. Code prints
+each determination's status line, its sources and, for an unresolved determination,
+the list of missing information. You add short claims that explain the determinations,
+grounded only in the evidence given. You never decide, change, restate or question a
+status.
+
+Input: a JSON object with "determinations". Each has a determination_id, a type, an
+applicability_status (applicable / not_applicable / unresolved / not_in_force), a
+not_applicable_reason, an explanation written by code, its evidence (evidence_id,
+citation and, for some items, the provision's excerpt) and, when unresolved, the
+unresolved_inputs (the question that could not be answered, sometimes with a rationale).
+
+Output: {"claims": [...]}. Each claim has:
+- claim_id: "c1", "c2", ... unique.
+- determination_id: the one determination the claim explains.
+- text: one or two plain-language sentences.
+- evidence_ids: one or more evidence_ids taken only from that same determination's
+  evidence. Never cite another determination's evidence.
+- quote: null, or a short span copied character for character from the excerpt of one
+  cited evidence item; then quote_evidence_id is that item's evidence_id. Otherwise
+  both are null. Never quote an item that has no excerpt.
+
+What to write:
+- Write at least one claim for every determination that has evidence and is either
+  unresolved, or is the risk tier or prohibited practice determination, or is an
+  obligation article that is applicable or not yet applicable. Other claims are
+  optional. Write no claim for a determination that has no evidence.
+- Explain what the cited provisions say and how the code's explanation connects them.
+  For an applicable obligation article, summarise what its provisions require, citing
+  the provisions you summarise.
+- For an unresolved determination, explain why each missing piece of information
+  matters to the cited provision. Do not guess the answer and do not suggest which
+  way it would go.
+- Use only the input. Do not add facts about the user or the system that are not in
+  the input, and do not cite or name any provision that is not in the claim's own
+  evidence: every "Article ..." or "Annex ..." you mention must be one of the claim's
+  cited items.
+
+Words you must not use in any claim, because the status line already says it and
+your wording must never contradict it: "apply", "applies", "applicable",
+"not applicable", "exempt", "excluded", "out of scope", "not covered", "subject to",
+"high-risk", "not high-risk", "prohibited", "in force", "unresolved",
+"undetermined", "may", "might", "possibly", "error", "failed", "unable to",
+"you must", "you are required", "qualifies as", "you are a provider",
+"you are a deployer". Use "must", "shall" or "is required to" only in a claim that
+cites an obligation provision of that determination.
+"""
+
+
+def prompt_sha() -> str:
+    payload = json.dumps({"system": SYSTEM_PROMPT, "schema": response_schema()},
+                         sort_keys=True)
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def user_message(inp: GenerationInput) -> str:
+    return json.dumps(inp.as_prompt_data(), ensure_ascii=False, indent=1)
+
+
+@dataclass
+class GenerationResult:
+    answer: GeneratedAnswer | None
+    raw: str | None
+    error: str | None
+    served_model: str | None
+    input_tokens: int
+    output_tokens: int
+
+
+class OpenAIGenerator:
+    """`model` is required: the generator hard-codes no model (Phase 5 compares
+    models). The pre-registered Phase 4 choice lives in the harness."""
+
+    def __init__(self, client: Any = None, *, model: str, effort: str = "low",
+                 max_output_tokens: int = MAX_OUTPUT_TOKENS):
+        if not model:
+            raise ValueError("a generation model must be named")
+        if effort not in EFFORTS:
+            raise ValueError(f"unknown effort {effort!r} ({EFFORTS})")
+        if client is None:
+            import openai
+
+            client = openai.OpenAI()
+        self.client = client
+        self.model = model
+        self.effort = effort
+        self.max_output_tokens = max_output_tokens
+        self.name = f"generator:{model}:{effort}"
+
+    def request(self, inp: GenerationInput) -> dict[str, Any]:
+        return {
+            "model": self.model,
+            "input": [
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": user_message(inp)},
+            ],
+            "reasoning": {"effort": self.effort},
+            "max_output_tokens": self.max_output_tokens,
+            "text": {"format": {"type": "json_schema", "name": SCHEMA_NAME,
+                                "schema": response_schema(), "strict": True}},
+        }
+
+    def generate(self, inp: GenerationInput) -> GenerationResult:
+        from ..extraction.openai_extractor import _message_content
+
+        response = self.client.responses.create(**self.request(inp))
+        usage = getattr(response, "usage", None)
+        result = GenerationResult(
+            answer=None, raw=None, error=None,
+            served_model=getattr(response, "model", None),
+            input_tokens=getattr(usage, "input_tokens", 0) or 0,
+            output_tokens=getattr(usage, "output_tokens", 0) or 0,
+        )
+        refusal, text = _message_content(response)
+        status = getattr(response, "status", None)
+        if refusal is not None:
+            result.error = f"refusal: {refusal[:120]}"
+        elif status == "incomplete":
+            reason = getattr(getattr(response, "incomplete_details", None), "reason", None)
+            result.error = f"incomplete response ({reason})"
+        elif status not in (None, "completed"):
+            result.error = f"response status {status}"
+        else:
+            result.raw = text
+            result.answer, result.error = parse_answer(text)
+        return result
