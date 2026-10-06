@@ -46,8 +46,11 @@ class FakeGenerator:
                                 evidence_ids=[d.supporting_evidence[0].evidence_id]
                                 if d.supporting_evidence else [], quote=None,
                                 quote_evidence_id=None))
+        if self.mode == "truncate":
+            return GenerationResult(None, None, "incomplete response (max_output_tokens)",
+                                    "fake-model", 4000, 5000, 4900, "incomplete:max_output_tokens")
         return GenerationResult(GeneratedAnswer(claims=claims), "{}", None, "fake-model",
-                                4000, 2000)
+                                4000, 2000, 1500, "completed")
 
 
 @pytest.fixture(scope="module")
@@ -61,13 +64,11 @@ def tracker(tmp_path, inputs, cap=5.0) -> SpendTracker:
     return t
 
 
-def test_smoke_input_is_made_up_and_complete(inputs) -> None:
-    inp = ev.smoke_input(inputs.corpus)
-    by_id = {d.determination_id: d.status_key for d in inp.determinations}
-    assert by_id["risk_tier"] == "applicable"
-    assert by_id["obligation:aiact:art_26"] == "applicable"
-    assert by_id["actor_role:deployer"] == "applicable"
-    assert inp.case_ref == "smoke"
+def test_smoke_item_is_the_largest_dev_record(inputs) -> None:
+    item = ev.smoke_item(inputs)
+    assert item.ref == "D41#1" and not item.synthetic
+    assert item.ref.split("#")[0] in inputs.split["dev"]["cases"]
+    assert len(item.input.determinations) == 6
 
 
 def test_smoke_run_with_fake_generator(tmp_path, inputs) -> None:
@@ -154,3 +155,28 @@ def test_decision_rule() -> None:
     assert ev.decide({**good, "grounded_explanation_coverage": 0.89}, 20)["adopt_llm"] is False
     assert ev.decide({**good, "fallback_rate": 0.051}, 20)["adopt_llm"] is False
     assert ev.decide(good, 20)["phase4_acceptance_met"] is True
+
+
+def test_truncation_is_reported_apart_from_bad_content(tmp_path, inputs) -> None:
+    t = tracker(tmp_path, inputs)
+    trunc = ev.run_dev(FakeGenerator("truncate"), t, inputs, "trunc", refs=["D01#0"],
+                       out_dir=tmp_path)
+    assert trunc["truncated"] == 1 and trunc["content_failures"] == 0
+    assert trunc["finish_reasons"] == {"incomplete:max_output_tokens": 1}
+    bad = ev.run_dev(FakeGenerator("contradict"), t, inputs, "bad2", refs=["D01#0"],
+                     out_dir=tmp_path)
+    assert bad["truncated"] == 0 and bad["content_failures"] == 1
+    entries = [json.loads(l) for l in (tmp_path / "spend.jsonl").read_text().splitlines()]
+    assert entries[0]["finish_reason"] == "incomplete:max_output_tokens"
+    assert entries[0]["reasoning_tokens"] == 4900
+
+
+def test_c4_failures_record_phrase_and_claim(tmp_path, inputs) -> None:
+    s = ev.run_dev(FakeGenerator("contradict"), tracker(tmp_path, inputs), inputs, "diag",
+                   refs=["D10#0"], out_dir=tmp_path)
+    row = json.loads((tmp_path / "generation_dev_diag.runs.jsonl").read_text().splitlines()[0])
+    diags = row["c4_diagnostics"]
+    assert {"check": "C4", "lexicon": "NOT_APPLICABLE_LEX", "phrase": "not applicable"}.items()         <= next(d for d in diags if d["phrase"] == "not applicable").items()
+    assert all(d["claim_text"] == "This could not be determined and is not applicable."
+               for d in diags if d["kind"] == "claim_lexicon")
+    assert s["c4_c8_diagnostic_hits"] == {"C4:NOT_APPLICABLE_LEX": 1}

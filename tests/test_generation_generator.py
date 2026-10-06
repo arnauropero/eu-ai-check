@@ -23,7 +23,8 @@ from eu_ai_check.generation.schema import response_schema
 
 
 def fake_response(text: str | None = None, *, refusal: str | None = None,
-                  status: str = "completed", reason: str | None = None) -> SimpleNamespace:
+                  status: str = "completed", reason: str | None = None,
+                  reasoning: int | None = 1800) -> SimpleNamespace:
     content = []
     if refusal is not None:
         content.append(SimpleNamespace(type="refusal", refusal=refusal))
@@ -31,7 +32,8 @@ def fake_response(text: str | None = None, *, refusal: str | None = None,
         content.append(SimpleNamespace(type="output_text", text=text))
     return SimpleNamespace(
         output=[SimpleNamespace(type="message", content=content)],
-        usage=SimpleNamespace(input_tokens=4000, output_tokens=2500),
+        usage=SimpleNamespace(input_tokens=4000, output_tokens=2500,
+                              output_tokens_details=SimpleNamespace(reasoning_tokens=reasoning)),
         status=status, model="mock-model",
         incomplete_details=SimpleNamespace(reason=reason) if reason else None)
 
@@ -125,3 +127,14 @@ def test_bad_responses_fail_closed(response, fragment) -> None:
 
 def test_prompt_sha_is_stable() -> None:
     assert prompt_sha() == prompt_sha() and len(prompt_sha()) == 64
+
+
+def test_finish_reason_and_reasoning_tokens_are_captured() -> None:
+    ok = OpenAIGenerator(MockClient(fake_response(json.dumps(GOOD))), model="m").generate(
+        load_input("D01#0"))
+    assert (ok.finish_reason, ok.reasoning_tokens) == ("completed", 1800)
+    cut = OpenAIGenerator(MockClient(fake_response(status="incomplete", reason="max_output_tokens",
+                                                   reasoning=4990)), model="m").generate(
+        load_input("D01#0"))
+    assert cut.finish_reason == "incomplete:max_output_tokens" and cut.reasoning_tokens == 4990
+    assert cut.answer is None

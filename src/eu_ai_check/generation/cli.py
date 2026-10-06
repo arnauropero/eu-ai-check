@@ -1,7 +1,7 @@
 """`eu-ai-check eval-generation`: the Phase 4 harness from the command line.
 
     --mode template        template baseline, counts only ($0)
-    --mode smoke           one call on a made-up input (needs the user's go-ahead)
+    --mode smoke           one call on the largest dev record (counts against dev budget)
     --mode dev             dev iteration on repeat 0 + S01-S03 (or --refs)
     --mode heldout         the single held-out pass (needs --confirm-heldout)
     --mode rating-sheet    blinded A/B sheet, after the held-out pass
@@ -40,11 +40,27 @@ def cmd_eval_generation(args: argparse.Namespace) -> int:
     print(f"spent so far ${tracker.spent:.4f}; held-out reserve ${tracker.reserve():.4f}; "
           f"dev budget left ${tracker.dev_budget_left():.4f}")
     if args.mode == "smoke":
+        from .checks import CHECKS
+        from .spend import cost
+
+        item = ev.smoke_item(inputs)
+        before = tracker.spent
         r = ev.run_smoke(generator, tracker, inputs)
-        print(json.dumps({"raw_passed": r.raw_passed, "failed": r.raw_failures,
-                          "api_error": r.api_error, "error": r.generation_error,
-                          "input_tokens": r.input_tokens, "output_tokens": r.output_tokens,
-                          "spent_usd": round(tracker.spent, 4)}, indent=2))
+        print(json.dumps({
+            "record": item.ref, "determinations": len(item.input.determinations),
+            "request_chars": ev.request_chars(item.input),
+            "input_tokens": r.input_tokens, "output_tokens": r.output_tokens,
+            "reasoning_tokens": r.reasoning_tokens, "finish_reason": r.finish_reason,
+            "max_output_tokens": generator.max_output_tokens,
+            "cost_usd": round(cost(r.input_tokens, r.output_tokens), 6),
+            "spent_before_usd": round(before, 6), "spent_after_usd": round(tracker.spent, 6),
+            "api_error": r.api_error, "generation_error": r.generation_error,
+            "checks": {c: ("fail" if c in r.raw_failed_checks else "pass") for c in CHECKS}
+            if r.api_error is None and r.generation_error is None else "not run (no answer)",
+            "raw_failures": r.raw_failures, "c4_c8_diagnostics": r.c4_diagnostics,
+            "raw_passed": r.raw_passed, "fallback": r.fallback,
+            "dev_budget_left_usd": round(tracker.dev_budget_left(), 4),
+        }, indent=2, ensure_ascii=False))
         print(r.shipped_text)
         return 0
     if args.mode == "dev":

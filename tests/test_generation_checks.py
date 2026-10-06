@@ -366,3 +366,17 @@ def test_lexicons_are_pinned() -> None:
                          sort_keys=True)
     digest = hashlib.sha256(payload.encode("utf-8")).hexdigest()
     assert digest == LEXICON_SHA, digest
+
+
+def test_c4_diagnostics_name_phrase_and_claim_without_changing_the_verdict(d01) -> None:
+    p26_2 = ev(d01, "obligation:aiact:art_26", "Article 26(2)")
+    a = GeneratedAnswer(claims=[claim("c1", "obligation:aiact:art_26",
+                                      "Article 26(2) does not apply to a deployer like this.",
+                                      [p26_2])])
+    report = check(d01, a)
+    (d,) = report.diagnostics
+    assert d["phrase"] == "does not apply" and d["lexicon"] == "NOT_APPLICABLE_LEX"
+    assert d["claim_id"] == "c1" and d["claim_text"].startswith("Article 26(2) does not apply")
+    assert d["status"] == "applicable" and not report.passed
+    assert check(d01, good_d01(d01)).diagnostics == []
+    assert "?" not in checks.LEXICON_NAMES.values() and len(checks.LEXICON_NAMES) == 8

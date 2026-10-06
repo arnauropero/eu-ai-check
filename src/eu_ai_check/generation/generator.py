@@ -19,8 +19,9 @@ from .adapter import GenerationInput
 from .schema import SCHEMA_NAME, GeneratedAnswer, parse_answer, response_schema
 
 EFFORTS = ("low", "medium", "high")
-#: 5000 makes the held-out worst case ($2.39) fit beside the pre-registered dev plan
-#: (~$2.56 of dev budget); the smoke test shows whether answers fit (spend.py).
+#: Caps reasoning + visible output together (OpenAI reasoning guide). 5000 makes the
+#: held-out worst case ($2.39) fit beside the dev plan; recorded as a dated amendment
+#: in SYSTEM_SPEC §18. A call that hits it finishes "incomplete:max_output_tokens".
 MAX_OUTPUT_TOKENS = 5000
 
 SYSTEM_PROMPT = """\
@@ -91,7 +92,11 @@ class GenerationResult:
     error: str | None
     served_model: str | None
     input_tokens: int
-    output_tokens: int
+    output_tokens: int              # includes reasoning tokens (billed as output)
+    reasoning_tokens: int | None = None
+    #: "completed" | "incomplete:<reason>" (e.g. incomplete:max_output_tokens) |
+    #: "refusal" | "status:<status>". Truncation is reported apart from bad content.
+    finish_reason: str | None = None
 
 
 class OpenAIGenerator:
@@ -132,22 +137,28 @@ class OpenAIGenerator:
 
         response = self.client.responses.create(**self.request(inp))
         usage = getattr(response, "usage", None)
+        details = getattr(usage, "output_tokens_details", None)
         result = GenerationResult(
             answer=None, raw=None, error=None,
             served_model=getattr(response, "model", None),
             input_tokens=getattr(usage, "input_tokens", 0) or 0,
             output_tokens=getattr(usage, "output_tokens", 0) or 0,
+            reasoning_tokens=getattr(details, "reasoning_tokens", None),
         )
         refusal, text = _message_content(response)
         status = getattr(response, "status", None)
         if refusal is not None:
+            result.finish_reason = "refusal"
             result.error = f"refusal: {refusal[:120]}"
         elif status == "incomplete":
             reason = getattr(getattr(response, "incomplete_details", None), "reason", None)
+            result.finish_reason = f"incomplete:{reason}"
             result.error = f"incomplete response ({reason})"
         elif status not in (None, "completed"):
+            result.finish_reason = f"status:{status}"
             result.error = f"response status {status}"
         else:
+            result.finish_reason = "completed"
             result.raw = text
             result.answer, result.error = parse_answer(text)
         return result
