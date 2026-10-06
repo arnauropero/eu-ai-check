@@ -19,7 +19,9 @@ from .adapter import GenerationInput
 from .schema import SCHEMA_NAME, GeneratedAnswer, parse_answer, response_schema
 
 EFFORTS = ("low", "medium", "high")
-MAX_OUTPUT_TOKENS = 8000
+#: 5000 makes the held-out worst case ($2.39) fit beside the pre-registered dev plan
+#: (~$2.56 of dev budget); the smoke test shows whether answers fit (spend.py).
+MAX_OUTPUT_TOKENS = 5000
 
 SYSTEM_PROMPT = """\
 You write the explanatory claims of an EU AI Act (Regulation (EU) 2024/1689) compliance
