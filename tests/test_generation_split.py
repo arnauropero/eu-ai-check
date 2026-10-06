@@ -124,8 +124,9 @@ def test_rating_key_matches_its_commitment_when_present() -> None:
     """The key is gitignored and secret until rating ends. When it is present
     (the machine that froze it), it must still match the committed hash. The test
     checks the hash only and never prints the key."""
-    key = Path(SAMPLE["key"]["path"])
-    if not key.exists():
+    from eu_ai_check.generation.rating import verify_key_commitment
+
+    if not Path(SAMPLE["key"]["path"]).exists():
         pytest.skip("rating key not present on this machine")
-    digest = hashlib.sha256(key.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
-    assert digest == SAMPLE["key"]["sha256"]
+    # Opened only inside the rating module, which returns a bool and nothing else.
+    assert verify_key_commitment(Path("data/eval/generation_rating_sample.json"))

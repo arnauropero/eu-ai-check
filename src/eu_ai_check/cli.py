@@ -8,6 +8,7 @@
     eu-ai-check bench-filter    §21 filtered-HNSW benchmark (needs --qdrant-url)
     eu-ai-check extract TEXT    extract case facts from a description (Phase 2)
     eu-ai-check eval-extraction run the Phase 2 extraction evaluation harness
+    eu-ai-check eval-generation the Phase 4 generation harness (see generation/cli.py)
 
 Ingestion exits non-zero when an invariant is broken. A broken invariant is not a
 warning to scroll past: per SYSTEM_SPEC.md §12.1 it would resurface later as a
@@ -546,6 +547,9 @@ def main(argv: list[str] | None = None) -> int:
     p_eval_x.add_argument("--out", type=Path, default=None,
                           help="write <out>.txt, <out>.json and <out>.runs.jsonl")
     p_eval_x.set_defaults(func=cmd_eval_extraction)
+
+    from .generation.cli import register as register_generation  # Phase 4
+    register_generation(sub)
 
     args = parser.parse_args(argv)
     return args.func(args)
