@@ -17,6 +17,10 @@ import json
 
 
 def cmd_eval_generation(args: argparse.Namespace) -> int:
+    import sys
+
+    # The Windows console default (cp1252) would mangle non-ASCII text such as "–".
+    sys.stdout.reconfigure(encoding="utf-8")
     from . import evaluation as ev
     from . import rating
     from .inputs import Inputs
