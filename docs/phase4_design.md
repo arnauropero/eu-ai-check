@@ -1,8 +1,10 @@
 # Phase 4 — Generation and citation: design note
 
-Status: **DRAFT FOR APPROVAL** (2026-10-06, branch `phase-4/generation`).
-Nothing here is implemented. No API call has been made for Phase 4.
-Items marked **[PROPOSAL]** need the user's approval before any code is written.
+Status: **design approved in part; round 2 awaiting approval** (2026-10-06, branch
+`phase-4/generation`). No generator code exists, and no Phase 4 API call has been made.
+The decisions taken so far are listed in §8. Items still marked **PROPOSED** (the
+decision rule, the targets and the spend cap) need approval. Earlier **[PROPOSAL]**
+tags in §0–§4 were approved unless §8 says otherwise.
 
 Grounded in:
 - SYSTEM_SPEC §14 (four-state join), §16 (output contract) and §18 (evaluation, including
@@ -27,7 +29,7 @@ not produce**, and the cached records hold less than §16 describes.
 | D5 | Actor role uses the four-state contract | `RoleResult.status` is `known` / `unresolved` (and `not_in_force` in `role_label()` when roles are `None`). It is not `applicable` / `not_applicable`; per-role values are three-valued (`True`/`False`/`None`). |
 | D6 | Evidence carries `versioned_provision_id` | The cached `*.runs.jsonl` records keep **no** `versioned_provision_id`, **no** excerpt, and only the **article-level group status** for obligations (`{"aiact:art_16": "applicable"}`). Per-provision `ProvisionStatus` and `rule_outcomes` are dropped by `Run.record()`. |
 | D7 | Excerpt = canonical provision text | Not stored. Recoverable deterministically from `data/corpus/provisions.json` (all referenced ids exist there, including `aiact:art_3:point_3/4/23` and `aiact:art_25:*`). |
-| D8 | (not addressed) | Matcher evidence includes `case_quote`: a **verbatim span of the user's description**. Code checked that it is verbatim, but it is still user text (see open question Q2). |
+| D8 | (not addressed) | Matcher evidence includes `case_quote`: a **verbatim span of the user's description**. Code checked that it is verbatim, but it is still user text (decided: excluded, §8). |
 
 **Consequence.** The cached records cannot be fed to a generator as they are. Phase 4
 needs a deterministic **adapter** that produces §16-shaped objects. It can do that at
@@ -46,7 +48,7 @@ GenerationInput:                 # everything the generator ever sees
   determinations: [Determination]   # §16 shape, one per item below
 
 Determination:                   # §16, plus two fields marked NEW
-  determination_id: str          # NEW: stable ref, e.g. "risk_tier", "obligation:aiact:art_26:para_2"
+  determination_id: str          # NEW: stable ref, e.g. "risk_tier", "obligation:aiact:art_26"
   determination_type: risk_tier | prohibited_practice | actor_role | obligation_applicability
   applicability_status: applicable | not_applicable | unresolved | not_in_force
   not_applicable_reason: conditions_not_met | not_yet_applicable | null   # split from D3
@@ -70,10 +72,14 @@ MissingInput:
 ```
 
 Mapping decisions the adapter needs (each **[PROPOSAL]**):
-- *Obligations:* one `Determination` per obligation provision (12 under Article 16, 12
-  under Article 26), not one per article. The per-article status (`group_status`)
-  is kept as a summary only. `mixed` never occurred in the 123 cached M-low records,
-  but if it ever does the adapter raises an error rather than choosing a status.
+- *Obligations (**decided: per article**):* one `Determination` per article
+  (`obligation:aiact:art_16`, `obligation:aiact:art_26`), carrying the article's
+  `group_status`. The cached data holds only that per-article status, so the output
+  must not suggest finer granularity. The article's provisions are its evidence.
+  Their excerpts are included only when the article is `applicable` or
+  `not_yet_applicable`. `mixed` never occurred in the 123 cached M-low records, but
+  if it ever does the adapter raises an error rather than choosing a status.
+  (Superseded: one determination per provision.)
 - *Actor role (D5):* one `Determination` per role (`actor_role:provider`,
   `actor_role:deployer`). `True` → `applicable`, `False` → `not_applicable /
   conditions_not_met`, `None` → `unresolved`, `roles is None` → `not_in_force`. This is
@@ -221,9 +227,9 @@ can never contradict the line.
 - obligations: the rule conditions that evaluated to `None` (`rule_outcomes`) and the
   upstream determination behind them.
 
-Open question Q3: should the matcher's `rationale` (LLM text that paraphrases the
-user's description) be passed through? The table above assumes it may appear in claims
-but never in the code-rendered "we would need to know" list.
+Decided (Q3): the matcher's `rationale` is passed through only for the `insufficient`
+verdicts listed in `unresolved_inputs`. It may inform claims. It never appears in the
+code-rendered "we would need to know" list.
 
 ---
 
@@ -281,133 +287,175 @@ C4(b), C5(b–c) and C8 are lexical. They can miss a paraphrase, so a pass does 
 faithfulness. That is why a small human-read sample is proposed below (reported, not
 gated).
 
-### [PROPOSAL] Acceptance criteria (replacing PROJECT_PLAN's Phase 4 line)
+### Acceptance criteria and the template baseline (round 2; PROPOSED, see SYSTEM_SPEC §18)
 
-Pre-registered: fixed and committed **before** the first generation API call,
-following Phase 3's discipline. The input sets are defined in §6.
+A **template renderer** (no LLM, $0) is the Phase 4 baseline. It uses the same
+adapter, renderer and checks, with no model claims. It therefore passes C0–C8 *by
+construction*, and check pass rates cannot tell it apart from the LLM. The LLM's
+added value has to be measured separately, as follows.
 
-1. **Shipped output, zero tolerance.** On every input in the dev and held-out sets,
-   the shipped answer (generated, or fallback) passes C0–C8. Target: **1.00**. Any
-   failure is a code bug.
-2. **Raw generator pass rate.** The share of answers passing C0–C8 on the first
-   attempt, *before* fallback. Target: **≥ 0.95** on the held-out set. Reported
-   per check and per status.
-3. **Hard invariants on raw output, zero tolerance:** C4 and C8 violations on the
-   held-out set: **0**. A model that tries to change a status has to be caught, and
-   should not be happening at all.
-4. **Fallback rate ≤ 0.05** on the held-out set. This is the same quantity as
-   criterion 2, but it is stated separately so that a degenerate generator which
-   always falls back cannot pass.
-5. **Faithful reproduction:** on the inputs where the determination differs from
-   gold (in the official run: D32#2, D10/D26/D28 risk tier, and the 32 prohibited
-   `not_applicable`→`unresolved` misses), the rendered status equals the
-   *input* status in **100%** of cases (G4).
-6. **Reported, not gated:** a human read of 20 sampled answers (stratified by
-   status, chosen by seeded random before reading), each marked faithful / unfaithful
-   to its cited excerpt. This covers what the lexical checks cannot. It becomes a
-   gate only if the user wants one; proposed threshold if so: ≥ 19/20.
+**Acceptance (both arms):**
+1. Every shipped answer passes C0–C8: **1.00**.
+2. Faithful reproduction: on the held-out records whose determination differs from
+   gold (D02, D05, D28, D35, D36: 15 records), the rendered status equals the input
+   status in **100%** of them. D32#2 is pinned separately by a regression test (it
+   is in dev).
+3. Reported, not gated (decided): a human faithfulness read of 20 sampled answers.
 
-The PROJECT_PLAN Phase 4 acceptance line would read:
+**PROPOSED decision rule: adopt the LLM generator over the template only if all of
+the following hold on the held-out set.**
+1. *Hygiene:*
+   - raw first-attempt pass rate ≥ 0.95;
+   - fallback rate ≤ 0.05;
+   - zero C4 violations;
+   - zero C8 violations.
+2. ***Grounded-explanation coverage ≥ 0.90*** (the improvement metric, deterministic).
+   Count the explainable determinations: risk tier and prohibited practice when
+   `applicable` or `not_applicable`, obligation articles when `applicable` or
+   `not_yet_applicable`, and every `unresolved` determination. Coverage is the share of
+   them that carry at least one model claim passing C0–C8. The template scores 0.00 by
+   construction. This metric shows that the LLM adds *verified* content. It does not
+   show that the content is better. Hence 3.
+3. ***Blind pairwise preference ≥ 15 / 20*** (the improvement metric, quality). The user
+   rates 20 held-out pairs (template vs LLM, same input), sampled with a fixed seed and
+   stratified by input state, with order randomised and the arm hidden. Ties count for
+   the template. This can run in the same sitting as the faithfulness read.
 
-> Acceptance (pre-registered, SYSTEM_SPEC §18): every shipped answer passes the
-> deterministic checks C0–C8 (1.00); raw generator first-attempt pass rate ≥ 0.95
-> and fallback ≤ 0.05 on the held-out input set; zero status-changing (C4) and zero
-> `not_in_force`-as-`not_applicable` (C8) violations; input status reproduced
-> faithfully in 100% of known-wrong upstream determinations.
+If the rule fails, the **template ships** as the Phase 4 generator. Phase 4
+acceptance (1–2) is then still met, because traceability is the acceptance property
+and the template satisfies it. The cost of the LLM is justified only by 2 and 3.
+
+Note on 3: you decided the faithfulness read is reported, not gated. Criterion 3 is a
+different human judgement, and it gates *adoption of the LLM*, not Phase 4
+acceptance. If you want no human gate at all, drop 3 and raise 2 to ≥ 0.95. The cost
+is that adoption would then rest on a metric that only measures presence, not
+quality.
 
 ---
 
 ## 6. Development approach
 
 - **No pipeline re-run.** Inputs come from replaying cached verdicts through
-  `Pipeline` (as `retry_determination_failed.py` does) and then the adapter. Zero API
-  cost, and exact replay is asserted.
-- **[PROPOSAL] Input sets.**
-  - *Dev (iterate freely):* the official run, `determination_v1_41c_retry.runs.jsonl`,
-    M-low, 123 records (41 cases × 3).
-  - *Held-out (one pass, pre-registered):* `dev_social_scoring_v1_41c.runs.jsonl`, M-low,
-    123 records. These are the same 41 descriptions but different determinations
-    (prohibited `not_applicable` 0.931 vs 0.632; D32 risk tier wrong 3/3). Weakness:
-    descriptions overlap with dev, so this tests status mixes, not unseen use cases.
-    Alternative: build new held-out determinations by running the deterministic
-    baseline B on `determination_heldout_5_1_c.json`, also at zero cost. But B never
-    produces `unresolved`, so it is a poor test for §3. User decision: Q4.
-  - The 3 `not_in_force` records (D38) appear in both sets.
-- **Configurable model.** `--generation-model` and `--generation-effort`, with no
-  default model hard-coded in the generator. A provider interface like `Matcher`, plus
-  a fake generator for tests. **Choosing between Sol and cheaper models is deferred to
-  Phase 5** as a pre-registered comparison over these same checks. Phase 4 is
-  developed and accepted on one model, which the user picks (Q1).
-- **Tests first, at zero cost:** the adapter, the renderer and C0–C8 are all
-  deterministic, and are tested against hand-written `GeneratedAnswer` fixtures,
-  including adversarial ones (an id that is not in the input, a borrowed evidence id,
-  a non-verbatim quote, "does not apply" on a `not_in_force` determination).
+  `Pipeline` and then the adapter. `scripts/verify_generation_inputs.py` confirms the
+  replay is exact for all 123 M-low records.
+- **Input derivability (verified, item 5).** For every cited provision of every
+  record, `versioned_provision_id` and the excerpt follow from the corpus plus
+  `relevant_date`. Each of the 110 provisions has exactly one version (valid from
+  2024-08-01, open-ended): 4,295 lookups derived, and the pipeline's own
+  `ProvisionStatus.versioned_provision_id` agrees in every case. **Not derivable:**
+  D38#0, D38#1 and D38#2, 24 lookups each (every Article 16 and 26 provision).
+  `relevant_date` is 2024-06-15, before any text was in force. This is correct
+  `not_in_force` behaviour, not a data gap. Those determinations carry no
+  `EvidenceItem` (SYSTEM_SPEC §16.2).
+- **Split (decided, frozen in `a105e66`, before any generator prompt).**
+  `data/eval/generation_split.json`, produced by `scripts/make_generation_split.py`
+  and SHA-pinned in `tests/test_generation_split.py`. It is split by case id,
+  stratified on gold risk tier, with seed 20261006. D38 is forced into held-out
+  because it is the only `not_in_force` case.
+
+  | Side | Cases | Records | Input determinations |
+  |---|---|---|---|
+  | dev | D01 D03 D04 D07 D08 D09 D10 D11 D12 D14 D16 D17 D18 D19 D21 D23 D24 D25 D26 D29 D30 D32 D33 D34 D37 D39 D40 D41 (28) | 84 | 114 applicable, 154 not_applicable, 80 unresolved, 0 not_in_force |
+  | held-out | D02 D05 D06 D13 D15 D20 D22 D27 D28 D31 D35 D36 D38 (13) | 39 | 60 applicable, 45 not_applicable, 42 unresolved, 15 not_in_force |
+  | extra held-out | H01–H08 | none yet | **no cached determinations** (see below) |
+
+  Dev has no `not_in_force`. That state is covered by deterministic tests on D38-shaped
+  fixtures, and by held-out.
+- **H01–H08 have no determinations (needs your decision).** The 5(1)(c) held-out set
+  was never run, so there is nothing cached to generate from. The options are:
+  - **(a) M-low, baseline prompt, 1 repeat:** 8 matcher calls, ≈ $0.46. This uses up
+    the set's status as an *untouched* confirmation set for any future 5(1)(c)
+    matcher change (SYSTEM_SPEC §18 kept it for that purpose).
+  - **(b) Score-cutoff baseline B:** $0, local embedder only. New descriptions, and
+    the H set stays untouched for the matcher. But B cannot produce `unresolved`, so
+    H07/H08 come out wrong. That is still a valid faithful-reproduction test, since
+    the generator must render B's status as given.
+  - **(c) Drop H from Phase 4.**
+
+  **Recommendation: (b).** It keeps the H set's matcher value, costs nothing, and
+  held-out already has 42 `unresolved` determinations from the D cases.
+- **Model:** `gpt-6.1-sol`, effort `low` (decided). It is configurable, with a fake
+  generator for tests. The cheaper-model comparison happens in Phase 5.
+- **Tests first, at zero cost:** the adapter, both renderers and C0–C8 are tested on
+  hand-written `GeneratedAnswer` fixtures, including adversarial ones.
 - **Do not touch:** the Phase 3 prompts, the SHA pins, the cached results, and
   `DEFAULT_PROMPT_VARIANT = "baseline"`.
 
-### Rough cost estimate
+### Cost breakdown (corrected)
 
-Anchor: the Phase 3 matcher on `gpt-6.1-sol` at effort `low` cost $6.86 for 123 calls,
-about **$0.056 per call**, at a mean of 8.2k input and 4.1k output tokens (output
-includes reasoning).
+**Why the first estimate said $12–21.** It was not $0.02–0.035 × 41. It assumed
+about 574 calls: 8 dev rounds × 41 cases (328), plus a final pass over 246 records
+(123 dev + 123 `social-scoring-v1` held-out). That is 574 × $0.02–0.035. You have
+since excluded that held-out set and capped the spend. The per-call figure was also
+too low, as the measurements below show.
 
-A generator call, estimated: 3–6k input tokens (around 30 determinations; obligation
-excerpts are short, about 30–80 tokens each) and 1.5–3k output tokens. That is about
-0.4–0.6 of a matcher call, so **≈ $0.02–0.035 per call** on Sol at effort `low`.
+**Per call, measured inputs.** Prices are from `cli.py`: Sol costs $2 / $10 per
+million input / output tokens. That reproduces the matcher's $0.057 per call
+(8.2k in, 4.1k out).
+- *Input:* cited excerpts measured by `verify_generation_inputs.py`, with obligation
+  text only for applicable / not-yet articles. Median 10.0k chars (≈ 2.5k tokens),
+  max 29.5k chars (≈ 7.4k tokens). Adding ≈ 1.5k tokens for instructions, schema and
+  determination metadata gives **≈ 4k median, 9k max → $0.008–0.018**.
+- *Output:* about 6 determinations (tier, prohibited, 2 roles, 2 articles) × 2–3
+  claims × ≈ 60 tokens ≈ 1k visible, plus 1–2k reasoning at `low`. That is
+  **≈ 2–3k tokens → $0.02–0.03**.
+- **Total ≈ $0.03 typical, $0.05 upper. The plan below uses $0.05.** The smoke test
+  measures the real figure.
 
-| Activity | Calls | Est. cost (Sol, low) |
-|---|---|---|
-| Smoke test (made-up input) | 1–3 | < $0.10 |
-| Dev iteration, 41-case slice (1 repeat each), ~8 rounds | ~330 | $7–12 |
-| Pre-registered final run, dev + held-out | 246 | $5–9 |
-| **Phase 4 total** | | **≈ $12–21** |
+**Plan under the PROPOSED $5 cap** (1 generation per record; Phase 4 never re-runs
+the matcher):
 
-A cheaper model would cut this roughly in proportion to its price. Those numbers
-belong to the Phase 5 comparison, not to Phase 4.
+| Item | Calls per pass | Passes | Calls | At $0.05 | At $0.03 |
+|---|---|---|---|---|---|
+| Smoke test (made-up input) | 1 | 1 | 1 | $0.05 | $0.03 |
+| Dev iteration: repeat 0 of each dev case | 28 | ≤ 1.9 (budget-limited) | ≤ 52 | ≤ $2.60 | ≤ $1.56 |
+| Held-out, pre-registered, all 3 repeats | 39 | 1 | 39 | $1.95 | $1.17 |
+| H01–H08 generator (option b) | 8 | 1 | 8 | $0.40 | $0.24 |
+| **Total** | | | **≤ 100** | **≤ $5.00** | **≤ $3.00** |
+
+- *Repeats:* dev uses repeat 0 only, because repeats mostly share a determination.
+  Held-out uses all 3 repeats, because the records differ (matcher variance), which
+  also partly exposes generator variance.
+- *Reserve first:* the held-out and H passes ($2.35 at the planning price) are
+  reserved before dev starts. Dev iteration stops when spend + reserve reaches $5.
+  The harness keeps a spend ledger from response usage.
+- With option (a) for H, add 8 matcher calls (≈ $0.46). Dev then drops to about 43
+  calls.
+- $0: the adapter, the template baseline, the checks, the split, the tests and all
+  replay work.
 
 ---
 
-## 7. Proposed edits to SYSTEM_SPEC and PROJECT_PLAN (not made yet)
+## 7. Edits to SYSTEM_SPEC and PROJECT_PLAN
 
-**SYSTEM_SPEC**
-1. §16: state that the real Phase 3 output is the composite `pipeline.Determination`,
-   and that the §16 shape is produced by the Phase 4 adapter (D1–D7). Add
-   `determination_id`, `evidence_id` and `unresolved_inputs` / `MissingInput`. Record
-   the compound-string ↔ status + reason split (D3).
-2. §16: add the actor-role mapping onto the four states (D5).
-3. §16 or new §16.1: Generation invariants G1–G4 and the `GeneratedAnswer` schema.
-4. §18: a new "Generation" subsection with the checks C0–C8, the pre-registered
-   targets, the input sets, and the known-limitation paragraph (§4 above).
-5. §19 Invariants: add G1–G4.
-
-**PROJECT_PLAN**
-1. Phase 4 acceptance: replace it with the text in §5.
-2. Phase 4 deliverables: the adapter, the renderer, the checks, and the
-   `eu-ai-check eval-generation` harness.
-3. Phase 5: add the pre-registered generation-model comparison (Sol vs cheaper),
-   using the C0–C8 metrics.
+Applied in `34acd2a`, separately from this note:
+- SYSTEM_SPEC §16 as-built note and §16.1 (what Phase 3 really produces);
+- §16.2 (adapter input, per-article obligations);
+- §16.3 (claims-first output, template renderer);
+- §18 Generation block (split, C0–C8, baseline, PROPOSED rule / targets / cap, known
+  limitation);
+- §19 invariants 23–26 (= G1–G4);
+- PROJECT_PLAN Phase 4 deliverables and PROPOSED acceptance, and the Phase 5 model
+  comparison.
 
 ---
 
-## 8. Open questions for the user
+## 8. Decisions and open questions
 
-- **Q1.** Which model and effort should Phase 4 be developed and accepted on? The
-  suggestion is `gpt-6.1-sol` at `low`, for continuity with Phase 2/3.
-- **Q2.** Matcher `case_quote`s are verbatim spans of the user's description (D8).
-  Should they count as "raw user text" under G1 and be excluded? Or should they be
-  allowed, since they are code-verified spans that support a cited verdict? The
-  proposal is to exclude them: G1 stays absolute, and the answer is addressed to the
-  user, who already knows what they wrote.
-- **Q3.** Matcher `rationale`s: should they pass through to the generator as part of
-  `explanation`? They are LLM text and can paraphrase the user's description. The
-  proposal is to include them only for `insufficient` verdicts that appear in
-  `unresolved_inputs`, because that is where they carry the "what is missing" signal.
-- **Q4.** Held-out set: v1 dev-run records (same descriptions, different
-  determinations), or baseline-B determinations on the 5(1)(c) held-out cases (new
-  descriptions, no `unresolved`), or both?
-- **Q5.** Should the human-read faithfulness sample (criterion 6) be a gate, or only
-  reported?
-- **Q6.** Granularity of obligations: one rendered line per provision (24 lines when
-  both articles apply), or one per article with its provisions listed under it? The
-  adapter keeps one determination per provision either way. This only affects the
-  renderer.
+**Decided (2026-10-06):**
+- Option B.
+- `gpt-6.1-sol` at `low`.
+- No verbatim user quotes in the input.
+- Matcher rationales only for unanswered verdicts.
+- Obligations grouped per article.
+- The faithfulness sample is reported, not gated.
+- The split is by case id, with H01–H08 as extra held-out.
+- The template baseline.
+
+**Open:**
+- **Q7.** H01–H08 determinations: (a) M-low, (b) baseline B (recommended), or (c) drop.
+- **Q8.** Approve the decision rule: coverage ≥ 0.90 plus pairwise preference ≥ 15/20.
+  Or no human gate, with coverage ≥ 0.95.
+- **Q9.** Approve the $5 cap and the reserve-first spending plan.
+- **Q10.** Once Q7–Q9 are answered, the PROPOSED items in SYSTEM_SPEC §18 and
+  PROJECT_PLAN become the Phase 4 pre-registration, committed before the smoke test.
