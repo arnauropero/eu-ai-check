@@ -2339,6 +2339,17 @@ It is binding. As with Phase 3, a miss is reported as a miss and is not retuned.
     unanswered risk-tier questions (86 dev, 24 held-out) that decide nothing on their
     own.
 
+- **[Note, 2026-10-06, after the smoke test, before any dev call] Shared renderer
+  changed: missing information grouped.** This note edits neither the pre-registration
+  nor the amendment. The shared renderer changed after the pre-registration. Each
+  distinct "we would need to know" question is now listed once, at the end of the
+  answer, with the provisions it is asked about and the determinations it is needed
+  for, and every unresolved section points to its items. The change applies to the
+  template and the LLM arm equally, because both are rendered by the same code. C7 is
+  unchanged: it still checks each determination's own list. The rating sample was
+  frozen by record (class, held-out record, sample id), not by output text, so it is
+  unaffected; both texts of every pair are rendered by the current renderer.
+
 **End-to-end:**
 - Obligation correctness (right obligations, right roles, right union/dedup per §4.1)
 - Citation correctness (right `versioned_provision_id` per claim)
