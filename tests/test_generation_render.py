@@ -8,7 +8,12 @@ from generation_fixtures import load_input, load_synthetic
 
 from eu_ai_check.generation.checks import FAILURE_LEX, NOT_APPLICABLE_LEX
 from eu_ai_check.generation.inputs import Inputs
-from eu_ai_check.generation.render import NEED_TO_KNOW, render, status_line
+from eu_ai_check.generation.render import (
+    NEED_TO_KNOW,
+    NEED_TO_KNOW_HEADING,
+    render,
+    status_line,
+)
 from eu_ai_check.generation.template_eval import run
 
 
@@ -42,7 +47,39 @@ def test_unresolved_reads_as_missing_information_not_failure() -> None:
     section = render(inp).sections[0]
     assert section.need_to_know and not FAILURE_LEX.search(section.status_line)
     text = render(inp).to_text()
-    assert NEED_TO_KNOW in text and "Annex III(4)(b): Is the AI system" in text
+    assert NEED_TO_KNOW in text and f"## {NEED_TO_KNOW_HEADING}" in text
+    assert "Is the AI system intended to be used as described in this Annex III item?" in text
+    assert "Annex III(4)(b)" in text
+
+
+def test_identical_questions_are_listed_once_with_what_they_affect() -> None:
+    inp = load_input("D41#1")
+    text = render(inp).to_text()
+    tail = text.split(f"## {NEED_TO_KNOW_HEADING}\n", 1)[1]
+    assert tail.count("Is the AI system intended to be used as described in this Annex III item?") == 1
+    assert tail.count("depends on the risk tier, which is itself unresolved") == 1
+    assert "Needed for: Role (provider); Article 16; Article 26" in tail
+    assert "Provisions: Annex III(1)(a); Annex III(1)(b)" in tail
+
+
+def test_grouped_list_covers_every_missing_input_of_every_record() -> None:
+    """Rendering-level counterpart of C7: every question of every unresolved
+    determination is in the grouped list, under that determination's title, and
+    its section points to it. Decided determinations point to nothing."""
+    inputs = Inputs()
+    for item in inputs.side("dev", repeats=None, synthetic=False) + inputs.synthetic_items():
+        answer = render(item.input)
+        text = answer.to_text()
+        groups = {q: (p, a) for q, p, a in answer.need_to_know_groups()}
+        assert len(groups) == len(answer.need_to_know_groups())   # each question once
+        for s in answer.sections:
+            assert len(s.missing) == len(s.need_to_know)
+            for (cite, question), full in zip(s.missing, s.need_to_know):
+                assert full == (f"{cite}: {question}" if cite else question)
+                provisions, affects = groups[question]
+                assert s.title in affects and (cite is None or cite in provisions)
+            block = text.split(f"## {s.status_line}\n", 1)[1].split("\n## ", 1)[0]
+            assert (NEED_TO_KNOW in block) == bool(s.missing)
 
 
 def test_applicable_obligations_show_their_text_and_sources() -> None:

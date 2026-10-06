@@ -28,6 +28,7 @@ from .schema import Claim, GeneratedAnswer
 #: Fixed rendering order (§16.3).
 ORDER = (RISK_TIER, PROHIBITED, ACTOR_ROLE, OBLIGATION)
 NEED_TO_KNOW = "To decide this, we would need to know:"
+NEED_TO_KNOW_HEADING = "What we would need to know"
 
 
 def title(d: Determination) -> str:
@@ -89,6 +90,9 @@ class Section:
     obligation_texts: tuple[tuple[str, str], ...]   # (provision_citation, excerpt)
     need_to_know: tuple[str, ...]
     claims: tuple[RenderedClaim, ...] = ()
+    title: str = ""
+    #: need_to_know split into (provision citation or None, question), same order.
+    missing: tuple[tuple[str | None, str], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -98,7 +102,22 @@ class RenderedAnswer:
     sections: tuple[Section, ...]
     extra: tuple[str, ...] = field(default=())   # claims whose determination is unknown
 
+    def need_to_know_groups(self) -> list[tuple[str, tuple[str, ...], tuple[str, ...]]]:
+        """Each distinct question once, in first-seen rendering order, with the
+        provisions it is asked about and the determinations (titles) it affects."""
+        groups: dict[str, tuple[list[str], list[str]]] = {}
+        for s in self.sections:
+            for cite, question in s.missing:
+                provisions, affects = groups.setdefault(question, ([], []))
+                if cite and cite not in provisions:
+                    provisions.append(cite)
+                if s.title not in affects:
+                    affects.append(s.title)
+        return [(q, tuple(p), tuple(a)) for q, (p, a) in groups.items()]
+
     def to_text(self) -> str:
+        groups = self.need_to_know_groups()
+        number = {q: i for i, (q, _, _) in enumerate(groups, 1)}
         lines: list[str] = []
         for s in self.sections:
             lines += [f"## {s.status_line}"]
@@ -106,15 +125,29 @@ class RenderedAnswer:
                 lines.append(f"- {c.text} [{'; '.join(c.citations)}]")
                 if c.quote:
                     lines.append(f"  > \"{c.quote}\" ({c.quote_citation})")
-            if s.need_to_know:
-                lines.append(NEED_TO_KNOW)
-                lines += [f"- {q}" for q in s.need_to_know]
+            if s.missing:
+                items = sorted({number[q] for _, q in s.missing})
+                lines.append(f"{NEED_TO_KNOW} {_items(items)} in the list at the end.")
             for cite, text in s.obligation_texts:
                 lines.append(f"- {cite}: {text}")
             if s.citations:
                 lines.append("Sources: " + "; ".join(f"{c} ({v})" for c, v in s.citations))
             lines.append("")
+        if groups:
+            lines.append(f"## {NEED_TO_KNOW_HEADING}")
+            for i, (question, provisions, affects) in enumerate(groups, 1):
+                lines.append(f"{i}. {question}")
+                if provisions:
+                    lines.append(f"   Provisions: {'; '.join(provisions)}")
+                lines.append(f"   Needed for: {'; '.join(affects)}")
+            lines.append("")
         return "\n".join(lines).rstrip() + "\n"
+
+
+def _items(numbers: list[int]) -> str:
+    if len(numbers) == 1:
+        return f"item {numbers[0]}"
+    return f"items {', '.join(map(str, numbers[:-1]))} and {numbers[-1]}"
 
 
 def _ordered(inp: GenerationInput) -> list[Determination]:
@@ -126,6 +159,17 @@ def _ordered(inp: GenerationInput) -> list[Determination]:
 
 def _need_to_know(d: Determination) -> tuple[str, ...]:
     return tuple(m.question for m in d.unresolved_inputs)
+
+
+def _missing(d: Determination) -> tuple[tuple[str | None, str], ...]:
+    """A matcher question is worded "<citation>: <question>" by the adapter; the
+    citation is split off so identical questions can be grouped."""
+    out = []
+    for m in d.unresolved_inputs:
+        cite, sep, question = m.question.partition(": ")
+        out.append((cite, question) if m.kind == "matcher_question" and sep
+                   else (None, m.question))
+    return tuple(out)
 
 
 def _render_claim(c: Claim, evidence: dict[str, EvidenceItem]) -> RenderedClaim:
@@ -158,6 +202,8 @@ def render(inp: GenerationInput, answer: GeneratedAnswer | None = None) -> Rende
             obligation_texts=obligation_texts,
             need_to_know=_need_to_know(d),
             claims=tuple(_render_claim(c, evidence) for c in mine),
+            title=title(d),
+            missing=_missing(d),
         ))
     known = {d.determination_id for d in inp.determinations}
     extra = tuple(c.claim_id for c in claims if c.determination_id not in known)
