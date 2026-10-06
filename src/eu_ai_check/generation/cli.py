@@ -33,7 +33,10 @@ def cmd_eval_generation(args: argparse.Namespace) -> int:
         print(json.dumps(rating.make_sheet(), indent=2))
         return 0
     if args.mode == "score-ratings":
-        print(json.dumps(rating.score(), indent=2))
+        from pathlib import Path
+
+        print(json.dumps(rating.score(validation_ratings_path=Path(args.validation_ratings)),
+                         indent=2))
         return 0
 
     from .generator import OpenAIGenerator
@@ -93,6 +96,10 @@ def register(sub) -> None:
     p.add_argument("--label", default="iter1", help="dev run label (results file name)")
     p.add_argument("--repeats", default="0", help="dev repeats, comma-separated")
     p.add_argument("--refs", default=None, help="dev records only, e.g. D01#0,D10#0")
+    p.add_argument("--validation-ratings",
+                   default="data/eval/results/generation_ratings_validation.json",
+                   help="score-ratings: the user's ratings of the validation pairs "
+                        "(agreement with the LLM rater, reported only)")
     p.add_argument("--confirm-heldout", action="store_true",
                    help="required for the single held-out pass")
     p.set_defaults(func=cmd_eval_generation)

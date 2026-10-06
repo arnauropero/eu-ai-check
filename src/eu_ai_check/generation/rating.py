@@ -8,6 +8,10 @@ module, and never printed, logged or returned:
 - `score` runs only once every sample has a preference. It then reads the key,
   checks it again, and counts LLM wins (ties go to the template).
 
+Rater (§18 deviation, 2026-10-06): an LLM rater rates all 20 pairs, and results are
+labelled "LLM-rated (Claude)". The user's ratings of a 6-pair validation sample are
+compared with it, reported only.
+
 Blinding is partial: the template has no model sentences, so style can reveal the
 arm. That limitation is recorded in the pre-registration.
 """
@@ -23,6 +27,11 @@ SAMPLE = Path("data/eval/generation_rating_sample.json")
 HELDOUT_RUNS = Path("data/eval/results/generation_heldout.runs.jsonl")
 SHEET = Path("data/eval/results/generation_rating_sheet.md")
 RATINGS = Path("data/eval/results/generation_ratings.json")
+#: Validation sample (6 informative pairs, seed 20261008) rated by the user; the full
+#: 20 are rated by an LLM rater (§18 deviation note, 2026-10-06, before any rating).
+VALIDATION = Path("data/eval/generation_rating_validation.json")
+VALIDATION_RATINGS = Path("data/eval/results/generation_ratings_validation.json")
+RATER_LABEL = "LLM-rated (Claude)"
 PREFERENCES = ("A", "B", "tie")
 
 
@@ -85,19 +94,49 @@ def make_sheet(*, sample_path: Path = SAMPLE, runs_path: Path = HELDOUT_RUNS,
     return {"sheet": str(sheet_path), "ratings": str(ratings_path), "pairs": len(blank)}
 
 
-def score(*, sample_path: Path = SAMPLE, ratings_path: Path = RATINGS,
-          key_path: Path | None = None) -> dict[str, Any]:
-    sample = json.loads(sample_path.read_text(encoding="utf-8"))
-    ratings = json.loads(ratings_path.read_text(encoding="utf-8"))
-    ids = [s["sample_id"] for s in sample["samples"]]
+def _check_ratings(ratings: dict, ids: list[str], what: str) -> None:
     if sorted(ratings) != sorted(ids):
-        raise RatingError("ratings do not cover exactly the frozen sample")
+        raise RatingError(f"{what} do not cover exactly the frozen sample")
     for sid in ids:
         r = ratings[sid]
         if r.get("preference") not in PREFERENCES:
             raise RatingError(f"{sid}: preference must be one of {PREFERENCES} before unblinding")
         if not isinstance(r.get("faithful_A"), bool) or not isinstance(r.get("faithful_B"), bool):
             raise RatingError(f"{sid}: faithful_A / faithful_B must be true or false")
+
+
+def agreement(main: dict, validation: dict, ids: list[str]) -> dict[str, Any]:
+    """Reported only: how often the user's validation ratings equal the LLM rater's
+    on the same pairs. Compares A/B/tie labels, so it needs no key."""
+    same = {f: sum(main[s][f] == validation[s][f] for s in ids)
+            for f in ("preference", "faithful_A", "faithful_B")}
+    n = len(ids)
+    return {"reported_only": True, "pairs": n,
+            "preference_agreement": f"{same['preference']}/{n}",
+            "preference_agreement_rate": round(same["preference"] / n, 4) if n else None,
+            "faithful_A_agreement": f"{same['faithful_A']}/{n}",
+            "faithful_B_agreement": f"{same['faithful_B']}/{n}",
+            "per_pair": {s: {"user": validation[s]["preference"], "llm": main[s]["preference"]}
+                         for s in ids}}
+
+
+def score(*, sample_path: Path = SAMPLE, ratings_path: Path = RATINGS,
+          key_path: Path | None = None, validation_path: Path | None = VALIDATION,
+          validation_ratings_path: Path | None = VALIDATION_RATINGS) -> dict[str, Any]:
+    sample = json.loads(sample_path.read_text(encoding="utf-8"))
+    ratings = json.loads(ratings_path.read_text(encoding="utf-8"))
+    ids = [s["sample_id"] for s in sample["samples"]]
+    _check_ratings(ratings, ids, "ratings")
+    # The validation ratings are checked before the key is opened, like the main ones.
+    validation: dict[str, Any] = {"reported_only": True, "status": "not provided"}
+    if validation_path and validation_ratings_path and validation_ratings_path.exists():
+        vids = json.loads(validation_path.read_text(encoding="utf-8"))["sample_ids"]
+        vratings = json.loads(validation_ratings_path.read_text(encoding="utf-8"))
+        if all(r.get("preference") is None for r in vratings.values()):
+            validation = {"reported_only": True, "status": "not rated"}
+        else:  # partly filled is an error, never a silent subset
+            _check_ratings(vratings, vids, "validation ratings")
+            validation = agreement(ratings, vratings, vids)
     assignment = _load_key(sample, key_path)  # opened only now: every pair is rated
     llm_wins = template_wins = ties = 0
     faithful = {"llm": 0, "template": 0}
@@ -118,11 +157,13 @@ def score(*, sample_path: Path = SAMPLE, ratings_path: Path = RATINGS,
     informative_wins = sum(1 for sid in ids if sid not in identical
                            and ratings[sid]["preference"] != "tie"
                            and assignment[sid][ratings[sid]["preference"]] == "llm")
-    return {"pairs": len(ids), "llm_wins": llm_wins, "template_wins": template_wins,
+    return {"rater": RATER_LABEL, "pairs": len(ids), "llm_wins": llm_wins, "template_wins": template_wins,
             "ties": ties, "pairwise_ok": llm_wins >= 15,
             "llm_wins_of_20": f"{llm_wins}/{len(ids)}",
             "informative_pairs": len(ids) - len(identical),
             "llm_wins_of_informative": f"{informative_wins}/{len(ids) - len(identical)}",
             "identical_pairs_rated_tie": sum(ratings[sid]["preference"] == "tie"
                                              for sid in identical),
-            "faithful_llm": faithful["llm"], "faithful_template": faithful["template"]}
+            "faithful_llm": faithful["llm"], "faithful_template": faithful["template"],
+            # Reported only: never read by the adoption rule.
+            "validation_agreement": validation}
