@@ -331,7 +331,7 @@ one rule-matching engine → cited, fail-closed output.
   - Unresolved upstream determinations feed the rule engine as unknown, using
     three-valued logic.
 
-**Phase 4 — Generation and citation**
+**Phase 4 — Generation and citation (COMPLETE, 2026-10-06, tag `phase-4`)**
 - Deliverable: final generation stage producing tier + obligations + explanation +
   citations from the evidence set.
 - Design approved 2026-10-06 (`docs/phase4_design.md`; SYSTEM_SPEC.md §16.1–16.3, §18):
@@ -364,7 +364,8 @@ one rule-matching engine → cited, fail-closed output.
     has been looked at.
   - Spend cap: $5 for all Phase 4 API calls, with held-out reserved first.
   - H01–H08 are not used in Phase 4. They are reserved for Phase 5.
-- **Status (2026-10-06): complete, acceptance met, LLM generator adopted.**
+- **Status (2026-10-06): complete, acceptance met, LLM generator adopted. Merged in
+  `678f44c` (PR #3) and tagged `phase-4`.**
   - *Dev.* Two dev prompt iterations. v2 was frozen before the held-out pass.
   - *Held-out pass (once, 39 records).* Raw pass 1.00, fallback 0.00, 0 truncated,
     0 C4/C8, coverage 1.00, status reproduced 15/15, 0 API errors.
