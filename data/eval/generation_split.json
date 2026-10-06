@@ -1,0 +1,136 @@
+{
+  "notice": "Phase 4 generator split, frozen before any generator prompt existed. Do not edit; regenerate with scripts/make_generation_split.py.",
+  "source_run": {
+    "path": "data/eval/results/determination_v1_41c_retry.runs.jsonl",
+    "sha256": "cfacac3574627b6ac19468de1d663f3b4a331b62776aa1d5e66c2afea3f9e7b3",
+    "arm": "matcher-low"
+  },
+  "source_cases": {
+    "path": "data/eval/determination_cases.json",
+    "sha256": "bec730b06c5f8cbdef156b2232d90393ca1e8308162aaaabbe5842b89b136baa"
+  },
+  "method": {
+    "seed": 20261006,
+    "stratified_on": "gold risk_tier state",
+    "heldout_per_state": {
+      "applicable": 6,
+      "not_applicable": 4,
+      "unresolved": 2,
+      "not_in_force": 1
+    },
+    "forced_heldout": [
+      "D38"
+    ]
+  },
+  "dev": {
+    "cases": [
+      "D01",
+      "D03",
+      "D04",
+      "D07",
+      "D08",
+      "D09",
+      "D10",
+      "D11",
+      "D12",
+      "D14",
+      "D16",
+      "D17",
+      "D18",
+      "D19",
+      "D21",
+      "D23",
+      "D24",
+      "D25",
+      "D26",
+      "D29",
+      "D30",
+      "D32",
+      "D33",
+      "D34",
+      "D37",
+      "D39",
+      "D40",
+      "D41"
+    ],
+    "records": 84,
+    "input_states": {
+      "applicable": 114,
+      "not_applicable": 154,
+      "role_known": 72,
+      "unresolved": 80
+    }
+  },
+  "dev_synthetic": {
+    "note": "SYNTHETIC. Not Phase 3 results: dev cases re-dated before entry into force, replayed through Pipeline with no matcher call. One record each (deterministic, so repeats would be identical). Used only for dev iteration on not_in_force wording; never scored as held-out.",
+    "cases": [
+      {
+        "id": "S01",
+        "synthetic": true,
+        "source_case": "D01",
+        "relevant_date": "2024-07-31",
+        "input_states": {
+          "not_in_force": 5
+        }
+      },
+      {
+        "id": "S02",
+        "synthetic": true,
+        "source_case": "D21",
+        "relevant_date": "2024-03-13",
+        "input_states": {
+          "not_in_force": 5
+        }
+      },
+      {
+        "id": "S03",
+        "synthetic": true,
+        "source_case": "D30",
+        "relevant_date": "2023-06-01",
+        "input_states": {
+          "not_in_force": 5
+        }
+      }
+    ]
+  },
+  "heldout": {
+    "cases": [
+      "D02",
+      "D05",
+      "D06",
+      "D13",
+      "D15",
+      "D20",
+      "D22",
+      "D27",
+      "D28",
+      "D31",
+      "D35",
+      "D36",
+      "D38"
+    ],
+    "records": 39,
+    "input_states": {
+      "applicable": 60,
+      "not_applicable": 45,
+      "not_in_force": 15,
+      "role_known": 33,
+      "unresolved": 42
+    }
+  },
+  "reserved_phase5": {
+    "path": "data/eval/determination_heldout_5_1_c.json",
+    "sha256": "936166724be71a1e7a4312b60750b60b1a9078f33f513d822ef64c19644fe403",
+    "cases": [
+      "H01",
+      "H02",
+      "H03",
+      "H04",
+      "H05",
+      "H06",
+      "H07",
+      "H08"
+    ],
+    "note": "Not used in Phase 4 (decision Q7, 2026-10-06). Never run; kept untouched for the Phase 5 end-to-end evaluation."
+  }
+}

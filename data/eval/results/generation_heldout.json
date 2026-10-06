@@ -1,0 +1,79 @@
+{
+  "records": 39,
+  "api_errors": 0,
+  "retries": 0,
+  "retry_cost_usd": 0.0,
+  "raw_pass_rate": 1.0,
+  "fallback_rate": 0.0,
+  "raw_failed_by_check": {
+    "C0": 0,
+    "C1": 0,
+    "C2": 0,
+    "C3": 0,
+    "C4": 0,
+    "C5": 0,
+    "C6": 0,
+    "C7": 0,
+    "C8": 0
+  },
+  "finish_reasons": {
+    "completed": 39
+  },
+  "truncated": 0,
+  "content_failures": 0,
+  "c4_c8_diagnostic_hits": {},
+  "c4_violations": 0,
+  "c8_violations": 0,
+  "shipped_pass_rate": 1.0,
+  "grounded_explanation_coverage": 1.0,
+  "gold_differs_records": 15,
+  "faithful_reproduction_rate": 1.0,
+  "status_reproduced_all": true,
+  "system_language": {
+    "lexicon_sha256": "96ad5e7670a299c4ab983c3721e500216b111bad3386c1e9858f76d1d04a197e",
+    "claims_affected": 0,
+    "claims_total": 276,
+    "rate": 0.0,
+    "occurrences": {
+      "code": 0,
+      "explanation": 0,
+      "records/recorded": 0,
+      "match/matched/matching": 0,
+      "supplied evidence": 0,
+      "excerpt(s)": 0,
+      "the cited": 0,
+      "by citation": 0,
+      "system-side assessment": 0
+    },
+    "affected": []
+  },
+  "input_tokens": 163126,
+  "reasoning_tokens": 2931,
+  "output_tokens": 35546,
+  "decision": {
+    "hygiene": {
+      "raw_pass_rate>=0.95": true,
+      "fallback_rate<=0.05": true,
+      "zero_C4": true,
+      "zero_C8": true
+    },
+    "coverage>=0.90": true,
+    "pairwise>=15/20": null,
+    "adopt_llm": false,
+    "phase4_generator": "pending pairwise rating",
+    "acceptance": {
+      "shipped_pass_rate==1.00": true,
+      "faithful_reproduction==1.00": true
+    },
+    "phase4_acceptance_met": true
+  },
+  "spent_usd": 1.6931,
+  "budget_stop": null,
+  "model": "gpt-6.1-sol",
+  "effort": "low",
+  "max_output_tokens": 5000,
+  "prompt_sha": "a6b4a491da53588b40fd575d34756d0432068fb9f87d7bbc4313cdd68aece0f6",
+  "prompt_version": "v2",
+  "prompt_note": "system prompt and input labels describe an analysis of the user's system (no 'code'), citation-only items not to be discussed, derogation 'not_assessed' worded as not reached; dev pass 1 had 70/179 claims with system language (diff: data/eval/prompts/generator_v1_to_v2.diff)",
+  "split_content_sha256": "8300d7cc71658ce2fbaad7202363878be74afc6c32d477184cc0f436b519eb28"
+}

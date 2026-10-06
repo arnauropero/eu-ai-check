@@ -8,7 +8,9 @@ places — exact-citation priority (§7.4), reranker off by default (§7.4), and
 payload indexes as a hard index requirement (§13.2) — and closed the §21
 filtered-HNSW open question. **Phase 3 design (2026-10-03)** added the provision
 matcher (§2, §4.2), the Article 6 route combination and Annex I (§9.1), and found a
-corpus defect: trailing paragraph-level text was dropped (§9.1). This document is the
+corpus defect: trailing paragraph-level text was dropped (§9.1). **Phase 4 design
+(2026-10-06)** records what Phase 3 actually outputs (§16.1), then defines the
+generation input and output (§16.2–16.3) and the generation checks (§18). This document is the
 technical source of truth for implementation in Claude Code. Where a decision rests on
 assumption rather than verified source material, it is marked **[ASSUMPTION]**. Where a
 decision has been checked against the actual EUR-Lex / AI Act Explorer text, it is marked
@@ -1337,6 +1339,10 @@ filterable occurrences exist") and must not be conflated.
 
 ## 16. Output Contract: Citations and Fail-Closed States
 
+> **As-built note (2026-10-06).** Phase 3 does not emit this shape directly. §16.1
+> records what it actually produces, and §16.2 the Phase 4 adapter that maps it onto
+> this contract.
+
 The evidence/citation shape is shared across **all four top-level determinations**
 (risk-tier, prohibited-practice, actor-role, obligation applicability), not defined
 only for obligations. Each determination's evidence items reference both identities:
@@ -1406,6 +1412,127 @@ internal logs — a compliance tool that silently omits gaps in its own rule cov
 silently conflates "no rule was in force" with "this doesn't apply to you," is more
 dangerous than one that admits uncertainty. See §14 for the precise definition of each
 state.
+
+### 16.1 What Phase 3 actually produces (as-built, recorded 2026-10-06)
+
+The shape above is the **contract**. Phase 3 does not emit it directly. The Phase 4
+design audit (`docs/phase4_design.md` §0) compared it with the code and the cached
+results, and found these differences. They are recorded here so this section describes
+what exists rather than what was intended.
+
+- **No `EvidenceItem` type exists in Phase 3.** Evidence is spread across
+  `ProvisionStatus.versioned_provision_id` (obligations), `RoleResult.evidence`
+  (logical ids only) and the matcher's `Verdict`s (`provision_quote`, `case_quote`,
+  `rationale`).
+- **One composite object, not one `Determination` per type.** `pipeline.Determination`
+  holds `risk_tier: RiskTier`, `prohibited: Prohibition`, `roles: RoleResult | None`,
+  `obligations: {article: [ProvisionStatus]}` and the `MatchResult`. There is no
+  `determination_type` field.
+- **Status and reason share one string.** `logic.py` uses
+  `"not_applicable/conditions_not_met"` and `"not_applicable/not_yet_applicable"`.
+  The pair maps one-to-one onto `applicability_status` + `not_applicable_reason`.
+- **No `explanation` field.** The only prose is the matcher's per-candidate
+  `rationale`. Rule-based outcomes have none.
+- **Actor role is not four-state.** `RoleResult` holds a three-valued value per role,
+  and its status is `known` / `unresolved`. `role_label()` reports `not_in_force` when
+  roles were not computed.
+- **The cached `*.runs.jsonl` records keep less than this.** `Run.record()` drops
+  `versioned_provision_id`, excerpts and per-provision obligation statuses. It keeps
+  one status per obligation article (`group_status`). For the matcher, it keeps every
+  verdict with its quotes and rationale.
+- **`case_quote` is user text.** It is a code-verified verbatim span of the user's
+  description.
+
+**The full in-memory object is recoverable at zero cost.** Replaying the recorded
+verdicts through `Pipeline` reproduces every one of the 123 M-low records of the
+official run exactly (`scripts/verify_generation_inputs.py`). Every cited
+`versioned_provision_id` and excerpt follows from the corpus and `relevant_date`
+alone: each of the 110 provisions has exactly one version, valid from 2024-08-01 with
+no end date. The exceptions are D38#0–2 (`relevant_date` 2024-06-15). They are
+`not_in_force` throughout, so by definition they have no valid version to cite (§16.2).
+
+### 16.2 Generation input: the Phase 4 adapter (design approved 2026-10-06)
+
+A deterministic adapter (no LLM) maps the replayed `pipeline.Determination` onto the
+contract above and adds three fields. This is everything the generator ever receives
+(invariant 23).
+
+```yaml
+GenerationInput:
+  case_ref: str                     # e.g. "D10#0"; opaque to the model
+  relevant_date: date
+  determinations: [Determination]
+
+Determination:                      # the contract above, plus:
+  determination_id: str             # "risk_tier", "prohibited_practice",
+                                    # "actor_role:provider", "obligation:aiact:art_26"
+  unresolved_inputs: [MissingInput] # non-empty iff applicability_status is unresolved
+
+EvidenceItem:                       # the contract above, plus:
+  evidence_id: str                  # unique within one GenerationInput
+
+MissingInput:
+  kind: matcher_question | case_fact | upstream_determination
+  ref: str                          # provision id, CaseFacts field, or determination_id
+  question: str                     # code-owned text (scope question, field description)
+  rationale: str | null             # matcher rationale, for insufficient verdicts only
+```
+
+Mapping rules:
+- **Status:** the compound string is split into `applicability_status` +
+  `not_applicable_reason`.
+- **Actor role:** one `Determination` per role. `True` → `applicable`, `False` →
+  `not_applicable` / `conditions_not_met`, unknown → `unresolved`, roles not computed
+  → `not_in_force`.
+- **Obligations:** one `Determination` per article (`aiact:art_16`, `aiact:art_26`),
+  with the article's `group_status`. The cached data holds one status per article, and
+  V1's rules are uniform within an article. The output must not suggest a finer
+  granularity than that. A `mixed` group status makes the adapter raise an error
+  rather than choose a status. The evidence is the article's provisions. Their
+  excerpts are included only when the article is `applicable` or
+  `not_yet_applicable`, and otherwise the citation alone is given.
+- **Risk tier / prohibited practice:** these cite the provisions whose verdict is
+  `matches`, the route provisions (Article 6(1)/6(2)), and the Article 6(3)
+  provisions when assessed.
+- **`unresolved_inputs`:** these list only the `insufficient` verdicts whose flip to
+  true or false would change the outcome under the fixed §9.1 combination, together
+  with the `CaseFacts` fields that are null and feed a role formula (§4.3) and the
+  unknown rule conditions (`rule_outcomes`), each with its upstream determination.
+- **Excluded from the input:** the user's description and `CaseFacts` free text,
+  every `case_quote`, rationales other than those of `insufficient` verdicts in
+  `unresolved_inputs`, uncited `does_not_match` verdicts, and all eval labels.
+- **`not_in_force`:** a `not_in_force` determination carries no `EvidenceItem`, because
+  no version was valid on the date. The renderer states the date the text entered
+  into force (from the corpus) as a plain fact, not as evidence.
+- **`explanation`:** built by code from structured state (route states, derogation,
+  failing condition). It is never written by an LLM.
+
+### 16.3 Generation output (design approved 2026-10-06)
+
+**Claims first, prose rendered by code.** The model returns strict JSON:
+
+```yaml
+GeneratedAnswer:
+  claims:
+    - claim_id: str
+      determination_id: str      # an input determination_id
+      text: str
+      evidence_ids: [str]        # >= 1, all from that determination's supporting_evidence
+      quote: str | null          # optional verbatim span of one cited excerpt
+      quote_evidence_id: str | null
+```
+
+Code renders the answer in a fixed order: risk tier, prohibited practice, roles,
+obligations per article. For each determination, the **status line is written by
+code** from the input status. The model's claims for that determination follow, with
+citations rendered by code from the `EvidenceItem`s. For `unresolved`, code renders
+"To decide this, we would need to know:" from `unresolved_inputs`, worded as missing
+information, never as a system failure. `not_in_force` lines are never worded as
+`not_applicable`. The schema has no status field, so a model cannot change a status.
+
+A deterministic **template renderer** produces the same rendering with no model
+claims at all. It is the Phase 4 baseline (§18), and also the fallback for any
+generated answer that fails a check.
 
 ---
 
@@ -2058,6 +2185,280 @@ pre-registered attempt:
 - D32 (attention vs emotion recognition) is the most fragile case in the set, and
   any change has to be measured against it.
 
+**Generation — Phase 4 pre-registration (APPROVED 2026-10-06).** Design:
+`docs/phase4_design.md`; contract: §16.2–16.3. Everything below was approved by the
+user and committed **before any Phase 4 API call** (no smoke test, no generation).
+It is binding. As with Phase 3, a miss is reported as a miss and is not retuned.
+
+- **Inputs, not a pipeline run.** The generator is developed and scored on the cached
+  official Phase 3 run (`determination_v1_41c_retry`, M-low), replayed through
+  `Pipeline` and the adapter at zero cost. Phase 4 metrics are measured against the
+  **input** determination, never the gold label (invariant 26).
+- **Split, frozen before any generator prompt existed.**
+  `data/eval/generation_split.json`, SHA-pinned in `tests/test_generation_split.py`
+  and built by `scripts/make_generation_split.py`. The 41 cases are split by case
+  id, stratified on the gold risk-tier state, with seed 20261006. D38 is forced into
+  held-out because it is the only `not_in_force` case. Every repeat of a case stays
+  on one side.
+  - *Dev, 28 cases / 84 records:* D01, D03, D04, D07–D12, D14, D16–D19, D21, D23–D26,
+    D29, D30, D32–D34, D37, D39–D41.
+  - *Dev, synthetic, 3 records:* S01 (D01 at 2024-07-31), S02 (D21 at 2024-03-13)
+    and S03 (D30 at 2023-06-01). These are dev cases re-dated before entry into
+    force. `Pipeline` finds no candidate in force and never calls the matcher, so
+    every determination is `not_in_force`, deterministically and at no cost (a test
+    replays them with a matcher that raises). They are marked `synthetic`, are not
+    Phase 3 results, and exist only so that `not_in_force` wording is seen in dev.
+    Every provision has one start date, so they are all-`not_in_force`, like D38.
+  - *Held-out, 13 cases / 39 records:* D02, D05, D06, D13, D15, D20, D22, D27, D28,
+    D31, D35, D36, D38. Input determinations: 60 `applicable`, 45 `not_applicable`,
+    42 `unresolved`, 15 `not_in_force`, plus 33 known role sets. Five of these cases
+    (D02, D05, D28, D35, D36, all 15 of their records) carry at least one
+    determination that differs from gold.
+  - *Not used in Phase 4:* H01–H08 are reserved, untouched, for the Phase 5
+    end-to-end evaluation.
+- **Deterministic checks (no LLM), run on every answer.**
+
+  | ID | Check |
+  |---|---|
+  | C0 | The response parses against the strict `GeneratedAnswer` schema; a refusal or an incomplete response fails. |
+  | C1 | Every cited `evidence_id` exists in the input. |
+  | C2 | Every cited `evidence_id` belongs to the claim's own determination, and that `determination_id` exists. |
+  | C3 | A `quote` is a verbatim substring (after whitespace normalisation) of its cited excerpt. Every excerpt equals the corpus text of its `versioned_provision_id`. |
+  | C4 | The rendered status equals the input status and reason (by construction, and tested). Claim text contains no status phrase from another state's lexicon. |
+  | C5 | Every obligation article is rendered with its own evidence (by construction). Claim text names no provision it does not cite, and uses obligation language ("must", "shall", "is required to") only when it cites an obligation provision. |
+  | C6 | Every input determination is rendered exactly once, and no claim references an id outside the input. |
+  | C7 | Every `unresolved` determination renders its `unresolved_inputs` as a non-empty "we would need to know" list. |
+  | C8 | No claim on a `not_in_force` determination uses the `not_applicable` lexicon. |
+
+  C4, C5 and C8 are partly lexical, so a pass does not prove faithfulness. A failing
+  answer is never shown: the template rendering replaces it, and the replacement is
+  counted. The exact lexicons and regexes are fixed in code and tests before the
+  smoke test.
+- **Baseline: the template renderer** (no LLM, $0). It uses the same adapter, the same
+  renderer and the same checks, with no model claims. It passes C0–C8 by construction,
+  so check pass rates cannot tell the two arms apart.
+- **Decision rule (APPROVED): adopt the LLM generator over the template only if all
+  three hold on the held-out set.**
+  1. *Hygiene:*
+     - raw first-attempt pass rate on C0–C8 ≥ 0.95;
+     - fallback rate ≤ 0.05;
+     - zero C4 violations;
+     - zero C8 violations.
+  2. *Grounded-explanation coverage ≥ 0.90.* This is the share of explainable
+     determinations that carry at least one model claim passing C0–C8. The
+     explainable determinations are risk tier and prohibited practice when
+     `applicable` or `not_applicable`, obligation articles when `applicable` or
+     `not_yet_applicable`, and every `unresolved` determination. The template scores
+     0.00 by construction. This criterion is deterministic.
+  3. *Blind pairwise preference ≥ 15 of 20.* Ties count for the template. The
+     protocol follows below.
+
+  If any condition fails, the template ships as the Phase 4 generator, and the
+  failure is recorded here.
+- **Acceptance targets (APPROVED).**
+  - Every shipped answer passes C0–C8: 1.00.
+  - Input status reproduced in 100% of the 15 held-out records whose determination
+    differs from gold. D32#2 (dev) is pinned by a regression test.
+  - Reported, not gated: a human faithfulness read of the same 20 rated answers.
+- **Rating protocol (frozen).** `data/eval/generation_rating_sample.json`, built by
+  `scripts/make_generation_rating_sample.py` and SHA-pinned:
+  - *The sample:* 20 held-out records, drawn before any generation existed with
+    seed 20261007. Records are stratified by class, with proportional allocation,
+    at least 2 per class and at most 2 per case. The classes are `not_in_force`,
+    any `unresolved`, an obligation article that applies now or later, and
+    otherwise `not_applicable`. The allocation is 2 / 9 / 4 / 5.
+  - *Each pair:* the template and the LLM answer for the same input, labelled A and
+    B. The A/B assignment was drawn from a fresh secret seed and written only to
+    `data/eval/private/generation_rating_key.json`. That file is gitignored and is
+    not opened until rating is finished. Its SHA-256 is committed in the sample
+    file, and a test checks it, so the key is fixed now and can be verified at
+    unblinding.
+  - *Limitation, stated in advance:* blinding is partial. The template contains no
+    model sentences, so stylistic differences can reveal which side is the LLM.
+    Blinding removes label and order effects, not that one.
+- **Hard rule (APPROVED).**
+  - The held-out pass runs **exactly once**.
+  - No prompt, check, lexicon or renderer change is made after any held-out output
+    has been looked at.
+  - If the hygiene criterion fails, that is recorded and the template ships as the
+    Phase 4 generator. There is no retry.
+  - API failures during the held-out pass count as failures. They are not re-run,
+    unless the user decides otherwise before the results are looked at, as in
+    Phase 3.
+- **Model:** `gpt-6.1-sol` at effort `low`, configurable. The comparison with cheaper
+  models is deferred to Phase 5 as a pre-registered comparison.
+- **Spend cap (APPROVED): $5 for all Phase 4 API calls.** Spend is tracked from
+  response usage at $2 / $10 per million input / output tokens.
+  - The held-out pass (39 calls, ≤ $1.95 at the $0.05 planning price) is reserved
+    first, before dev starts.
+  - Dev iteration stops when spend plus that reserve would exceed the cap.
+  - Planned worst case: smoke test $0.05, plus dev ≤ 52 calls ($2.60), plus
+    held-out $1.95, for ≈ $4.60.
+  - Adapter, template baseline, checks and replay cost $0.
+- **Known limitation: upstream errors are reproduced faithfully (invariant 26).**
+  D32#2 (dev) has gold risk tier `unresolved`. The determination is
+  `not_applicable/conditions_not_met`, because the matcher returned `does_not_match`
+  on Annex III 1(c). The answer must say "does not apply". Rendering it as uncertain
+  would be a generator defect. A regression test pins this. An answer is only as
+  correct as the Phase 3 determination behind it, and Phase 3 acceptance was NOT MET
+  (above).
+
+- **[Amendment, 2026-10-06, before any Phase 4 API call] Output cap, tighter held-out
+  reserve, smoke input, diagnostics.** This adds to the pre-registration above and edits
+  none of it. The $5 total cap is unchanged.
+  - *Output cap: `max_output_tokens` = 5,000 per call.* OpenAI's reasoning guide states
+    that this limit covers reasoning tokens, visible output and formatting tokens
+    together. Reasoning tokens are billed as output. A call that hits the limit returns
+    `status: incomplete` with reason `max_output_tokens`, and it is still billed. OpenAI
+    recommends reserving at least 25,000 tokens when experimenting. That is not
+    followed: at 25,000 the held-out worst case (~$10) would exceed the $5 cap.
+  - *How truncation is handled.* A truncated answer fails C0, so the template ships, and
+    it counts against the raw pass rate and the fallback rate like any other failure.
+    It is reported separately: every call's finish reason and reasoning tokens go to
+    the ledger, and summaries count `truncated` apart from `content_failures`. The
+    held-out pass does not retry.
+  - *Held-out reserve, tightened.* The pre-registered reserve was $1.95 (39 × the $0.05
+    planning price). It is now the largest of $1.95, 39 × the dearest call observed,
+    and the held-out pass's worst case. The worst case is computed from the real
+    held-out request sizes: input at ⌈characters / 3⌉ tokens × $2 per million, plus
+    5,000 output tokens × $10 per million, per call. **That gives $2.3875.** Before
+    any call, the reserve is therefore $2.39 and the dev budget is $2.61, smoke test
+    included. The plan had $2.60 for dev and $0.05 for smoke. The held-out pass also
+    refuses to start unless its whole worst case fits under the cap.
+  - *Smoke test.* It runs on the real dev record with the most determinations and the
+    largest request: D41#1, with 6 determinations, 40,371 characters and a $0.077
+    worst case. The planned made-up input is not used. The smoke test counts against
+    the dev budget.
+  - *C4/C8 diagnostics, reported only.* Every C4/C8 hit records the lexicon, the exact
+    matched phrase and the claim text, so false positives can be told apart from real
+    contradictions after the held-out run. The word lists are unchanged (pinned SHA
+    `11ac0cf8…`), and no pass rate changes.
+  - *Missing-information rule, unchanged.* The rule lists a question only if flipping
+    it alone changes the outcome. Under it, 0 of the 125 unresolved determinations get
+    an empty list (83 dev, 42 held-out, 0 synthetic). The rule leaves out 110
+    unanswered risk-tier questions (86 dev, 24 held-out) that decide nothing on their
+    own.
+
+- **[Note, 2026-10-06, after the smoke test, before any dev call] Shared renderer
+  changed: missing information grouped.** This note edits neither the pre-registration
+  nor the amendment. The shared renderer changed after the pre-registration. Each
+  distinct "we would need to know" question is now listed once, at the end of the
+  answer, with the provisions it is asked about and the determinations it is needed
+  for, and every unresolved section points to its items. The change applies to the
+  template and the LLM arm equally, because both are rendered by the same code. C7 is
+  unchanged: it still checks each determination's own list. The rating sample was
+  frozen by record (class, held-out record, sample id), not by output text, so it is
+  unaffected; both texts of every pair are rendered by the current renderer.
+
+- **[Note, 2026-10-06, after the smoke test, before any dev call] Input wording in
+  plain words.** This note edits neither the pre-registration nor the amendment. The
+  obligation, role and not-in-force `explanation` strings no longer carry internal ids
+  or Python `None` ("aiact:art_16: rule outcomes None" becomes "Article 16: rule
+  outcomes: undetermined; depends on: the provider role, the risk tier"). They are
+  input to the LLM arm only; the template does not print them. The held-out worst case
+  moves from $2.3875 to $2.3885 under the unchanged reserve rule, which can only make
+  the reserve stricter. From prompt v1 on, every call's ledger line records the prompt
+  version, its SHA and a one-line note, the SHA of the exact request, the response id
+  and the raw usage object.
+
+- **[Note, 2026-10-06, after dev pass 1, before any v2 call] Prompt v2 and a
+  reported-only metric.** This note edits neither the pre-registration nor the
+  amendment, and changes no check, word list, threshold or pass rate.
+  - *Prompt v2.* The system prompt and the input labels describe an analysis of the
+    user's system: `explanation` is shown to the model as `analysis` and `excerpt` as
+    `text`. The words "code", "matched" and "rule outcomes" are gone from the
+    model-facing strings. Two instructions are added: write about the law and the
+    system, never about how the analysis was produced; and, for citation-only evidence,
+    do not mention excerpts, supplied evidence or the absence of text. The prompt's
+    forbidden-word list is unchanged. The diff is `data/eval/prompts/generator_v1_to_v2.diff`.
+  - *Derogation wording.* `combine.risk_tier` sets `not_assessed` only on the path where
+    the Annex III route is not met (every other path overwrites it), and Article 6(3)
+    derogates only from Article 6(2). The model now sees "not reached (the Annex III
+    route is not met)", and the adapter refuses any other pairing.
+  - *Reserve.* The longer system prompt moves the held-out worst case from $2.3885 to
+    $2.3963 under the unchanged reserve rule.
+  - *System-language rate, reported only.* This is the share of claims that describe
+    how the analysis was produced ("code", "recorded", "matched", "supplied evidence",
+    "excerpt", system-side "assessment", "the cited", ...). It uses a lexicon pinned by
+    SHA in `generation/system_language.py`, and legal uses such as "conformity
+    assessment" do not count. It is not a gate. Dev pass 1 baseline: 70 of 179 claims.
+
+- **[Note, 2026-10-06, after dev pass 2, before any held-out call] Prompt v2 frozen
+  for the held-out pass.** This note does not edit the pre-registration. Prompt v2
+  (`prompt_sha` `a6b4a491da53588b40fd575d34756d0432068fb9f87d7bbc4313cdd68aece0f6`) is
+  the held-out prompt. There will be no further prompt versions in Phase 4. Dev pass 2
+  (v2, 31 calls, $0.5057) had a raw pass rate of 1.00, fallback 0.00, coverage 1.00,
+  0 truncated, 0 C4/C8, and a system-language rate of 0/205. Phase 4 spend before the
+  held-out pass is $1.0114.
+
+- **[Note, 2026-10-06, before any held-out call and before any held-out result
+  exists] API-failure policy for the held-out pass.** The user decided this before
+  looking at any held-out result, as the hard rule above allows ("unless the user
+  decides otherwise before the results are looked at"). The pre-registration is not
+  edited.
+  - *Transient errors* (connection failures, timeouts, HTTP 5xx) are retried
+    automatically, up to 3 times per record. Each retry goes through the spend
+    tracker's guard, is billed from its own usage, and is recorded in the ledger with
+    its attempt number. A call that still fails after the retries counts as a
+    failure: the template ships for that record, and it is not a raw pass.
+  - *Not transient:* any other API error, including HTTP 429 and other 4xx, counts as
+    a failure at once.
+  - *Content failures* (any C0-C8 failure, including truncation and a refusal) are
+    never retried.
+  - *No hidden retries.* The OpenAI client is now built with `max_retries=0`, so every
+    retry is the harness's own and is counted. The dev passes used the SDK default
+    (2 hidden retries), and none of their 62 calls returned an error.
+  - The summaries report `retries` and `retry_cost_usd`.
+
+- **[Deviation, 2026-10-06, after the held-out pass, before any rating exists] The
+  pairwise rating is done by an LLM rater.** This is the user's decision. The
+  pre-registration is not edited.
+  - *Rater.* The pre-registered human rater (the user) will not rate all 20 pairs.
+    An independent LLM rater, Claude in the claude.ai chat (not the session that built
+    and ran Phase 4), rates all 20 blinded pairs from the committed sheet. The result
+    is labelled **"LLM-rated (Claude)"** everywhere, and never "human-rated".
+  - *Rule unchanged.* Blind pairwise preference ≥ 15/20, ties to the template.
+    Scoring still reports both 15/20 and x/18 (the 2 not_in_force pairs are
+    identical by construction).
+  - *Human validation, reported only.* The user rates 6 of the 18 informative pairs:
+    R04, R05, R06, R07, R12, R17, drawn with seed 20261008. The R01/R02 pairs are
+    excluded. Their agreement with the LLM rater is reported (preference x/6,
+    faithfulness x/6) and never changes the adoption decision. With 6 pairs the
+    agreement estimate is coarse, and 4 of the 6 are unresolved-class pairs.
+  - *Files.* `data/eval/generation_rating_validation.json` (the frozen ids and seed)
+    and `data/eval/results/generation_ratings_validation.json` (the user's ratings).
+    The A/B key is opened only by the scorer, after both rating files are complete.
+
+- **[Note, 2026-10-06, after rating] Rating outcome and adoption decision.** The
+  pre-registration is not edited. The scorer opened the A/B key only after both
+  rating files were committed (9d88c9f). The key matched its committed SHA-256
+  (`41231e32…01222`).
+  - *Pairwise, LLM-rated (Claude).* The model arm was preferred in **17/20** pairs
+    (17/18 informative pairs). The template arm was preferred in 0, and 3 were ties:
+    the 2 identical not_in_force pairs and 1 informative pair. Condition 3 (≥ 15/20,
+    ties to the template) **holds**. Counting ties for the model would give 20/20
+    (18/18), but the pre-registered rule does not count them. Faithfulness: model arm
+    20/20, template arm 20/20.
+  - *Decision.* All three conditions hold: hygiene (1.00 raw pass, 0.00 fallback,
+    0 C4, 0 C8), coverage (1.00) and pairwise (17/20). The **LLM generator (prompt
+    v2) is adopted** as the Phase 4 generator, and the template stays as the fallback.
+    Phase 4 acceptance is met (shipped pass rate 1.00, status reproduced 15/15).
+    Phase 4 spend is $1.6931 of the $5 cap.
+  - *Limitations.*
+    - (a) The rater is an LLM (Claude in the claude.ai chat), not the
+      pre-registered human rater. This is a documented deviation, and the result is
+      labelled LLM-rated.
+    - (b) Human validation covers only 6 pairs. Agreement was 6/6 on preference
+      and 6/6 on faithfulness. It is reported only and has no statistical value.
+    - (c) Blinding is partial. In every informative pair one arm is the template
+      and the other carries model claims, so the arm is easy to recognise.
+    - (d) As reported by the raters, when a prohibited practice applies, both arms
+      still list the high-risk obligations, and neither flags it. This comes from the
+      shared determinations and renderer, not from the generator.
+    - (e) As reported by the raters, some claims are slightly imprecise about the
+      Article 6(3) subparagraphs (R04, R07). This was judged within tolerance and
+      passed C0–C8.
+
 **End-to-end:**
 - Obligation correctness (right obligations, right roles, right union/dedup per §4.1)
 - Citation correctness (right `versioned_provision_id` per claim)
@@ -2156,6 +2557,21 @@ to a specific stage, not just logged as "wrong answer."
     exception the Act requires a party to positively establish, such as the Article
     6(3) derogation, is recorded as `not_established` rather than `unresolved`. The
     default applies, and the record says so (§9.1).
+
+**Updated (Phase 4 design) additions:**
+
+23. **The generator sees only determinations.** Its only input is the adapter's
+    `GenerationInput` (§16.2). It never sees the user's description or free-text
+    facts, any `case_quote`, unfiltered retrieval or candidate lists, or eval labels.
+24. **The generator never changes an `applicability_status`.** The status and reason
+    are copied by code into a code-rendered status line, and the output schema has no
+    status field (§16.3).
+25. **Generation cannot add a determination.** The answer covers exactly the input
+    determinations. There is no obligation, provision or conclusion that the input
+    did not contain, and no obligation is rendered without its citation.
+26. **Upstream determinations are reproduced faithfully, even when wrong.** The
+    generator does not correct them, so every end-to-end error stays attributable to
+    the stage that made it (§18).
 
 ---
 

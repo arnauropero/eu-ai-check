@@ -1,0 +1,190 @@
+# Generator prompt v1 -> v2 (2026-10-06). What the model sees: the system prompt, and
+# one user message (dev record D14#0) as an example of the input label/wording changes.
+# Schema unchanged. No API call was made with v2 when this file was written.
+diff --git v1_system.txt v2_system.txt
+index bbcf2a1..d99f612 100644
+--- v1_system.txt
++++ v2_system.txt
+@@ -1,14 +1,15 @@
+ You write the explanatory claims of an EU AI Act (Regulation (EU) 2024/1689) compliance
+-answer. Every determination in the input has already been decided by code. Code prints
+-each determination's status line, its sources and, for an unresolved determination,
+-the list of missing information. You add short claims that explain the determinations,
+-grounded only in the evidence given. You never decide, change, restate or question a
+-status.
++analysis of the user's AI system. Every determination in the input is final. Each
++determination's status line, its sources and, for an unresolved determination, the
++list of missing information are printed separately. You add short claims that explain
++the determinations, grounded only in the evidence given. You never decide, change,
++restate or question a status.
+ 
+ Input: a JSON object with "determinations". Each has a determination_id, a type, an
+ applicability_status (applicable / not_applicable / unresolved / not_in_force), a
+-not_applicable_reason, an explanation written by code, its evidence (evidence_id,
+-citation and, for some items, the provision's excerpt) and, when unresolved, the
+-unresolved_inputs (the question that could not be answered, sometimes with a rationale).
++not_applicable_reason, an analysis (a short summary of the findings for the user's
++system), its evidence (evidence_id, citation and, for some items, the provision's text)
++and, when unresolved, the unresolved_inputs (the question that could not be answered,
++sometimes with a rationale).
+ 
+ Output: {"claims": [...]}. Each claim has:
+@@ -18,7 +19,7 @@ Output: {"claims": [...]}. Each claim has:
+ - evidence_ids: one or more evidence_ids taken only from that same determination's
+   evidence. Never cite another determination's evidence.
+-- quote: null, or a short span copied character for character from the excerpt of one
++- quote: null, or a short span copied character for character from the text of one
+   cited evidence item; then quote_evidence_id is that item's evidence_id. Otherwise
+-  both are null. Never quote an item that has no excerpt.
++  both are null. Never quote an item that has no text.
+ 
+ What to write:
+@@ -27,7 +28,12 @@ What to write:
+   obligation article that is applicable or not yet applicable. Other claims are
+   optional. Write no claim for a determination that has no evidence.
+-- Explain what the cited provisions say and how the code's explanation connects them.
+-  For an applicable obligation article, summarise what its provisions require, citing
+-  the provisions you summarise.
++- Explain what the cited provisions say and how the analysis connects them to the
++  user's system. For an applicable obligation article, summarise what its provisions
++  require, citing the provisions you summarise.
++- Write about the law and the user's system, never about how the analysis was produced:
++  do not mention code, software, records, recording, matching, the input, or an
++  assessment carried out by the analysis.
++- Some evidence items are citations without text. Cite them as usual, but do not
++  mention excerpts, supplied evidence or the absence of text.
+ - For an unresolved determination, explain why each missing piece of information
+   matters to the cited provision. Do not guess the answer and do not suggest which
+diff --git v1_user_D14.json v2_user_D14.json
+index 1d7e60c..ed03ffd 100644
+--- v1_user_D14.json
++++ v2_user_D14.json
+@@ -9 +9 @@
+-   "explanation": "Annex III route (Article 6(2)): not met; product route (Article 6(1)): not met; Article 6(3) derogation: not_assessed; matched provisions: Article 6(3)(a)",
++   "analysis": "Annex III route (Article 6(2)): not met; product route (Article 6(1)): not met; Article 6(3) derogation: not reached (the Annex III route is not met); provisions that fit the described system: Article 6(3)(a)",
+@@ -14 +14 @@
+-     "excerpt": "In addition to the high-risk AI systems referred to in paragraph 1, AI systems referred to in Annex III shall be considered to be high-risk."
++     "text": "In addition to the high-risk AI systems referred to in paragraph 1, AI systems referred to in Annex III shall be considered to be high-risk."
+@@ -19 +19 @@
+-     "excerpt": "Irrespective of whether an AI system is placed on the market or put into service independently of the products referred to in points (a) and (b), that AI system shall be considered to be high-risk where both of the following conditions are fulfilled: the AI system is intended to be used as a safety component of a product, or the AI system is itself a product, covered by the Union harmonisation legislation listed in Annex I;"
++     "text": "Irrespective of whether an AI system is placed on the market or put into service independently of the products referred to in points (a) and (b), that AI system shall be considered to be high-risk where both of the following conditions are fulfilled: the AI system is intended to be used as a safety component of a product, or the AI system is itself a product, covered by the Union harmonisation legislation listed in Annex I;"
+@@ -24 +24 @@
+-     "excerpt": "By derogation from paragraph 2, an AI system referred to in Annex III shall not be considered to be high-risk where it does not pose a significant risk of harm to the health, safety or fundamental rights of natural persons, including by not materially influencing the outcome of decision making. The first subparagraph shall apply where any of the following conditions is fulfilled: the AI system is intended to perform a narrow procedural task;"
++     "text": "By derogation from paragraph 2, an AI system referred to in Annex III shall not be considered to be high-risk where it does not pose a significant risk of harm to the health, safety or fundamental rights of natural persons, including by not materially influencing the outcome of decision making. The first subparagraph shall apply where any of the following conditions is fulfilled: the AI system is intended to perform a narrow procedural task;"
+@@ -34 +34 @@
+-   "explanation": "matched Article 5(1) points: none",
++   "analysis": "Article 5(1) points that fit the described practice: none",
+@@ -39 +39 @@
+-     "excerpt": null
++     "text": null
+@@ -44 +44 @@
+-     "excerpt": null
++     "text": null
+@@ -49 +49 @@
+-     "excerpt": null
++     "text": null
+@@ -54 +54 @@
+-     "excerpt": null
++     "text": null
+@@ -59 +59 @@
+-     "excerpt": null
++     "text": null
+@@ -64 +64 @@
+-     "excerpt": null
++     "text": null
+@@ -69 +69 @@
+-     "excerpt": null
++     "text": null
+@@ -74 +74 @@
+-     "excerpt": null
++     "text": null
+@@ -84 +84 @@
+-   "explanation": "provider: no; substantial modification: no",
++   "analysis": "provider: no; substantial modification: no",
+@@ -89 +89 @@
+-     "excerpt": "For the purposes of this Regulation, the following definitions apply: ‘provider’ means a natural or legal person, public authority, agency or other body that develops an AI system or a general-purpose AI model or that has an AI system or a general-purpose AI model developed and places it on the market or puts the AI system into service under its own name or trademark, whether for payment or free of charge;"
++     "text": "For the purposes of this Regulation, the following definitions apply: ‘provider’ means a natural or legal person, public authority, agency or other body that develops an AI system or a general-purpose AI model or that has an AI system or a general-purpose AI model developed and places it on the market or puts the AI system into service under its own name or trademark, whether for payment or free of charge;"
+@@ -99 +99 @@
+-   "explanation": "deployer: yes",
++   "analysis": "deployer: yes",
+@@ -104 +104 @@
+-     "excerpt": "For the purposes of this Regulation, the following definitions apply: ‘deployer’ means a natural or legal person, public authority, agency or other body using an AI system under its authority except where the AI system is used in the course of a personal non-professional activity;"
++     "text": "For the purposes of this Regulation, the following definitions apply: ‘deployer’ means a natural or legal person, public authority, agency or other body using an AI system under its authority except where the AI system is used in the course of a personal non-professional activity;"
+@@ -114 +114 @@
+-   "explanation": "Article 16: rule outcomes: conditions not met",
++   "analysis": "Article 16: conditions not met",
+@@ -119 +119 @@
+-     "excerpt": null
++     "text": null
+@@ -124 +124 @@
+-     "excerpt": null
++     "text": null
+@@ -129 +129 @@
+-     "excerpt": null
++     "text": null
+@@ -134 +134 @@
+-     "excerpt": null
++     "text": null
+@@ -139 +139 @@
+-     "excerpt": null
++     "text": null
+@@ -144 +144 @@
+-     "excerpt": null
++     "text": null
+@@ -149 +149 @@
+-     "excerpt": null
++     "text": null
+@@ -154 +154 @@
+-     "excerpt": null
++     "text": null
+@@ -159 +159 @@
+-     "excerpt": null
++     "text": null
+@@ -164 +164 @@
+-     "excerpt": null
++     "text": null
+@@ -169 +169 @@
+-     "excerpt": null
++     "text": null
+@@ -174 +174 @@
+-     "excerpt": null
++     "text": null
+@@ -184 +184 @@
+-   "explanation": "Article 26: rule outcomes: conditions not met",
++   "analysis": "Article 26: conditions not met",
+@@ -189 +189 @@
+-     "excerpt": null
++     "text": null
+@@ -194 +194 @@
+-     "excerpt": null
++     "text": null
+@@ -199 +199 @@
+-     "excerpt": null
++     "text": null
+@@ -204 +204 @@
+-     "excerpt": null
++     "text": null
+@@ -209 +209 @@
+-     "excerpt": null
++     "text": null
+@@ -214 +214 @@
+-     "excerpt": null
++     "text": null
+@@ -219 +219 @@
+-     "excerpt": null
++     "text": null
+@@ -224 +224 @@
+-     "excerpt": null
++     "text": null
+@@ -229 +229 @@
+-     "excerpt": null
++     "text": null
+@@ -234 +234 @@
+-     "excerpt": null
++     "text": null
+@@ -239 +239 @@
+-     "excerpt": null
++     "text": null
+@@ -244 +244 @@
+-     "excerpt": null
++     "text": null

@@ -1,0 +1,38 @@
+{
+  "R04": {
+    "preference": "B",
+    "faithful_A": true,
+    "faithful_B": true,
+    "note": ""
+  },
+  "R05": {
+    "preference": "B",
+    "faithful_A": true,
+    "faithful_B": true,
+    "note": ""
+  },
+  "R06": {
+    "preference": "B",
+    "faithful_A": true,
+    "faithful_B": true,
+    "note": ""
+  },
+  "R07": {
+    "preference": "B",
+    "faithful_A": true,
+    "faithful_B": true,
+    "note": ""
+  },
+  "R12": {
+    "preference": "A",
+    "faithful_A": true,
+    "faithful_B": true,
+    "note": ""
+  },
+  "R17": {
+    "preference": "A",
+    "faithful_A": true,
+    "faithful_B": true,
+    "note": ""
+  }
+}

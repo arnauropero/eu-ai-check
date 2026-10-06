@@ -1,0 +1,591 @@
+{
+  "lexicon_sha256": "96ad5e7670a299c4ab983c3721e500216b111bad3386c1e9858f76d1d04a197e",
+  "claims_affected": 70,
+  "claims_total": 179,
+  "rate": 0.3911,
+  "occurrences": {
+    "code": 67,
+    "explanation": 12,
+    "records/recorded": 15,
+    "match/matched/matching": 12,
+    "supplied evidence": 11,
+    "excerpt(s)": 10,
+    "the cited": 3,
+    "by citation": 1,
+    "system-side assessment": 21
+  },
+  "affected": [
+    {
+      "record": "D01#0",
+      "claim_id": "c1",
+      "phrases": [
+        "code’s",
+        "explanation",
+        "explanation",
+        "records"
+      ]
+    },
+    {
+      "record": "D01#0",
+      "claim_id": "c2",
+      "phrases": [
+        "code’s",
+        "explanation",
+        "records",
+        "matched",
+        "supplied evidence",
+        "excerpts"
+      ]
+    },
+    {
+      "record": "D01#0",
+      "claim_id": "c6",
+      "phrases": [
+        "code’s"
+      ]
+    },
+    {
+      "record": "D03#0",
+      "claim_id": "c1",
+      "phrases": [
+        "explanation"
+      ]
+    },
+    {
+      "record": "D03#0",
+      "claim_id": "c2",
+      "phrases": [
+        "explanation"
+      ]
+    },
+    {
+      "record": "D03#0",
+      "claim_id": "c3",
+      "phrases": [
+        "supplied evidence",
+        "excerpts",
+        "The assessment checked"
+      ]
+    },
+    {
+      "record": "D04#0",
+      "claim_id": "c1",
+      "phrases": [
+        "code"
+      ]
+    },
+    {
+      "record": "D04#0",
+      "claim_id": "c2",
+      "phrases": [
+        "code",
+        "records"
+      ]
+    },
+    {
+      "record": "D07#0",
+      "claim_id": "c1",
+      "phrases": [
+        "code"
+      ]
+    },
+    {
+      "record": "D07#0",
+      "claim_id": "c5",
+      "phrases": [
+        "code's"
+      ]
+    },
+    {
+      "record": "D08#0",
+      "claim_id": "c1",
+      "phrases": [
+        "code’s",
+        "explanation"
+      ]
+    },
+    {
+      "record": "D08#0",
+      "claim_id": "c2",
+      "phrases": [
+        "explanation",
+        "supplied evidence",
+        "The assessment checked"
+      ]
+    },
+    {
+      "record": "D09#0",
+      "claim_id": "c1",
+      "phrases": [
+        "code"
+      ]
+    },
+    {
+      "record": "D09#0",
+      "claim_id": "c2",
+      "phrases": [
+        "code"
+      ]
+    },
+    {
+      "record": "D09#0",
+      "claim_id": "c3",
+      "phrases": [
+        "code",
+        "matched",
+        "supplied evidence",
+        "excerpts"
+      ]
+    },
+    {
+      "record": "D10#0",
+      "claim_id": "c3",
+      "phrases": [
+        "code’s",
+        "matching",
+        "the cited",
+        "The code’s assessment"
+      ]
+    },
+    {
+      "record": "D10#0",
+      "claim_id": "c4",
+      "phrases": [
+        "code",
+        "its assessment",
+        "the assessment of these obligations"
+      ]
+    },
+    {
+      "record": "D10#0",
+      "claim_id": "c5",
+      "phrases": [
+        "code",
+        "its assessment",
+        "the assessment of these obligations"
+      ]
+    },
+    {
+      "record": "D11#0",
+      "claim_id": "c2",
+      "phrases": [
+        "code",
+        "recorded",
+        "matching"
+      ]
+    },
+    {
+      "record": "D11#0",
+      "claim_id": "c3",
+      "phrases": [
+        "code",
+        "its assessment",
+        "matters to assessing"
+      ]
+    },
+    {
+      "record": "D12#0",
+      "claim_id": "c1",
+      "phrases": [
+        "code"
+      ]
+    },
+    {
+      "record": "D12#0",
+      "claim_id": "c2",
+      "phrases": [
+        "code"
+      ]
+    },
+    {
+      "record": "D14#0",
+      "claim_id": "c1",
+      "phrases": [
+        "code"
+      ]
+    },
+    {
+      "record": "D14#0",
+      "claim_id": "c2",
+      "phrases": [
+        "code",
+        "recorded",
+        "matched"
+      ]
+    },
+    {
+      "record": "D14#0",
+      "claim_id": "c3",
+      "phrases": [
+        "supplied evidence",
+        "excerpts",
+        "by citation",
+        "The assessment checked"
+      ]
+    },
+    {
+      "record": "D16#0",
+      "claim_id": "c1",
+      "phrases": [
+        "code"
+      ]
+    },
+    {
+      "record": "D16#0",
+      "claim_id": "c2",
+      "phrases": [
+        "code’s",
+        "explanation",
+        "records",
+        "separate assessment"
+      ]
+    },
+    {
+      "record": "D16#0",
+      "claim_id": "c3",
+      "phrases": [
+        "code’s",
+        "supplied evidence",
+        "excerpts",
+        "practice assessment"
+      ]
+    },
+    {
+      "record": "D17#0",
+      "claim_id": "c1",
+      "phrases": [
+        "code",
+        "recorded"
+      ]
+    },
+    {
+      "record": "D17#0",
+      "claim_id": "c2",
+      "phrases": [
+        "code",
+        "recorded",
+        "matching",
+        "supplied evidence",
+        "excerpts"
+      ]
+    },
+    {
+      "record": "D18#0",
+      "claim_id": "c1",
+      "phrases": [
+        "code"
+      ]
+    },
+    {
+      "record": "D18#0",
+      "claim_id": "c2",
+      "phrases": [
+        "code",
+        "records",
+        "match"
+      ]
+    },
+    {
+      "record": "D18#0",
+      "claim_id": "c3",
+      "phrases": [
+        "code",
+        "records",
+        "matched",
+        "supplied evidence",
+        "excerpts"
+      ]
+    },
+    {
+      "record": "D18#0",
+      "claim_id": "c4",
+      "phrases": [
+        "code"
+      ]
+    },
+    {
+      "record": "D18#0",
+      "claim_id": "c5",
+      "phrases": [
+        "code's",
+        "explanation"
+      ]
+    },
+    {
+      "record": "D19#0",
+      "claim_id": "c1",
+      "phrases": [
+        "code"
+      ]
+    },
+    {
+      "record": "D19#0",
+      "claim_id": "c2",
+      "phrases": [
+        "code",
+        "explanation",
+        "records",
+        "matched",
+        "supplied evidence",
+        "excerpts"
+      ]
+    },
+    {
+      "record": "D21#0",
+      "claim_id": "c1",
+      "phrases": [
+        "code",
+        "explanation"
+      ]
+    },
+    {
+      "record": "D21#0",
+      "claim_id": "c2",
+      "phrases": [
+        "code"
+      ]
+    },
+    {
+      "record": "D21#0",
+      "claim_id": "c3",
+      "phrases": [
+        "code"
+      ]
+    },
+    {
+      "record": "D23#0",
+      "claim_id": "c1",
+      "phrases": [
+        "code"
+      ]
+    },
+    {
+      "record": "D23#0",
+      "claim_id": "c2",
+      "phrases": [
+        "code"
+      ]
+    },
+    {
+      "record": "D24#0",
+      "claim_id": "c1",
+      "phrases": [
+        "code"
+      ]
+    },
+    {
+      "record": "D24#0",
+      "claim_id": "c2",
+      "phrases": [
+        "code's",
+        "explanation",
+        "records",
+        "matching"
+      ]
+    },
+    {
+      "record": "D25#0",
+      "claim_id": "c1",
+      "phrases": [
+        "code"
+      ]
+    },
+    {
+      "record": "D25#0",
+      "claim_id": "c2",
+      "phrases": [
+        "code",
+        "match"
+      ]
+    },
+    {
+      "record": "D26#0",
+      "claim_id": "c1",
+      "phrases": [
+        "code"
+      ]
+    },
+    {
+      "record": "D26#0",
+      "claim_id": "c2",
+      "phrases": [
+        "code"
+      ]
+    },
+    {
+      "record": "D26#0",
+      "claim_id": "c3",
+      "phrases": [
+        "code"
+      ]
+    },
+    {
+      "record": "D29#0",
+      "claim_id": "c1",
+      "phrases": [
+        "code"
+      ]
+    },
+    {
+      "record": "D29#0",
+      "claim_id": "c2",
+      "phrases": [
+        "code’s",
+        "supplied evidence",
+        "excerpts",
+        "The code’s assessment"
+      ]
+    },
+    {
+      "record": "D30#0",
+      "claim_id": "c1",
+      "phrases": [
+        "code"
+      ]
+    },
+    {
+      "record": "D30#0",
+      "claim_id": "c8",
+      "phrases": [
+        "code"
+      ]
+    },
+    {
+      "record": "D32#0",
+      "claim_id": "c6",
+      "phrases": [
+        "code",
+        "obligation assessment"
+      ]
+    },
+    {
+      "record": "D32#0",
+      "claim_id": "c7",
+      "phrases": [
+        "code",
+        "obligation assessment"
+      ]
+    },
+    {
+      "record": "D33#0",
+      "claim_id": "c1",
+      "phrases": [
+        "code"
+      ]
+    },
+    {
+      "record": "D33#0",
+      "claim_id": "c6",
+      "phrases": [
+        "code"
+      ]
+    },
+    {
+      "record": "D33#0",
+      "claim_id": "c7",
+      "phrases": [
+        "code"
+      ]
+    },
+    {
+      "record": "D34#0",
+      "claim_id": "c1",
+      "phrases": [
+        "code"
+      ]
+    },
+    {
+      "record": "D34#0",
+      "claim_id": "c2",
+      "phrases": [
+        "code",
+        "its assessment"
+      ]
+    },
+    {
+      "record": "D37#0",
+      "claim_id": "c1",
+      "phrases": [
+        "code",
+        "code"
+      ]
+    },
+    {
+      "record": "D37#0",
+      "claim_id": "c2",
+      "phrases": [
+        "code",
+        "records",
+        "matching",
+        "supplied evidence",
+        "excerpts",
+        "practice assessment"
+      ]
+    },
+    {
+      "record": "D39#0",
+      "claim_id": "c1",
+      "phrases": [
+        "code"
+      ]
+    },
+    {
+      "record": "D39#0",
+      "claim_id": "c2",
+      "phrases": [
+        "code",
+        "code",
+        "records",
+        "records"
+      ]
+    },
+    {
+      "record": "D39#0",
+      "claim_id": "c4",
+      "phrases": [
+        "code's",
+        "the code's assessment"
+      ]
+    },
+    {
+      "record": "D40#0",
+      "claim_id": "c1",
+      "phrases": [
+        "code"
+      ]
+    },
+    {
+      "record": "D40#0",
+      "claim_id": "c2",
+      "phrases": [
+        "code’s",
+        "separate assessment"
+      ]
+    },
+    {
+      "record": "D40#0",
+      "claim_id": "c3",
+      "phrases": [
+        "code"
+      ]
+    },
+    {
+      "record": "D41#0",
+      "claim_id": "c20",
+      "phrases": [
+        "code",
+        "the cited",
+        "its assessment"
+      ]
+    },
+    {
+      "record": "D41#0",
+      "claim_id": "c21",
+      "phrases": [
+        "code",
+        "the cited",
+        "its assessment"
+      ]
+    }
+  ]
+}

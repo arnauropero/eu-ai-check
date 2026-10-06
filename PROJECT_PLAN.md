@@ -334,11 +334,53 @@ one rule-matching engine → cited, fail-closed output.
 **Phase 4 — Generation and citation**
 - Deliverable: final generation stage producing tier + obligations + explanation +
   citations from the evidence set.
+- Design approved 2026-10-06 (`docs/phase4_design.md`; SYSTEM_SPEC.md §16.1–16.3, §18):
+  - Deliverable: a deterministic adapter from the replayed Phase 3 `Determination`
+    to the §16 contract (`GenerationInput`).
+  - Deliverable: a claims-first generator (strict JSON). Code renders the status
+    lines and citations. Model: `gpt-6.1-sol` at `low`, configurable.
+  - Deliverable: a template-only renderer (no LLM). It is the baseline and the
+    fallback.
+  - Deliverable: deterministic checks C0–C8 and an `eu-ai-check eval-generation`
+    harness.
+  - Developed on cached determinations only, with no pipeline re-run. The dev /
+    held-out split is frozen in `data/eval/generation_split.json`.
 - Acceptance: every claim in generated output traceable to a specific
   `versioned_provision_id`; no obligation stated without a citation.
+  **Pre-registered 2026-10-06, before any Phase 4 API call (SYSTEM_SPEC.md §18):**
+  - Every shipped answer passes checks C0–C8 (1.00).
+  - The input status is reproduced in 100% of held-out records whose determination
+    differs from gold.
+  - The LLM generator is adopted over the template only if, on the held-out set:
+    - it reaches a raw first-attempt pass rate ≥ 0.95;
+    - fallback is ≤ 0.05;
+    - there are zero status-changing (C4) and zero `not_in_force`-as-`not_applicable`
+      (C8) violations;
+    - grounded-explanation coverage is ≥ 0.90;
+    - it is preferred in ≥ 15/20 blind pairwise comparisons with the template
+      (frozen rating sample, sealed A/B key; ties go to the template).
+    Otherwise the template ships as the Phase 4 generator.
+  - Hard rule: the held-out pass runs exactly once, and nothing changes after it
+    has been looked at.
+  - Spend cap: $5 for all Phase 4 API calls, with held-out reserved first.
+  - H01–H08 are not used in Phase 4. They are reserved for Phase 5.
+- **Status (2026-10-06): complete, acceptance met, LLM generator adopted.**
+  - *Dev.* Two dev prompt iterations. v2 was frozen before the held-out pass.
+  - *Held-out pass (once, 39 records).* Raw pass 1.00, fallback 0.00, 0 truncated,
+    0 C4/C8, coverage 1.00, status reproduced 15/15, 0 API errors.
+  - *Pairwise.* LLM-rated (Claude), a documented deviation from the human rater:
+    17/20 (17/18 informative), 0 template wins, 3 ties. Human validation agreed on
+    6/6 pairs (reported only).
+  - *Spend.* $1.6931 of $5.
+  - *Limitations.* LLM rater; a 6-pair validation; partial blinding; high-risk
+    obligations still listed when a prohibited practice applies (both arms);
+    minor Art. 6(3) imprecision (R04, R07). See SYSTEM_SPEC.md §18.
 
 **Phase 5 — End-to-end evaluation and polish**
 - Deliverable: end-to-end eval set with full expected outputs.
+- Deliverable: a pre-registered comparison of generation models (`gpt-6.1-sol` vs
+  cheaper models). It uses the Phase 4 checks and decision rule, and is not decided
+  in Phase 4.
 - Deliverable: README documenting architecture, rejected alternatives, and known
   limitations (including the Digital Omnibus amendment to Article 5 as a live
   versioning example).
