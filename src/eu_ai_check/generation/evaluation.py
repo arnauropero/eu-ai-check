@@ -3,8 +3,11 @@
 Pre-registration 33cf62c (SYSTEM_SPEC.md §18) governs everything here:
 - the held-out pass runs exactly once. A marker is written before its first call,
   so even a crashed pass cannot be re-run;
-- API failures in the held-out pass count as failures and are not retried. The
-  answer falls back to the template and the record is not counted as a raw pass;
+- API-failure policy (§18 note, 2026-10-06, before any held-out call): transient
+  errors (connection failures, timeouts, HTTP 5xx) are retried up to 3 times, every
+  attempt guarded, billed and recorded by the spend tracker. A call that still fails
+  counts as a failure: the answer falls back to the template and the record is not a
+  raw pass. Content failures (any C0-C8 failure) are never retried;
 - held-out output is written to its runs file (the rating sheet needs it), but only
   counts are printed;
 - the adoption rule reads hygiene, coverage and (later) the pairwise rating.
@@ -14,6 +17,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import time
 from collections import Counter
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -68,6 +72,9 @@ class ItemResult:
     output_tokens: int = 0
     reasoning_tokens: int | None = None
     finish_reason: str | None = None
+    #: Transient-error retries made for this record (each one guarded and in the ledger).
+    retries: int = 0
+    retry_cost_usd: float = 0.0
     #: C4/C8 matched phrases with their claims (reported only, §18 amendment).
     c4_diagnostics: list[dict] = field(default_factory=list)
     raw: str | None = None
@@ -89,25 +96,57 @@ def _audit(result) -> dict[str, Any]:
             "usage_raw": getattr(result, "usage_raw", None)}
 
 
+#: Retries after the first attempt, for transient errors only (§18 API-failure policy).
+MAX_TRANSIENT_RETRIES = 3
+RETRY_DELAYS_S = (2.0, 8.0, 30.0)
+
+
+def is_transient(exc: BaseException) -> bool:
+    """Connection failures, timeouts and HTTP 5xx. Everything else (4xx including
+    429, schema or content problems) is not retried."""
+    import openai
+
+    if isinstance(exc, (openai.APIConnectionError, openai.APITimeoutError)):
+        return True
+    status = getattr(exc, "status_code", None)
+    return isinstance(status, int) and status >= 500
+
+
 def evaluate_item(item: Item, generator: OpenAIGenerator, tracker: SpendTracker,
                   phase: str, texts: dict[str, str]) -> ItemResult:
-    """One call, checked. BudgetExceeded propagates: it is a hard abort."""
+    """One record, checked. Transient API errors are retried (each attempt guarded
+    and recorded); content is never retried. BudgetExceeded propagates: hard abort."""
     inp = item.input
     out = ItemResult(item.ref, item.gold_differs, item.synthetic)
-    tracker.guard(phase, request_chars(inp), generator.max_output_tokens)
     answer = None
-    try:
-        result = generator.generate(inp)
-    except Exception as exc:  # transport / API error: recorded, counted as a failure
-        out.api_error = f"{type(exc).__name__}: {str(exc)[:160]}"
-        tracker.record(phase, item.ref, generator.model, 0, 0, error=out.api_error,
-                       **_audit(None))
+    result = None
+    for attempt in range(1 + MAX_TRANSIENT_RETRIES):
+        tracker.guard(phase, request_chars(inp), generator.max_output_tokens)
+        try:
+            result = generator.generate(inp)
+        except Exception as exc:  # transport / API error: recorded
+            out.api_error = f"{type(exc).__name__}: {str(exc)[:160]}"
+            tracker.record(phase, item.ref, generator.model, 0, 0, error=out.api_error,
+                           attempt=attempt + 1, transient=is_transient(exc), **_audit(None))
+            if is_transient(exc) and attempt < MAX_TRANSIENT_RETRIES:
+                out.retries += 1
+                time.sleep(RETRY_DELAYS_S[attempt])
+                continue
+            result = None
+            break
+        else:
+            out.api_error = None
+            entry = tracker.record(phase, item.ref, result.served_model or generator.model,
+                                   result.input_tokens, result.output_tokens,
+                                   error=result.error, finish_reason=result.finish_reason,
+                                   reasoning_tokens=result.reasoning_tokens,
+                                   attempt=attempt + 1, **_audit(result))
+            if attempt:
+                out.retry_cost_usd += entry["cost_usd"]
+            break
+    if result is None:
         raw_report = None
     else:
-        tracker.record(phase, item.ref, result.served_model or generator.model,
-                       result.input_tokens, result.output_tokens, error=result.error,
-                       finish_reason=result.finish_reason,
-                       reasoning_tokens=result.reasoning_tokens, **_audit(result))
         out.input_tokens, out.output_tokens = result.input_tokens, result.output_tokens
         out.reasoning_tokens, out.finish_reason = result.reasoning_tokens, result.finish_reason
         out.raw, out.generation_error, answer = result.raw, result.error, result.answer
@@ -154,6 +193,8 @@ def summarise(results: list[ItemResult]) -> dict[str, Any]:
     return {
         "records": n,
         "api_errors": sum(r.api_error is not None for r in results),
+        "retries": sum(r.retries for r in results),
+        "retry_cost_usd": round(sum(r.retry_cost_usd for r in results), 6),
         "raw_pass_rate": rate([r.raw_passed for r in results]),
         "fallback_rate": rate([r.fallback for r in results]),
         "raw_failed_by_check": failed_by_check,
@@ -316,7 +357,7 @@ def run_heldout(generator: OpenAIGenerator, tracker: SpendTracker, inputs: Input
 
 
 def counts_only(summary: dict[str, Any]) -> str:
-    keep = ("records", "api_errors", "raw_pass_rate", "fallback_rate", "raw_failed_by_check",
+    keep = ("records", "api_errors", "retries", "retry_cost_usd", "raw_pass_rate", "fallback_rate", "raw_failed_by_check",
             "finish_reasons", "truncated", "content_failures", "c4_c8_diagnostic_hits",
             "c4_violations", "c8_violations", "shipped_pass_rate",
             "grounded_explanation_coverage", "faithful_reproduction_rate", "spent_usd",

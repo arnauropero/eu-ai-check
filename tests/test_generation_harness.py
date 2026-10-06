@@ -203,3 +203,84 @@ def test_amended_reserve_matches_the_tracker(inputs) -> None:
     assert "$2.3963 under the unchanged reserve rule" in text
     assert round(t.heldout_worst_case, 4) == 2.3963
     assert round(t.dev_budget_left(), 2) == 2.60
+
+
+# --------------------------------------------------------------------------
+# API-failure policy (§18 note, 2026-10-06, before any held-out call)
+# --------------------------------------------------------------------------
+
+class Status503(Exception):
+    status_code = 503
+
+
+class Status429(Exception):
+    status_code = 429
+
+
+class FlakyGenerator(FakeGenerator):
+    """Raises `errors` in order, then answers like FakeGenerator."""
+
+    def __init__(self, errors):
+        super().__init__()
+        self.errors = list(errors)
+
+    def generate(self, inp):
+        if self.errors:
+            self.calls += 1
+            raise self.errors.pop(0)
+        return super().generate(inp)
+
+
+def _one(inputs):
+    return inputs.side("dev", repeats=(0,), synthetic=False)[0]
+
+
+def test_transient_errors_are_retried_and_every_attempt_is_recorded(tmp_path, inputs,
+                                                                   monkeypatch) -> None:
+    import httpx
+    import openai
+
+    monkeypatch.setattr(ev, "RETRY_DELAYS_S", (0, 0, 0))
+    t = tracker(tmp_path, inputs)
+    conn = openai.APIConnectionError(request=httpx.Request("POST", "https://x"))
+    gen = FlakyGenerator([Status503(), conn])
+    r = ev.evaluate_item(_one(inputs), gen, t, "heldout", inputs.corpus_texts())
+    assert (r.retries, r.api_error, r.raw_passed, gen.calls) == (2, None, True, 3)
+    assert [e["attempt"] for e in t.entries] == [1, 2, 3]
+    assert [e.get("transient") for e in t.entries[:2]] == [True, True]
+    assert r.retry_cost_usd == t.entries[-1]["cost_usd"]
+
+
+def test_a_call_still_failing_after_three_retries_is_a_failure(tmp_path, inputs,
+                                                              monkeypatch) -> None:
+    monkeypatch.setattr(ev, "RETRY_DELAYS_S", (0, 0, 0))
+    t = tracker(tmp_path, inputs)
+    gen = FlakyGenerator([Status503()] * 5)
+    r = ev.evaluate_item(_one(inputs), gen, t, "heldout", inputs.corpus_texts())
+    assert (r.retries, gen.calls, len(t.entries)) == (3, 4, 4)
+    assert r.api_error and r.fallback and not r.raw_passed and r.shipped_passed
+
+
+def test_non_transient_errors_and_content_failures_are_not_retried(tmp_path, inputs,
+                                                                   monkeypatch) -> None:
+    monkeypatch.setattr(ev, "RETRY_DELAYS_S", (0, 0, 0))
+    for err in (Status429(), ValueError("bad request")):
+        t = tracker(tmp_path / type(err).__name__, inputs)
+        gen = FlakyGenerator([err])
+        r = ev.evaluate_item(_one(inputs), gen, t, "heldout", inputs.corpus_texts())
+        assert (r.retries, gen.calls, r.fallback) == (0, 1, True)
+    t = tracker(tmp_path / "content", inputs)
+    gen = FakeGenerator("contradict")
+    r = ev.evaluate_item(_one(inputs), gen, t, "heldout", inputs.corpus_texts())
+    assert (r.retries, gen.calls, r.raw_passed) == (0, 1, False)
+
+
+def test_the_real_client_has_no_hidden_sdk_retries(monkeypatch) -> None:
+    import openai
+
+    from eu_ai_check.generation.generator import OpenAIGenerator
+
+    seen = {}
+    monkeypatch.setattr(openai, "OpenAI", lambda **kw: seen.update(kw) or object())
+    OpenAIGenerator(model="m")
+    assert seen == {"max_retries": 0}

@@ -2391,6 +2391,25 @@ It is binding. As with Phase 3, a miss is reported as a miss and is not retuned.
   0 truncated, 0 C4/C8, and a system-language rate of 0/205. Phase 4 spend before the
   held-out pass is $1.0114.
 
+- **[Note, 2026-10-06, before any held-out call and before any held-out result
+  exists] API-failure policy for the held-out pass.** The user decided this before
+  looking at any held-out result, as the hard rule above allows ("unless the user
+  decides otherwise before the results are looked at"). The pre-registration is not
+  edited.
+  - *Transient errors* (connection failures, timeouts, HTTP 5xx) are retried
+    automatically, up to 3 times per record. Each retry goes through the spend
+    tracker's guard, is billed from its own usage, and is recorded in the ledger with
+    its attempt number. A call that still fails after the retries counts as a
+    failure: the template ships for that record, and it is not a raw pass.
+  - *Not transient:* any other API error, including HTTP 429 and other 4xx, counts as
+    a failure at once.
+  - *Content failures* (any C0-C8 failure, including truncation and a refusal) are
+    never retried.
+  - *No hidden retries.* The OpenAI client is now built with `max_retries=0`, so every
+    retry is the harness's own and is counted. The dev passes used the SDK default
+    (2 hidden retries), and none of their 62 calls returned an error.
+  - The summaries report `retries` and `retry_cost_usd`.
+
 **End-to-end:**
 - Obligation correctness (right obligations, right roles, right union/dedup per §4.1)
 - Citation correctness (right `versioned_provision_id` per claim)
