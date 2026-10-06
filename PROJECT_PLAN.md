@@ -334,11 +334,38 @@ one rule-matching engine → cited, fail-closed output.
 **Phase 4 — Generation and citation**
 - Deliverable: final generation stage producing tier + obligations + explanation +
   citations from the evidence set.
+- Design approved 2026-10-06 (`docs/phase4_design.md`; SYSTEM_SPEC.md §16.1–16.3, §18):
+  - Deliverable: a deterministic adapter from the replayed Phase 3 `Determination`
+    to the §16 contract (`GenerationInput`).
+  - Deliverable: a claims-first generator (strict JSON). Code renders the status
+    lines and citations. Model: `gpt-6.1-sol` at `low`, configurable.
+  - Deliverable: a template-only renderer (no LLM). It is the baseline and the
+    fallback.
+  - Deliverable: deterministic checks C0–C8 and an `eu-ai-check eval-generation`
+    harness.
+  - Developed on cached determinations only, with no pipeline re-run. The dev /
+    held-out split is frozen in `data/eval/generation_split.json`.
 - Acceptance: every claim in generated output traceable to a specific
   `versioned_provision_id`; no obligation stated without a citation.
+  **PROPOSED replacement, to be pre-registered before the first generator call
+  (SYSTEM_SPEC.md §18):**
+  - Every shipped answer passes checks C0–C8 (1.00).
+  - The input status is reproduced in 100% of held-out records whose determination
+    differs from gold.
+  - The LLM generator is adopted over the template only if, on the held-out set:
+    - it reaches a raw first-attempt pass rate ≥ 0.95;
+    - fallback is ≤ 0.05;
+    - there are zero status-changing (C4) and zero `not_in_force`-as-`not_applicable`
+      (C8) violations;
+    - grounded-explanation coverage is ≥ 0.90;
+    - it is preferred in ≥ 15/20 blind pairwise comparisons with the template.
+  - Spend cap: $5 for all Phase 4 API calls.
 
 **Phase 5 — End-to-end evaluation and polish**
 - Deliverable: end-to-end eval set with full expected outputs.
+- Deliverable: a pre-registered comparison of generation models (`gpt-6.1-sol` vs
+  cheaper models). It uses the Phase 4 checks and decision rule, and is not decided
+  in Phase 4.
 - Deliverable: README documenting architecture, rejected alternatives, and known
   limitations (including the Digital Omnibus amendment to Article 5 as a live
   versioning example).
