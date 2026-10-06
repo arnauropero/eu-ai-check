@@ -145,7 +145,9 @@ class OpenAIGenerator:
         if client is None:
             import openai
 
-            client = openai.OpenAI()
+            # No hidden SDK retries: every retry goes through the harness, which
+            # guards, bills and records it (§18 API-failure policy).
+            client = openai.OpenAI(max_retries=0)
         self.client = client
         self.model = model
         self.effort = effort
