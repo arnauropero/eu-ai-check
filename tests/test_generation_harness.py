@@ -180,3 +180,16 @@ def test_c4_failures_record_phrase_and_claim(tmp_path, inputs) -> None:
     assert all(d["claim_text"] == "This could not be determined and is not applicable."
                for d in diags if d["kind"] == "claim_lexicon")
     assert s["c4_c8_diagnostic_hits"] == {"C4:NOT_APPLICABLE_LEX": 1}
+
+
+def test_amended_reserve_matches_the_tracker(inputs) -> None:
+    """The 2026-10-06 amendment's numbers are what the tracker computes."""
+    from pathlib import Path
+
+    from eu_ai_check.generation.generator import MAX_OUTPUT_TOKENS
+    text = Path("SYSTEM_SPEC.md").read_text(encoding="utf-8")
+    assert "`max_output_tokens` = 5,000 per call" in text and MAX_OUTPUT_TOKENS == 5000
+    assert "**That gives $2.3875.**" in text
+    t = ev.make_tracker(inputs, MAX_OUTPUT_TOKENS, ledger=Path("does-not-exist.jsonl"))
+    assert round(t.heldout_worst_case, 4) == 2.3875
+    assert round(t.dev_budget_left(), 2) == 2.61

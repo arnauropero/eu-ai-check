@@ -2303,6 +2303,42 @@ It is binding. As with Phase 3, a miss is reported as a miss and is not retuned.
   correct as the Phase 3 determination behind it, and Phase 3 acceptance was NOT MET
   (above).
 
+- **[Amendment, 2026-10-06, before any Phase 4 API call] Output cap, tighter held-out
+  reserve, smoke input, diagnostics.** This adds to the pre-registration above and edits
+  none of it. The $5 total cap is unchanged.
+  - *Output cap: `max_output_tokens` = 5,000 per call.* OpenAI's reasoning guide states
+    that this limit covers reasoning tokens, visible output and formatting tokens
+    together. Reasoning tokens are billed as output. A call that hits the limit returns
+    `status: incomplete` with reason `max_output_tokens`, and it is still billed. OpenAI
+    recommends reserving at least 25,000 tokens when experimenting. That is not
+    followed: at 25,000 the held-out worst case (~$10) would exceed the $5 cap.
+  - *How truncation is handled.* A truncated answer fails C0, so the template ships, and
+    it counts against the raw pass rate and the fallback rate like any other failure.
+    It is reported separately: every call's finish reason and reasoning tokens go to
+    the ledger, and summaries count `truncated` apart from `content_failures`. The
+    held-out pass does not retry.
+  - *Held-out reserve, tightened.* The pre-registered reserve was $1.95 (39 × the $0.05
+    planning price). It is now the largest of $1.95, 39 × the dearest call observed,
+    and the held-out pass's worst case. The worst case is computed from the real
+    held-out request sizes: input at ⌈characters / 3⌉ tokens × $2 per million, plus
+    5,000 output tokens × $10 per million, per call. **That gives $2.3875.** Before
+    any call, the reserve is therefore $2.39 and the dev budget is $2.61, smoke test
+    included. The plan had $2.60 for dev and $0.05 for smoke. The held-out pass also
+    refuses to start unless its whole worst case fits under the cap.
+  - *Smoke test.* It runs on the real dev record with the most determinations and the
+    largest request: D41#1, with 6 determinations, 40,371 characters and a $0.077
+    worst case. The planned made-up input is not used. The smoke test counts against
+    the dev budget.
+  - *C4/C8 diagnostics, reported only.* Every C4/C8 hit records the lexicon, the exact
+    matched phrase and the claim text, so false positives can be told apart from real
+    contradictions after the held-out run. The word lists are unchanged (pinned SHA
+    `11ac0cf8…`), and no pass rate changes.
+  - *Missing-information rule, unchanged.* The rule lists a question only if flipping
+    it alone changes the outcome. Under it, 0 of the 125 unresolved determinations get
+    an empty list (83 dev, 42 held-out, 0 synthetic). The rule leaves out 110
+    unanswered risk-tier questions (86 dev, 24 held-out) that decide nothing on their
+    own.
+
 **End-to-end:**
 - Obligation correctness (right obligations, right roles, right union/dedup per §4.1)
 - Citation correctness (right `versioned_provision_id` per claim)
