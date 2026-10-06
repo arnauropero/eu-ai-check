@@ -21,7 +21,14 @@ from typing import Any
 
 from .adapter import GenerationInput
 from .checks import CHECKS, coverage_counts, run_checks
-from .generator import SYSTEM_PROMPT, OpenAIGenerator, prompt_sha, user_message
+from .generator import (
+    PROMPT_HISTORY,
+    PROMPT_VERSION,
+    SYSTEM_PROMPT,
+    OpenAIGenerator,
+    prompt_sha,
+    user_message,
+)
 from .inputs import Inputs, Item
 from .render import render
 from .spend import BudgetExceeded, SpendTracker
@@ -70,6 +77,15 @@ def request_chars(inp: GenerationInput) -> int:
     return len(SYSTEM_PROMPT) + len(user_message(inp))
 
 
+def _audit(result) -> dict[str, Any]:
+    """What the ledger keeps per call besides spend (prompt versioning, raw usage)."""
+    return {"prompt_version": PROMPT_VERSION, "prompt_sha": prompt_sha(),
+            "prompt_note": PROMPT_HISTORY[PROMPT_VERSION],
+            "request_sha": getattr(result, "request_sha", None),
+            "response_id": getattr(result, "response_id", None),
+            "usage_raw": getattr(result, "usage_raw", None)}
+
+
 def evaluate_item(item: Item, generator: OpenAIGenerator, tracker: SpendTracker,
                   phase: str, texts: dict[str, str]) -> ItemResult:
     """One call, checked. BudgetExceeded propagates: it is a hard abort."""
@@ -81,13 +97,14 @@ def evaluate_item(item: Item, generator: OpenAIGenerator, tracker: SpendTracker,
         result = generator.generate(inp)
     except Exception as exc:  # transport / API error: recorded, counted as a failure
         out.api_error = f"{type(exc).__name__}: {str(exc)[:160]}"
-        tracker.record(phase, item.ref, generator.model, 0, 0, error=out.api_error)
+        tracker.record(phase, item.ref, generator.model, 0, 0, error=out.api_error,
+                       **_audit(None))
         raw_report = None
     else:
         tracker.record(phase, item.ref, result.served_model or generator.model,
                        result.input_tokens, result.output_tokens, error=result.error,
                        finish_reason=result.finish_reason,
-                       reasoning_tokens=result.reasoning_tokens)
+                       reasoning_tokens=result.reasoning_tokens, **_audit(result))
         out.input_tokens, out.output_tokens = result.input_tokens, result.output_tokens
         out.reasoning_tokens, out.finish_reason = result.reasoning_tokens, result.finish_reason
         out.raw, out.generation_error, answer = result.raw, result.error, result.answer
@@ -193,6 +210,7 @@ def _meta(generator: OpenAIGenerator, inputs: Inputs) -> dict[str, Any]:
                                .encode("utf-8")).hexdigest()
     return {"model": generator.model, "effort": generator.effort,
             "max_output_tokens": generator.max_output_tokens, "prompt_sha": prompt_sha(),
+            "prompt_version": PROMPT_VERSION, "prompt_note": PROMPT_HISTORY[PROMPT_VERSION],
             "split_content_sha256": split_sha}
 
 

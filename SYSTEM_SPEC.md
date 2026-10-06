@@ -2350,6 +2350,17 @@ It is binding. As with Phase 3, a miss is reported as a miss and is not retuned.
   frozen by record (class, held-out record, sample id), not by output text, so it is
   unaffected; both texts of every pair are rendered by the current renderer.
 
+- **[Note, 2026-10-06, after the smoke test, before any dev call] Input wording in
+  plain words.** This note edits neither the pre-registration nor the amendment. The
+  obligation, role and not-in-force `explanation` strings no longer carry internal ids
+  or Python `None` ("aiact:art_16: rule outcomes None" becomes "Article 16: rule
+  outcomes: undetermined; depends on: the provider role, the risk tier"). They are
+  input to the LLM arm only; the template does not print them. The held-out worst case
+  moves from $2.3875 to $2.3885 under the unchanged reserve rule, which can only make
+  the reserve stricter. From prompt v1 on, every call's ledger line records the prompt
+  version, its SHA and a one-line note, the SHA of the exact request, the response id
+  and the raw usage object.
+
 **End-to-end:**
 - Obligation correctness (right obligations, right roles, right union/dedup per §4.1)
 - Citation correctness (right `versioned_provision_id` per claim)

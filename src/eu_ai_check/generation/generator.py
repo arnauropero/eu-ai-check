@@ -75,10 +75,27 @@ cites an obligation provision of that determination.
 """
 
 
+#: Every prompt change in dev gets a label and a one-line note (what and why). The
+#: ledger records the label, `prompt_sha()` and the note with every call, plus the
+#: SHA of the exact request sent. v0 was used only for the smoke test (its ledger
+#: line predates these fields).
+PROMPT_VERSION = "v1"
+PROMPT_HISTORY = {
+    "v0": "pre-registered system prompt and schema (33cf62c); smoke test only",
+    "v1": "system prompt and schema unchanged from v0; adapter explanations reworded "
+          "without internal ids or None (smoke showed them echoed as 'The code identifies')",
+}
+
+
 def prompt_sha() -> str:
     payload = json.dumps({"system": SYSTEM_PROMPT, "schema": response_schema()},
                          sort_keys=True)
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def request_sha(request: dict[str, Any]) -> str:
+    return hashlib.sha256(json.dumps(request, sort_keys=True, ensure_ascii=False)
+                          .encode("utf-8")).hexdigest()
 
 
 def user_message(inp: GenerationInput) -> str:
@@ -97,6 +114,10 @@ class GenerationResult:
     #: "completed" | "incomplete:<reason>" (e.g. incomplete:max_output_tokens) |
     #: "refusal" | "status:<status>". Truncation is reported apart from bad content.
     finish_reason: str | None = None
+    response_id: str | None = None
+    #: The API's usage object as returned (model_dump), for auditing token fields.
+    usage_raw: dict | None = None
+    request_sha: str | None = None
 
 
 class OpenAIGenerator:
@@ -135,15 +156,20 @@ class OpenAIGenerator:
     def generate(self, inp: GenerationInput) -> GenerationResult:
         from ..extraction.openai_extractor import _message_content
 
-        response = self.client.responses.create(**self.request(inp))
+        request = self.request(inp)
+        response = self.client.responses.create(**request)
         usage = getattr(response, "usage", None)
         details = getattr(usage, "output_tokens_details", None)
+        dump = getattr(usage, "model_dump", None)
         result = GenerationResult(
             answer=None, raw=None, error=None,
             served_model=getattr(response, "model", None),
             input_tokens=getattr(usage, "input_tokens", 0) or 0,
             output_tokens=getattr(usage, "output_tokens", 0) or 0,
             reasoning_tokens=getattr(details, "reasoning_tokens", None),
+            response_id=getattr(response, "id", None),
+            usage_raw=dump() if callable(dump) else None,
+            request_sha=request_sha(request),
         )
         refusal, text = _message_content(response)
         status = getattr(response, "status", None)

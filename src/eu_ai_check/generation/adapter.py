@@ -62,6 +62,16 @@ TRANSFER_FACTS = ("puts_own_name_or_trademark", "modifies_intended_purpose",
                   "modifies_safety_relevant_components")
 
 
+#: Plain wording of a rule outcome in an obligation `explanation` (no internal ids).
+OUTCOME_WORDS = {
+    APPLICABLE: "conditions met",
+    NA_CONDITIONS: "conditions not met",
+    False: "conditions not met",
+    NA_NOT_YET: "conditions met (later start date)",
+    None: "undetermined",
+}
+
+
 class AdapterError(ValueError):
     """The record cannot be mapped without choosing something the data does not say."""
 
@@ -371,6 +381,10 @@ def _fact_question(name: str) -> str:
     return description.split(" null ")[0].strip()
 
 
+def _tri(value: bool | None) -> str:
+    return {True: "yes", False: "no", None: "undetermined"}[value]
+
+
 def _roles(det: PipelineDetermination, facts: CaseFacts, b: _Builder) -> list[Determination]:
     out = []
     roles = det.roles
@@ -403,8 +417,8 @@ def _roles(det: PipelineDetermination, facts: CaseFacts, b: _Builder) -> list[De
             if not missing:
                 raise AdapterError(f"{role} unresolved but no missing input found")
         explanation = (
-            f"{role}: {'yes' if value else 'no' if value is False else 'undetermined'}"
-            + (f"; substantial modification: {roles.substantial_modification}"
+            f"{role}: {_tri(value)}"
+            + (f"; substantial modification: {_tri(roles.substantial_modification)}"
                if role == "provider" else ""))
         out.append(Determination(did, ACTOR_ROLE, status, reason, explanation,
                                  tuple(evidence), tuple(missing)))
@@ -423,8 +437,9 @@ def _obligations(det: PipelineDetermination, b: _Builder) -> list[Determination]
         status, reason = split_status(group_status)
         pids = [s.logical_provision_id for s in statuses]
         if status == NOT_IN_FORCE:
+            article = group.rsplit("art_", 1)[1]
             out.append(Determination(did, OBLIGATION, status, None,
-                                     f"no {group} text was in force on the date",
+                                     f"no Article {article} text was in force on the date",
                                      in_force_from=b.in_force_from(pids)))
             continue
         with_text = status == APPLICABLE or reason == "not_yet_applicable"
@@ -456,8 +471,13 @@ def _obligations(det: PipelineDetermination, b: _Builder) -> list[Determination]
                       if o.outcome == NA_NOT_YET
                       for r in engine.rules[s.logical_provision_id] if r.rule_id == o.rule_id]
             applicable_from = min(starts)
-        outcomes = sorted({str(o.outcome) for s in statuses for o in s.rule_outcomes})
-        explanation = f"{group}: rule outcomes {', '.join(outcomes) or 'none'}"
+        outcomes = sorted({OUTCOME_WORDS[o.outcome] for s in statuses for o in s.rule_outcomes})
+        explanation = (f"Article {group.rsplit('art_', 1)[1]}: rule outcomes: "
+                       f"{', '.join(outcomes) or 'none'}")
+        if missing:
+            explanation += "; depends on: " + ", ".join(
+                "the risk tier" if m.ref == RISK_TIER else f"the {m.ref.split(':')[1]} role"
+                for m in missing)
         out.append(Determination(did, OBLIGATION, status, reason, explanation,
                                  tuple(evidence), tuple(missing),
                                  applicable_from=applicable_from))
