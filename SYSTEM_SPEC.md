@@ -2429,6 +2429,36 @@ It is binding. As with Phase 3, a miss is reported as a miss and is not retuned.
     and `data/eval/results/generation_ratings_validation.json` (the user's ratings).
     The A/B key is opened only by the scorer, after both rating files are complete.
 
+- **[Note, 2026-10-06, after rating] Rating outcome and adoption decision.** The
+  pre-registration is not edited. The scorer opened the A/B key only after both
+  rating files were committed (9d88c9f). The key matched its committed SHA-256
+  (`41231e32…01222`).
+  - *Pairwise, LLM-rated (Claude).* The model arm was preferred in **17/20** pairs
+    (17/18 informative pairs). The template arm was preferred in 0, and 3 were ties:
+    the 2 identical not_in_force pairs and 1 informative pair. Condition 3 (≥ 15/20,
+    ties to the template) **holds**. Counting ties for the model would give 20/20
+    (18/18), but the pre-registered rule does not count them. Faithfulness: model arm
+    20/20, template arm 20/20.
+  - *Decision.* All three conditions hold: hygiene (1.00 raw pass, 0.00 fallback,
+    0 C4, 0 C8), coverage (1.00) and pairwise (17/20). The **LLM generator (prompt
+    v2) is adopted** as the Phase 4 generator, and the template stays as the fallback.
+    Phase 4 acceptance is met (shipped pass rate 1.00, status reproduced 15/15).
+    Phase 4 spend is $1.6931 of the $5 cap.
+  - *Limitations.*
+    - (a) The rater is an LLM (Claude in the claude.ai chat), not the
+      pre-registered human rater. This is a documented deviation, and the result is
+      labelled LLM-rated.
+    - (b) Human validation covers only 6 pairs. Agreement was 6/6 on preference
+      and 6/6 on faithfulness. It is reported only and has no statistical value.
+    - (c) Blinding is partial. In every informative pair one arm is the template
+      and the other carries model claims, so the arm is easy to recognise.
+    - (d) As reported by the raters, when a prohibited practice applies, both arms
+      still list the high-risk obligations, and neither flags it. This comes from the
+      shared determinations and renderer, not from the generator.
+    - (e) As reported by the raters, some claims are slightly imprecise about the
+      Article 6(3) subparagraphs (R04, R07). This was judged within tolerance and
+      passed C0–C8.
+
 **End-to-end:**
 - Obligation correctness (right obligations, right roles, right union/dedup per §4.1)
 - Citation correctness (right `versioned_provision_id` per claim)
