@@ -350,6 +350,12 @@ and the template satisfies it.
   The user rates every pair (A / B / tie) and the faithfulness of both, and
   commits the ratings. Only then is the key opened, its hash checked and the result
   computed.
+- **[Note, 2026-10-06, before any held-out call] Two pairs tie by construction.** The
+  sample's 2 `not_in_force` pairs (R01 D38#2, R02 D38#1) carry no evidence at all, so
+  any model claim would fail C1/C2, and both arms render the identical code-written
+  text. They will tie, and ties go to the template, so the effective bar is 15 of the
+  18 informative pairs. The pre-registered rule (≥ 15/20) is unchanged. Scoring reports
+  both: `llm_wins_of_20` and `llm_wins_of_informative` (x/18).
 - **Limitation: blinding is partial.** The template contains no model sentences,
   only code-rendered status lines, lists and citations. The LLM answer adds
   explanatory prose. Stylistic differences can therefore reveal which side is which,

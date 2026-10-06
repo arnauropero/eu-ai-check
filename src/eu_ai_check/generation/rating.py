@@ -111,6 +111,18 @@ def score(*, sample_path: Path = SAMPLE, ratings_path: Path = RATINGS,
             template_wins += 1
         faithful[sides["A"]] += r["faithful_A"]
         faithful[sides["B"]] += r["faithful_B"]
+    # The not_in_force pairs carry no evidence, so both arms render the same text and
+    # they tie by construction. The pre-registered bar stays 15/20 (pairwise_ok); the
+    # same wins are also reported over the informative pairs only (design note).
+    identical = {s["sample_id"] for s in sample["samples"] if s["class"] == "not_in_force"}
+    informative_wins = sum(1 for sid in ids if sid not in identical
+                           and ratings[sid]["preference"] != "tie"
+                           and assignment[sid][ratings[sid]["preference"]] == "llm")
     return {"pairs": len(ids), "llm_wins": llm_wins, "template_wins": template_wins,
             "ties": ties, "pairwise_ok": llm_wins >= 15,
+            "llm_wins_of_20": f"{llm_wins}/{len(ids)}",
+            "informative_pairs": len(ids) - len(identical),
+            "llm_wins_of_informative": f"{informative_wins}/{len(ids) - len(identical)}",
+            "identical_pairs_rated_tie": sum(ratings[sid]["preference"] == "tie"
+                                             for sid in identical),
             "faithful_llm": faithful["llm"], "faithful_template": faithful["template"]}
