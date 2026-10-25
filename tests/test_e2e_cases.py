@@ -94,3 +94,27 @@ def test_plan_section_8_coverage_in_the_new_cases() -> None:
     # All four states across the 20 cases.
     seen = {e[c]["risk_tier"]["status"].split("/")[0] for c in e}
     assert seen == {"applicable", "not_applicable", "unresolved", "not_in_force"}
+
+
+RELATIVE_TIME = ("today", "now", "currently", "this year", "next month", "next year",
+                 "last month", "last year", "recently")
+
+
+@pytest.mark.parametrize("case", ALL, ids=lambda c: c["id"])
+def test_expected_outputs_do_not_move_with_calendar_time(case) -> None:
+    """Every date the labels depend on is fixed in the file: a stated date in the
+    description, or the case's own assessment_date. Nothing reads the wall clock."""
+    text = case["description"].lower()
+    assert not [w for w in RELATIVE_TIME if f" {w}" in f" {text}"], case["id"]
+    phase3.date.fromisoformat(case["assessment_date"])
+
+
+def test_n08_route_statuses_follow_route_dates() -> None:
+    rt = BY_ID["N08"]["expected"]["risk_tier"]
+    on = phase3._relevant_date(BY_ID["N08"])
+    want = {c: ("applicable" if on >= phase3.ROUTE_START[c]
+                else "not_applicable/not_yet_applicable") for c in rt["system_category"]}
+    assert rt["route_status"] == want
+    assert rt["route_status"]["annex_iii_high_risk"] == "applicable"
+    assert rt["route_status"]["article_6_1_high_risk"] == "not_applicable/not_yet_applicable"
+    assert rt["status"] == "applicable"  # one applicable route is enough (§9.1)

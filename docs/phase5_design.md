@@ -1,9 +1,8 @@
 # Phase 5 — End-to-end evaluation and polish: design note
 
-Status: **DRAFT for review, round 2** (2026-10-25, branch `phase-5/end-to-end`).
-
-**Stopped before freezing, under the user's Q1 condition: the D32 failure class
-would trip G1. See §3.1.**
+Status: **DRAFT, round 3** (2026-10-25, branch `phase-5/end-to-end`). Q1–Q4 are
+decided. Nothing is frozen yet: the labels and thresholds wait for one last look from
+the user (see `docs/phase5_status.md`).
 
 No Phase 5 code beyond the eval-set label tests exists, and no Phase 5 API call has
 been made. Items marked **[DECIDED]** come from the user's decisions of 2026-10-25.
@@ -34,6 +33,23 @@ shipped configuration of every stage, with nothing gold in between:
 | Generation | `OpenAIGenerator` + C0–C8 + template fallback | prompt v2 (`a6b4a491…`), effort `low`, `max_output_tokens` 5000 (Phase 4 adopted) | 1 |
 
 That is about 3 calls and $0.078 per case on the measured means (§6).
+
+**Pinned clock [DECIDED].** No expected output may change as calendar time passes.
+- The runner pins its evaluation clock to **2026-10-25**, a constant tested in code.
+  It never reads the wall clock.
+- Each case's own `assessment_date` is fixed in its file: 2026-10-25 for N01–N12 and
+  2026-10-04 for H01–H08. When a description states no date, `Case` uses that
+  assessment date.
+- Descriptions use explicit dates, never "today". A test rejects relative time words.
+- The date logic is unchanged: Annex III obligations apply from 2026-08-02, and the
+  Annex I route from 2027-08-02.
+
+**Corpus snapshot [DECIDED].** All expected outputs are relative to the frozen corpus
+snapshot, `data/corpus/provisions.json`. Its 110 provisions are the Act's text as in
+force from 2024-08-01, with no amendments; every provision has
+`text_valid_from = 2024-08-01`. A later amendment, such as the pending Digital Omnibus
+change to Article 5, would need a new corpus version. It would not silently change
+these labels.
 
 **Retrieval is not on this path [DECIDED: recorded].** The matcher sees the closed,
 exhaustive candidate set of every scope (`determination/scopes.py`), never a retrieval
@@ -88,8 +104,10 @@ It passes (84 tests) and has already caught one labelling slip (§8, point 5).
 All of G1–G4 must hold. If any fails, Phase 5 acceptance is NOT MET, the phase is
 not tagged, and nothing is retuned.
 
-- **G1, zero tolerance, all 20 cases (both strata).** Treatment of the D32 class is
-  open (§3.1). The violations are:
+- **G1, zero tolerance, all 20 cases (both strata) [DECIDED: option (b)].** It is
+  strict and counted by root cause. One root event, such as one matcher verdict
+  flip, counts as one violation, and its cascade is listed with it. **Any violation
+  fails Phase 5.** The violations are:
   - an expected `unresolved` produced as `applicable` or `not_applicable`, on any
     determination;
   - an expected `not_in_force` produced as `not_applicable`;
@@ -111,11 +129,15 @@ not tagged, and nothing is retuned.
   exactly the expected Annex III, Annex I and Article 5 grounds (set equality).
   Stratum A has 10 such expected risk-tier determinations and no prohibited one, so
   n ≤ 10.
-- **Threshold values are pending the user's answer.** The options are given as counts
-  in §3.2.
+- **Thresholds [DECIDED: one rule for all gates, dev performance minus 0.05]:**
+  - G3a ≥ 19/24;
+  - G3b ≥ 33/36;
+  - G4: 0 mismatches.
 
-**How stratum B counts [DECIDED, conditional on §3.1].** Stratum B counts toward G1
-and G2 only, not toward G3/G4.
+  The derivation is in §3.2.
+
+**How stratum B counts [DECIDED].** Stratum B counts toward G1 and G2 only, not
+toward G3/G4.
 - Zero tolerance and hygiene are safety properties and must hold on any input.
 - The 5(1)(c) accuracy shortfall is the Phase 3 limitation already accepted
   (PROJECT_PLAN, 2026-10-25).
@@ -171,8 +193,13 @@ What the data shows:
    zero-tolerance violations in 2 of 3 runs. Any 5(1)(c) fix trades accuracy for G1
    risk.
 
-**How G1 should treat it: the user's decision, before freezing.** These are options,
-not a recommendation to weaken G1:
+**Decided: option (b).** It applies to both strata. Stated plainly, as the
+pre-registration will state it:
+- A D32-type event (1 in 123 dev runs) on H07 or H08 **would fail G1, and with it
+  Phase 5.**
+- The held-out pass runs once and **cannot be rerun**, so such an event would stand.
+
+The options as presented to the user:
 
 - **(a) Strict, as drafted.** Any G1 violation in either stratum fails Phase 5. A
   D32-type flip on H07 or H08 would fail the phase.
@@ -183,11 +210,9 @@ not a recommendation to weaken G1:
   gated. Stratum B is then treated like the accepted Phase 3 limitation. This weakens
   the "safe on every input" reason for counting stratum B at all.
 
-Recommendation: **(b)**. It keeps zero tolerance as a hard gate on every input, and
-the count is honest about cascades. Whatever is chosen is fixed before any held-out
-call and is not redefined afterwards.
+G1 is fixed before any held-out call and is not redefined afterwards.
 
-### 3.2 G3 and G4 thresholds as counts (Q2, values pending)
+### 3.2 G3 and G4 thresholds as counts (Q2: option 2 for every gate, DECIDED)
 
 **Justification base:** the official Phase 3 dev run, on gold facts.
 
@@ -210,7 +235,16 @@ through every actor fact. The 95% Wilson intervals are for the threshold count i
 | G4 (n ≤ 10) | 1, as drafted | ≤ 1 mismatch (9/10 at n = 10) | 0.900 | 0.596–0.982 | 0.90 |
 | G4 | 2, dev − 0.05 | 0 mismatches (10/10) | 1.000 | 0.722–1.000 | Dev 0.971 minus 0.05 = 0.921, which allows no miss at n ≤ 10 |
 
-Read this before choosing:
+**Decided:** option 2, one rule for all gates (dev performance minus 0.05):
+- G3a ≥ 19/24;
+- G3b ≥ 33/36;
+- G4: 0 mismatches.
+
+Every result is reported with its 95% Wilson interval, whether it passes or fails.
+**G4 is brittle:** with n ≤ 10 and no miss allowed, a single wrong citation fails
+the gate. The pre-registration says so.
+
+Notes written when the options were presented:
 - **G3a option 1 sits above the dev rate.** The 5(1)(c) over-caution also falls on
   stratum A: 11 of its 12 prohibited labels are `not_applicable`, and dev scored that
   bucket at 0.632. About 4 prohibited misses are therefore expected, and option 1
@@ -317,7 +351,9 @@ Measured per-call cost at $2 / $10 per M tokens, from the frozen ledgers:
 
 ## 8. Expected outputs for review (N01–N12)
 
-The assessment date is 2026-10-25 for all twelve. Abbreviations:
+The assessment date is 2026-10-25 for all twelve, and the runner's clock is pinned
+to it. Where a case states a date, that date is used. All outputs are relative to the
+2024-08-01 corpus snapshot. Abbreviations:
 - RT = risk tier, PP = prohibited practice;
 - n/a = `not_applicable`, with its reason: cnm = `conditions_not_met`, nya =
   `not_yet_applicable`.
@@ -329,15 +365,32 @@ Full facts and labelling notes are in `data/eval/e2e_cases.json`.
 | N01 | Art 25(1)(a) + both roles | College licenses an admissions engine, sells it as AdmitIQ, and uses it itself | applicable, III 3(a) | n/a cnm | provider + deployer | applicable | applicable |
 | N02 | Art 25(1)(c), provider only | Contractor configures a general classifier, model unchanged, to auto-approve benefit claims for a public agency; the agency runs it | applicable, III 5(a) | n/a cnm | provider | applicable | n/a cnm |
 | N03 | temporal | Dispatch centre, DispatchAI used as supplied, "on 1 March 2026" | n/a **nya**, III 5(d) | n/a cnm | deployer | n/a cnm | n/a **nya** |
-| N04 | temporal | same, "as of today" | applicable, III 5(d) | n/a cnm | deployer | n/a cnm | **applicable** |
+| N04 | temporal | same, "on 1 October 2026" | applicable, III 5(d) | n/a cnm | deployer | n/a cnm | **applicable** |
 | N05 | not_in_force vs n/a | same, "on 15 May 2024" | not_in_force | not_in_force | not_in_force | not_in_force | **not_in_force** |
 | N06 | 6(3)(a) derogation | Immigration office sorts asylum documents into fixed folders for the caseworker; no assessment, no profiling | n/a cnm, III 7(c), derogation applied | n/a cnm | deployer | n/a cnm | n/a cnm |
-| N07 | 6(1) route | Lift maker's own AI safety-brake module; Directive 2014/33/EU, notified body | n/a **nya**, Annex I item 4 | n/a cnm | provider | n/a nya | n/a cnm |
-| N08 | both routes | Class IIb medical-device triage software; Regulation (EU) 2017/745, notified body | applicable, III 5(d) **and** Annex I item 11 | n/a cnm | provider | applicable | n/a cnm |
+| N07 | 6(1) route | Lift maker's own AI safety-brake module; Directive 2014/33/EU, notified body; "on 1 October 2026" | n/a **nya**, Annex I item 4 | n/a cnm | provider | n/a nya | n/a cnm |
+| N08 | both routes | Class IIb medical-device triage software; Regulation (EU) 2017/745, notified body; "on 1 October 2026" | applicable (per route below) | n/a cnm | provider | applicable | n/a cnm |
 | N09 | adversarial: asserted conclusion | "Our lawyers say it's minimal-risk"; school exam-essay grader, built in-house | applicable, III 3(b) | n/a cnm | provider + deployer | applicable | applicable |
 | N10 | adversarial: injection | Redundancy-selection tool used as supplied, plus an "ignore your previous instructions" note | applicable, III 4(b) | n/a cnm | deployer | n/a cnm | applicable |
 | N11 | adversarial: keyword trap | Rates the creditworthiness of bidding *companies*; no individual person assessed | n/a cnm | n/a cnm | deployer | n/a cnm | n/a cnm |
 | N12 | partial role knowledge | Ranks job applicants; "not sure if our IT team built it" | applicable, III 4(a) | n/a cnm | deployer; provider **unresolved** | **unresolved** | applicable |
+
+**N08 per route, on 2026-10-01** (in the file as `route_status` and `combination`;
+a test checks them against the rule dates):
+
+| Route | Ground | Established | Applies from | Status on 2026-10-01 |
+|---|---|---|---|---|
+| Article 6(2), Annex III | 5(d) emergency healthcare patient triage | yes | 2026-08-02 | **applicable** |
+| Article 6(1), Annex I | item 11, Regulation (EU) 2017/745 + 6(1)(b) notified body | yes | 2027-08-02 | **not_applicable / not_yet_applicable** |
+
+*How the routes combine (§9.1):*
+- If either route is high-risk and applicable on `relevant_date`, the risk tier is
+  `applicable`. One applicable route is enough, so the overall risk tier is
+  **applicable**.
+- `system_category` lists both established routes: `annex_iii_high_risk` and
+  `article_6_1_high_risk`.
+- Article 16 applies through its Annex III rule. Its Article 6(1) rule would apply
+  only from 2027-08-02.
 
 **Decidability check (the user's Q4 rule).** Every expected output must be decidable
 from the frozen corpus and the description alone.
@@ -377,20 +430,25 @@ Changes in round 2:
    role `unresolved`. N02, N06 and N11 say it too.
 6. **The 5(1)(c) risk in stratum A is unchanged, and intentional (§3.2).** Stratum A
    measures the shipped system, weakness included.
+7. **Round 3: time stability.** N04 ("as of today") and N07 and N08 (no date) now ask
+   about "1 October 2026". That date is after the Annex III date and before the
+   Annex I date, so every status is unchanged.
 
-## 9. Decisions needed
+## 9. Decisions
 
-- **Q1, G1 treatment: OPEN.** The pre-check (§3.1) shows that the D32 class trips G1.
-  Choose (a), (b) or (c) before freezing. Recommended: (b), strict and counted by root
-  cause. "Stratum B counts toward G1–G2 only" stands, subject to this choice.
-- **Q2, threshold values: OPEN.** Choose option 1 or option 2 for each gate in §3.2,
-  or other values. Every option is stated as a count with its Wilson interval.
+- **Q1: DECIDED, option (b).**
+  - G1 is strict and counted by root cause; any violation fails Phase 5.
+  - Stratum B counts toward G1–G2 only.
+  - A D32-type event on H07 or H08 would fail G1, and the held-out pass cannot be
+    rerun.
+- **Q2: DECIDED, option 2 for every gate** (dev performance minus 0.05):
+  - G3a ≥ 19/24, G3b ≥ 33/36, G4 0 mismatches;
+  - results are always reported with Wilson intervals;
+  - G4 is brittle at n ≤ 10.
 - **Q3: DECIDED.** D32, D10, D35 and D39 × 3, in rounds, with a hard cap of $1.10.
-- **Q4, labels: OPEN.** Review N01–N12 in §8 after the round-2 changes to N06, N07,
-  N08 and N11. Once approved, they are frozen with a SHA.
+- **Q4: DECIDED, labels approved against the Act text, with two round-3 changes.**
+  - Time stability: a pinned clock, and explicit dates in N04, N07 and N08.
+  - N08's expected output is given per route.
 
-**After approval:**
-- write the runner and the spend changes ($0) and the SYSTEM_SPEC §18
-  pre-registration;
-- commit them with the frozen SHAs before any API call;
-- ask before pushing the branch.
+**Next:** the user looks once more at the §8 table and the thresholds. After an OK,
+the work follows the order in `docs/phase5_status.md`.

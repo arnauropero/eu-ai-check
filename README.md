@@ -13,6 +13,15 @@ Every determination cites the provisions it rests on. Each one comes out as
 > This README is being written as part of Phase 5. Architecture, rejected
 > alternatives, known limitations and setup instructions will be added here.
 
+## Legal text version
+
+All results, and all expected outputs in the evaluation sets, are relative to one
+frozen corpus snapshot: the Act as in force from 2024-08-01, with no amendments
+(`data/corpus/provisions.json`, 110 provisions). An amendment, such as the pending
+Digital Omnibus change to Article 5, would need a new corpus version. The answers do
+not track legislative changes automatically. Evaluation dates are fixed in the eval
+files, so no expected output changes as calendar time passes.
+
 ## Pipeline as built
 
 Fact extraction (LLM, schema-constrained) → grounded determination (rules plus one

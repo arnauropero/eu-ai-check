@@ -1,5 +1,5 @@
 {
-  "notice": "DRAFT, NOT FROZEN. Phase 5 end-to-end eval set: 12 new hand-labelled cases (N01-N12). Together with H01-H08 (data/eval/determination_heldout_5_1_c.json, never run) they form the 20-case end-to-end set (SYSTEM_SPEC.md §18, Phase 5 pre-registration). Labels are written from the Act text before any run. None is taken from the dev data (D01-D41, E01-E30, S01-S03) or from the demo examples. Once the user has reviewed them, the `cases` content is SHA-pinned in tests/test_e2e_cases.py, and any later change must be flagged post_hoc.",
+  "notice": "DRAFT, NOT FROZEN. Phase 5 end-to-end eval set: 12 new hand-labelled cases (N01-N12). Together with H01-H08 (data/eval/determination_heldout_5_1_c.json, never run) they form the 20-case end-to-end set (SYSTEM_SPEC.md §18, Phase 5 pre-registration). Labels are written from the Act text before any run. None is taken from the dev data (D01-D41, E01-E30, S01-S03) or from the demo examples. All expected outputs are relative to the frozen corpus snapshot (the Act as in force from 2024-08-01, no amendments; data/corpus/provisions.json) and to each case's fixed assessment_date; none depends on the wall clock. Once the user has reviewed them, the `cases` content is SHA-pinned in tests/test_e2e_cases.py, and any later change must be flagged post_hoc.",
   "status_format": "'applicable' | 'unresolved' | 'not_in_force' | 'not_applicable/<reason>' with reason conditions_not_met | not_yet_applicable",
   "labelling_rules": "Same as data/eval/determination_cases.json (role_rules, obligation_rules, DL1-DL5). Gold facts follow the Phase 2 field rules L1-L9 verbatim.",
   "cases": [
@@ -155,17 +155,17 @@
           "aiact:art_26": "not_applicable/not_yet_applicable"
         }
       },
-      "labelling_note": "Temporal triple N05 / N03 / N04 on Article 26: not_in_force (2024-05-15), not_yet_applicable (2026-03-01, before the Annex III date 2026-08-02), applicable (today). Annex III 5(d) emergency-call evaluation and dispatch priority. Article 5 applies from 2025-02-02, so prohibited is conditions_not_met, not not_yet_applicable. 'used as supplied' gives both modifies_* false, so the provider role is known false."
+      "labelling_note": "Temporal triple N05 / N03 / N04 on Article 26: not_in_force (2024-05-15), not_yet_applicable (2026-03-01, before the Annex III date 2026-08-02), applicable (2026-10-01, N04). Annex III 5(d) emergency-call evaluation and dispatch priority. Article 5 applies from 2025-02-02, so prohibited is conditions_not_met, not not_yet_applicable. 'used as supplied' gives both modifies_* false, so the provider role is known false."
     },
     {
       "id": "N04",
       "category": "temporal_applicable",
       "assessment_date": "2026-10-25",
-      "description": "Our regional emergency dispatch centre uses DispatchAI, a product we license from a vendor and use as supplied. It evaluates incoming emergency calls and sets the priority in which ambulances are dispatched; dispatchers can override it. Which AI Act rules apply to us as of today?",
+      "description": "Our regional emergency dispatch centre uses DispatchAI, a product we license from a vendor and use as supplied. It evaluates incoming emergency calls and sets the priority in which ambulances are dispatched; dispatchers can override it. Which AI Act rules apply to us on 1 October 2026?",
       "gold_facts": {
         "intended_purpose": "emergency call dispatch",
         "ai_functionality": "evaluates emergency calls and sets ambulance dispatch priority",
-        "relevant_date": "2026-10-25",
+        "relevant_date": "2026-10-01",
         "role_in_decision_making": "sets dispatch priority; dispatchers can override it",
         "develops_system": false,
         "uses_system": true,
@@ -206,7 +206,7 @@
           "aiact:art_26": "applicable"
         }
       },
-      "labelling_note": "Same system as N03, assessed as of today (L7: 'as of today' gives the assessment date). Article 26 now applies. 'used as supplied' gives both modifies_* false, so the provider role is known false."
+      "labelling_note": "Same system as N03, at an explicit date, 1 October 2026 (after the Annex III date 2026-08-02), so the expected output does not move with calendar time. Article 26 applies. 'used as supplied' gives both modifies_* false, so the provider role is known false."
     },
     {
       "id": "N05",
@@ -303,11 +303,11 @@
       "id": "N07",
       "category": "article_6_1",
       "assessment_date": "2026-10-25",
-      "description": "We manufacture passenger lifts. Our own AI module, SafeBrake, monitors the speed of the lift car and triggers the safety brake when it detects a fault; it is a safety component of the lift. Under the Lifts Directive (Directive 2014/33/EU), every lift we sell must have its conformity assessed by a notified body.",
+      "description": "We manufacture passenger lifts. Our own AI module, SafeBrake, monitors the speed of the lift car and triggers the safety brake when it detects a fault; it is a safety component of the lift. Under the Lifts Directive (Directive 2014/33/EU), every lift we sell must have its conformity assessed by a notified body. Which AI Act rules apply to us on 1 October 2026?",
       "gold_facts": {
         "intended_purpose": "lift safety",
         "ai_functionality": "monitors lift-car speed and triggers the safety brake on a fault",
-        "relevant_date": null,
+        "relevant_date": "2026-10-01",
         "role_in_decision_making": "triggers the safety brake by itself",
         "develops_system": true,
         "uses_system": false,
@@ -345,17 +345,17 @@
           "aiact:art_26": "not_applicable/conditions_not_met"
         }
       },
-      "labelling_note": "Art 6(1): safety component of a product under Annex I item 4 (Lifts Directive 2014/33/EU) that needs third-party conformity assessment (6(1)(b) stated). The route applies from 2027-08-02, so today it is established but not yet applicable. Contrast with N08 (6(2) applies now). L5: own product that it makes and sells; uses_system false (sells lifts, does not operate them). The directive number is stated so that Annex I item 4 is decidable from the corpus text."
+      "labelling_note": "Art 6(1): safety component of a product under Annex I item 4 (Lifts Directive 2014/33/EU) that needs third-party conformity assessment (6(1)(b) stated). The route applies from 2027-08-02, so on 2026-10-01 it is established but not yet applicable. Contrast with N08 (the 6(2) route applies on the same date). L5: own product that it makes and sells; uses_system false (sells lifts, does not operate them). The directive number is stated so that Annex I item 4 is decidable from the corpus text. Explicit date 1 October 2026: after 2026-08-02, before the Annex I route date 2027-08-02."
     },
     {
       "id": "N08",
       "category": "both_routes",
       "assessment_date": "2026-10-25",
-      "description": "We develop TriageAssist, software certified as a class IIb medical device under the Medical Device Regulation (Regulation (EU) 2017/745) after assessment by a notified body. Hospital emergency departments use it to triage incoming patients and set the order in which they are seen. We sell it to hospitals.",
+      "description": "We develop TriageAssist, software certified as a class IIb medical device under the Medical Device Regulation (Regulation (EU) 2017/745) after assessment by a notified body. Hospital emergency departments use it to triage incoming patients and set the order in which they are seen. We sell it to hospitals. Which AI Act rules apply to us on 1 October 2026?",
       "gold_facts": {
         "intended_purpose": "emergency-department patient triage",
         "ai_functionality": "triages incoming patients and sets the order in which they are seen",
-        "relevant_date": null,
+        "relevant_date": "2026-10-01",
         "role_in_decision_making": "sets the order in which patients are seen",
         "develops_system": true,
         "uses_system": false,
@@ -381,7 +381,12 @@
           ],
           "annex_i": [
             "aiact:anx_I:item_11"
-          ]
+          ],
+          "route_status": {
+            "annex_iii_high_risk": "applicable",
+            "article_6_1_high_risk": "not_applicable/not_yet_applicable"
+          },
+          "combination": "§9.1: either route high-risk and applicable on relevant_date gives applicable. The Annex III 5(d) route is established and applies from 2026-08-02, so it is applicable on 2026-10-01. The Article 6(1) route (Annex I item 11) is established but applies only from 2027-08-02, so it is not_yet_applicable. One applicable route is enough: the overall risk tier is applicable, and system_category lists both established routes. Article 16 applies through the Annex III rule; its Article 6(1) rule would not apply until 2027-08-02."
         },
         "prohibited_practice": {
           "status": "not_applicable/conditions_not_met",
@@ -399,7 +404,7 @@
           "aiact:art_26": "not_applicable/conditions_not_met"
         }
       },
-      "labelling_note": "Both routes established: Annex III 5(d) (emergency healthcare patient triage, applies from 2026-08-02) and Art 6(1) (medical device, Annex I item 11, notified body; applies from 2027-08-02). Article 16 applies today through the Annex III route only. Distinguishes the two routes and their dates (PLAN §8) on one system. Decidable from the corpus: Annex I item 11 names Regulation (EU) 2017/745, stated in the description; 6(1)(a) 'the AI system is itself a product'; 6(1)(b) the notified body is stated; Annex III 5(d) names 'emergency healthcare patient triage systems'."
+      "labelling_note": "Both routes established: Annex III 5(d) (emergency healthcare patient triage, applies from 2026-08-02) and Art 6(1) (medical device, Annex I item 11, notified body; applies from 2027-08-02). On 2026-10-01 Article 16 applies through the Annex III route only. Distinguishes the two routes and their dates (PLAN §8) on one system. Decidable from the corpus: Annex I item 11 names Regulation (EU) 2017/745, stated in the description; 6(1)(a) 'the AI system is itself a product'; 6(1)(b) the notified body is stated; Annex III 5(d) names 'emergency healthcare patient triage systems'."
     },
     {
       "id": "N09",
