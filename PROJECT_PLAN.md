@@ -296,6 +296,11 @@ one rule-matching engine → cited, fail-closed output.
     `social-scoring-v2`, scoped to the 5(1)(c) candidate, still produced
     zero-tolerance violations on D32. The user's hard stop ended the intervention.
     The pre-registered prompt stays the default.
+  - **Closed as a documented limitation (user, 2026-10-25).** No further Phase 3
+    attempt in V1. The not-met verdict stands, the phase stays untagged, and the
+    README states the numbers above. The 8-case 5(1)(c) held-out set (H01–H08) stays
+    reserved for the Phase 5 end-to-end evaluation; its use is fixed in the Phase 5
+    pre-registration.
 - Deliverable: `GroundedDetermination` component implemented once, parameterized for
   risk-tier, prohibited-practice, actor-role, and obligation-applicability use.
 - Deliverable: `ApplicabilityRule` matching engine (the evaluation logic; the rule
@@ -379,12 +384,23 @@ one rule-matching engine → cited, fail-closed output.
 
 **Phase 5 — End-to-end evaluation and polish**
 - Deliverable: end-to-end eval set with full expected outputs.
+  Phase 3 matcher errors flow into it and are reported as such, not corrected.
 - Deliverable: a pre-registered comparison of generation models (`gpt-6.1-sol` vs
   cheaper models). It uses the Phase 4 checks and decision rule, and is not decided
   in Phase 4.
 - Deliverable: README documenting architecture, rejected alternatives, and known
   limitations (including the Digital Omnibus amendment to Article 5 as a live
   versioning example).
+  The limitations section reports the Phase 3 not-met verdict with its numbers.
+- Deliverable (distribution, user decision 2026-10-03): a demo mode that replays
+  recorded results for prepared examples, needing no API key, plus a demo video.
+  Anyone trying their own descriptions clones the repo and uses their own OpenAI key
+  (environment variable); README gives these instructions. No hosted key, no public
+  endpoint.
+  - Demo outputs are real recorded runs, never edited by hand.
+  - Demo examples are new descriptions written for the demo. They are not H01–H08
+    or any other eval record.
+  - The demo and video description point to the known limitations.
 
 ## 7. Evaluation Plan
 
@@ -397,11 +413,15 @@ deliverable (§10), not an afterthought.
 ## 8. Acceptance Criteria (V1 complete when)
 
 - All five phase-level acceptance criteria above are met.
+  **Deviation (user, 2026-10-25):** Phase 3's criterion is not met and is accepted
+  as a documented limitation (see Phase 3). V1 is declared complete when the other
+  four phases meet theirs; it is never described as meeting all five.
 - The four-way `applicable/not_applicable/unresolved/not_in_force` output is
   demonstrably exercised by real eval cases (all four states, not just the easy ones),
   not just theoretically possible.
 - Numerical targets for every metric category in SYSTEM_SPEC.md §18 have been locked
   (not left as "TBD") against Phase 0 baselines, and the implemented system meets them.
+  The Phase 3 matcher targets are the stated exception (deviation above).
 - At least one eval case explicitly demonstrates correct handling of the Article 25
   role-transfer scenario (deployer becoming subject to provider obligations).
 - At least one eval case explicitly demonstrates simultaneous provider+deployer roles,
