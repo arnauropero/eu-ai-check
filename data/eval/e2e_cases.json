@@ -252,19 +252,19 @@
     },
     {
       "id": "N06",
-      "category": "derogation_6_3_d",
+      "category": "derogation_6_3_a",
       "assessment_date": "2026-10-25",
-      "description": "Our national immigration office uses LinguaDoc, a translation tool we license, to translate the supporting documents that asylum applicants submit into English before a caseworker examines the application. It only translates: it does not assess the applications, rate the applicants or profile anyone, and caseworkers read every original document.",
+      "description": "Our national immigration office uses DocSort, a tool we license and use as supplied, to sort the documents submitted with each asylum application into fixed folders (identity papers, medical reports, other) for the caseworker who examines the application. It only sorts: it does not assess the application or the applicant and does not profile anyone, and the caseworker reads every document.",
       "gold_facts": {
-        "intended_purpose": "translating asylum applicants' supporting documents",
-        "ai_functionality": "translates documents into English",
+        "intended_purpose": "organising asylum applicants' supporting documents",
+        "ai_functionality": "sorts documents into fixed folders",
         "relevant_date": null,
-        "role_in_decision_making": "provides translations; caseworkers examine the applications and read every original document",
+        "role_in_decision_making": "sorts documents for the caseworker, who examines the application and reads every document",
         "develops_system": false,
         "uses_system": true,
         "puts_own_name_or_trademark": false,
-        "modifies_intended_purpose": null,
-        "modifies_safety_relevant_components": null,
+        "modifies_intended_purpose": false,
+        "modifies_safety_relevant_components": false,
         "jurisdiction": null,
         "affected_persons": "asylum applicants"
       },
@@ -297,13 +297,13 @@
           "aiact:art_26": "not_applicable/conditions_not_met"
         }
       },
-      "labelling_note": "Annex III 7(c) (assisting the examination of asylum applications) + Art 6(3)(d) preparatory task; the override does not match (quote: 'does not ... profile anyone'). Under DL1 'no Annex III match' gives the same status, so not_assessed is also accepted."
+      "labelling_note": "Annex III 7(c): used by the competent authority to assist the examination of asylum applications. Art 6(3)(a): a narrow procedural task (sorting into fixed folders). The 6(3) third-subparagraph override does not match (quote: 'does not profile anyone'). All three provisions are in the corpus; no definition outside it is needed. Under DL1 'no Annex III match' gives the same status, so not_assessed is also accepted for the derogation value; G4 scores the grounds only when the derogation is applied."
     },
     {
       "id": "N07",
       "category": "article_6_1",
       "assessment_date": "2026-10-25",
-      "description": "We manufacture passenger lifts. Our own AI module, SafeBrake, monitors the speed of the lift car and triggers the safety brake when it detects a fault; it is a safety component of the lift. Under the Lifts Directive, every lift we sell must have its conformity assessed by a notified body.",
+      "description": "We manufacture passenger lifts. Our own AI module, SafeBrake, monitors the speed of the lift car and triggers the safety brake when it detects a fault; it is a safety component of the lift. Under the Lifts Directive (Directive 2014/33/EU), every lift we sell must have its conformity assessed by a notified body.",
       "gold_facts": {
         "intended_purpose": "lift safety",
         "ai_functionality": "monitors lift-car speed and triggers the safety brake on a fault",
@@ -345,13 +345,13 @@
           "aiact:art_26": "not_applicable/conditions_not_met"
         }
       },
-      "labelling_note": "Art 6(1): safety component of a product under Annex I item 4 (Lifts Directive 2014/33/EU) that needs third-party conformity assessment (6(1)(b) stated). The route applies from 2027-08-02, so today it is established but not yet applicable. Contrast with N08 (6(2) applies now). L5: own product that it makes and sells; uses_system false (sells lifts, does not operate them)."
+      "labelling_note": "Art 6(1): safety component of a product under Annex I item 4 (Lifts Directive 2014/33/EU) that needs third-party conformity assessment (6(1)(b) stated). The route applies from 2027-08-02, so today it is established but not yet applicable. Contrast with N08 (6(2) applies now). L5: own product that it makes and sells; uses_system false (sells lifts, does not operate them). The directive number is stated so that Annex I item 4 is decidable from the corpus text."
     },
     {
       "id": "N08",
       "category": "both_routes",
       "assessment_date": "2026-10-25",
-      "description": "We develop TriageAssist, software certified as a class IIb medical device under the Medical Device Regulation after assessment by a notified body. Hospital emergency departments use it to triage incoming patients and set the order in which they are seen. We sell it to hospitals.",
+      "description": "We develop TriageAssist, software certified as a class IIb medical device under the Medical Device Regulation (Regulation (EU) 2017/745) after assessment by a notified body. Hospital emergency departments use it to triage incoming patients and set the order in which they are seen. We sell it to hospitals.",
       "gold_facts": {
         "intended_purpose": "emergency-department patient triage",
         "ai_functionality": "triages incoming patients and sets the order in which they are seen",
@@ -399,7 +399,7 @@
           "aiact:art_26": "not_applicable/conditions_not_met"
         }
       },
-      "labelling_note": "Both routes established: Annex III 5(d) (emergency healthcare patient triage, applies from 2026-08-02) and Art 6(1) (medical device, Annex I item 11, notified body; applies from 2027-08-02). Article 16 applies today through the Annex III route only. Distinguishes the two routes and their dates (PLAN §8) on one system."
+      "labelling_note": "Both routes established: Annex III 5(d) (emergency healthcare patient triage, applies from 2026-08-02) and Art 6(1) (medical device, Annex I item 11, notified body; applies from 2027-08-02). Article 16 applies today through the Annex III route only. Distinguishes the two routes and their dates (PLAN §8) on one system. Decidable from the corpus: Annex I item 11 names Regulation (EU) 2017/745, stated in the description; 6(1)(a) 'the AI system is itself a product'; 6(1)(b) the notified body is stated; Annex III 5(d) names 'emergency healthcare patient triage systems'."
     },
     {
       "id": "N09",
@@ -508,17 +508,17 @@
       "id": "N11",
       "category": "adversarial_keyword_trap",
       "assessment_date": "2026-10-25",
-      "description": "Our online shop uses ReviewLens, a tool from a software vendor, to analyse the sentiment of the written product reviews that customers post on our website, so that we can spot common complaints about our products. It does not analyse faces, voices or any other biometric data, and it does not assess individual customers.",
+      "description": "Our procurement team uses SupplierScore, a tool from a software vendor that we use as supplied, to rate the creditworthiness of the companies that bid for our supply contracts. It works only from the companies' published financial statements and does not assess any individual person.",
       "gold_facts": {
-        "intended_purpose": "analysing product reviews",
-        "ai_functionality": "sentiment analysis of written reviews",
+        "intended_purpose": "supplier selection in procurement",
+        "ai_functionality": "rates the creditworthiness of bidding companies",
         "relevant_date": null,
-        "role_in_decision_making": "used to spot common complaints about products",
+        "role_in_decision_making": null,
         "develops_system": false,
         "uses_system": true,
         "puts_own_name_or_trademark": false,
-        "modifies_intended_purpose": null,
-        "modifies_safety_relevant_components": null,
+        "modifies_intended_purpose": false,
+        "modifies_safety_relevant_components": false,
         "jurisdiction": null,
         "affected_persons": null
       },
@@ -546,7 +546,7 @@
           "aiact:art_26": "not_applicable/conditions_not_met"
         }
       },
-      "labelling_note": "Adversarial keyword trap: 'sentiment' is not emotion recognition, which the Act defines on biometric data (Art 3(39)); not Annex III 1(c), not Art 5(1)(f). L8: the output concerns products, not persons, so affected_persons is null."
+      "labelling_note": "Adversarial keyword trap: 'creditworthiness' and 'score', but of companies. Annex III 5(b) covers the creditworthiness of natural persons, and Art 5(1)(c) the evaluation of natural persons or groups of persons; both are decidable from the corpus text. L8: how the rating is used is not described, so role_in_decision_making is null; it concerns companies, not persons, so affected_persons is null. Replaces the earlier sentiment-analysis draft, which needed Art 3(39) (not in the corpus)."
     },
     {
       "id": "N12",

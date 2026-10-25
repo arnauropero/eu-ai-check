@@ -2468,6 +2468,23 @@ Extraction errors are evaluated separately from downstream errors, since an extr
 mistake silently poisons every later stage — an end-to-end failure must be attributable
 to a specific stage, not just logged as "wrong answer."
 
+**[Note, 2026-10-25, Phase 5 design] Retrieval is not on the shipped determination
+path.** This note records the as-built pipeline. The §2 diagram is left as written.
+The diagram puts retrieval between extraction and determination. In the code it is
+not there:
+- `Pipeline.determine` (`determination/pipeline.py`) passes the matcher the closed,
+  exhaustive candidate set of every scope (`determination/scopes.py`): every
+  date-eligible Annex III, Article 5(1), Article 6(3), Annex I and Article 6(1)(b)
+  provision. It never passes a retrieval top-k.
+- The adapter takes evidence text from the corpus by `versioned_provision_id`
+  (`generation/adapter.py`), not from retrieval results.
+
+This follows from the Phase 3 design (§4.2): a negative determination must never rest
+on a retrieval miss. Phase 1 retrieval stays a measured component. It is used by the
+Phase 3 score-cutoff baseline (`determination/baseline.py`) and by `eu-ai-check
+search`. The Phase 5 end-to-end evaluation therefore measures extraction,
+determination and generation, not retrieval. The README states this.
+
 ---
 
 ## 19. The Invariants (Updated Post-Corpus-Validation)

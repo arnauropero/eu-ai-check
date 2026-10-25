@@ -1,10 +1,14 @@
 # Phase 5 — End-to-end evaluation and polish: design note
 
-Status: **DRAFT for review** (2026-10-25, branch `phase-5/end-to-end`). No Phase 5
-code beyond the eval-set label tests exists, and no Phase 5 API call has been made.
-Items marked **[DECIDED]** come from the user's decisions of 2026-10-25. Items marked
-**[PROPOSAL]** need the user's approval. Once approved, the binding text moves to
-SYSTEM_SPEC §18 in the pre-registration commit, as in Phases 3 and 4.
+Status: **DRAFT for review, round 2** (2026-10-25, branch `phase-5/end-to-end`).
+
+**Stopped before freezing, under the user's Q1 condition: the D32 failure class
+would trip G1. See §3.1.**
+
+No Phase 5 code beyond the eval-set label tests exists, and no Phase 5 API call has
+been made. Items marked **[DECIDED]** come from the user's decisions of 2026-10-25.
+Items marked **[PROPOSAL]** need the user's approval. Once approved, the binding text
+moves to SYSTEM_SPEC §18 in the pre-registration commit, as in Phases 3 and 4.
 
 Grounded in:
 - PROJECT_PLAN Phase 5 and §8 (including the Phase 3 deviation, `ce8e60d`);
@@ -12,13 +16,13 @@ Grounded in:
   per-stage attribution), and the Phase 2–4 pre-registrations;
 - the as-built code: `extraction/openai_extractor.py`, `determination/pipeline.py`,
   `generation/{adapter,generator,checks,spend}.py`;
-- measured costs from the frozen ledgers (§6).
+- measured costs and results from the frozen ledgers and runs (§3.1, §3.2, §6).
 
 ---
 
 ## 1. What "end-to-end" runs
 
-One case = one free-text description plus an assessment date. The runner chains the
+One case is one free-text description plus an assessment date. The runner chains the
 shipped configuration of every stage, with nothing gold in between:
 
 | Stage | Component | Frozen configuration | Calls |
@@ -29,31 +33,35 @@ shipped configuration of every stage, with nothing gold in between:
 | Adapter | `adapt` | as Phase 4 | 0 |
 | Generation | `OpenAIGenerator` + C0–C8 + template fallback | prompt v2 (`a6b4a491…`), effort `low`, `max_output_tokens` 5000 (Phase 4 adopted) | 1 |
 
-About 3 calls and $0.078 per case on the measured means (§6).
+That is about 3 calls and $0.078 per case on the measured means (§6).
 
-**Retrieval is not on this path, and the README will say so.** The matcher sees the
-closed, exhaustive candidate set of every scope (`determination/scopes.py`). It does
-not see a retrieval top-k, so a negative determination never rests on a retrieval
-miss. Phase 1 retrieval stays a measured component, used by the score-cutoff baseline
-and by `eu-ai-check search`. The §2 diagram in SYSTEM_SPEC draws retrieval inline,
-which the as-built pipeline does not do. That gets a correction note in the
-pre-registration commit **[PROPOSAL]**.
+**Retrieval is not on this path [DECIDED: recorded].** The matcher sees the closed,
+exhaustive candidate set of every scope (`determination/scopes.py`), never a retrieval
+top-k. Phase 1 retrieval stays a measured component, used by the score-cutoff baseline
+and by `eu-ai-check search`. This is recorded as a dated note in SYSTEM_SPEC §18
+(2026-10-25); the §2 diagram is left as written. The README states it too.
 
 ## 2. The evaluation set **[DECIDED]**
 
-20 cases, each run **once**:
+20 cases, each run **once**.
 
-- **Stratum A: N01–N12** (`data/eval/e2e_cases.json`). They are new, hand-labelled from
-  the Act text, and adversarial cases are included. None comes from dev data (D, E, S
-  cases) or from the demo examples, and a test checks that no description is reused.
-  The expected outputs are in §8 for review. After approval the file is SHA-pinned.
-- **Stratum B: H01–H08** (`data/eval/determination_heldout_5_1_c.json`, frozen in
-  `6b98c76`, never run). This is the Article 5(1)(c) stratum. It runs exactly once.
-  Nothing is tuned against it afterwards, and its results are reported as they come.
-  Any future 5(1)(c) fix needs a new held-out set, which the README lists as future
-  work. Its SHA is pinned in the same commit.
+**Stratum A: N01–N12** (`data/eval/e2e_cases.json`):
+- new cases, hand-labelled from the Act text, adversarial cases included;
+- none comes from dev data (D, E or S cases) or from the demo examples, and a test
+  checks that no description is reused;
+- the expected outputs are in §8 for review;
+- after approval the file is SHA-pinned.
 
-Each case carries full expected outputs:
+**Stratum B: H01–H08** (`data/eval/determination_heldout_5_1_c.json`, frozen in
+`6b98c76`, never run):
+- the Article 5(1)(c) stratum;
+- it runs exactly once, nothing is tuned against it afterwards, and its results are
+  reported as they come;
+- any future 5(1)(c) fix needs a new held-out set, which the README lists as future
+  work;
+- its SHA is pinned in the same commit.
+
+**Expected outputs per case:**
 - gold facts, for extraction scoring;
 - risk tier, with status, reason, `system_category`, Annex III and Annex I grounds,
   and derogation;
@@ -64,102 +72,198 @@ Each case carries full expected outputs:
 The generation checks need no expected text. They are checked against the input
 determination, as in Phase 4.
 
-`tests/test_e2e_cases.py` runs the Phase 3 label checks on all 20 cases:
-- facts valid against the schema;
-- statuses in the four-state vocabulary;
-- cited provisions present in the corpus;
-- route dates consistent;
-- roles and Article 16/26 recomputed from facts plus the risk tier;
-- PLAN §8 coverage.
+**Label tests.** `tests/test_e2e_cases.py` runs the Phase 3 label checks on all 20
+cases:
+- facts are valid against the schema;
+- statuses use the four-state vocabulary;
+- every cited provision is in the corpus;
+- route dates are consistent;
+- roles and Article 16/26 are recomputed from the facts plus the risk tier;
+- the PLAN §8 coverage is present.
 
-It passes, 84 tests. It already caught one labelling slip in this draft (see §8, N03).
+It passes (84 tests) and has already caught one labelling slip (§8, point 5).
 
-## 3. Acceptance rule **[PROPOSAL]**
+## 3. Acceptance rule
 
 All of G1–G4 must hold. If any fails, Phase 5 acceptance is NOT MET, the phase is
 not tagged, and nothing is retuned.
 
-- **G1, zero tolerance, all 20 cases (both strata):**
+- **G1, zero tolerance, all 20 cases (both strata).** Treatment of the D32 class is
+  open (§3.1). The violations are:
   - an expected `unresolved` produced as `applicable` or `not_applicable`, on any
     determination;
   - an expected `not_in_force` produced as `not_applicable`;
   - a positive conclusion resting on a verdict that failed code verification;
-  - extraction leakage: an excluded field, or a conclusion term in any value (Phase 2
-    lexicon);
+  - extraction leakage: an excluded field, or a conclusion term in any value (the
+    Phase 2 lexicon);
   - a shipped answer whose rendered status differs from the pipeline's determination.
 - **G2, output hygiene, all 20 cases:**
   - every shipped answer passes C0–C8 (1.00);
   - every claim's citation resolves to a real evidence item whose text equals the
-    corpus text of its `versioned_provision_id` (1.00; C1–C3).
-  - The template fallback still counts as shipped, but the fallback rate is reported.
+    corpus text of its `versioned_provision_id` (C1–C3, 1.00);
+  - a template fallback counts as shipped; the fallback rate is reported.
 - **G3, determination correctness, stratum A only.** Exact status match, including
   the `not_applicable` reason:
-  - risk tier and prohibited practice (matcher-backed, 24 judgements): ≥ 0.85, so
-    at most 3 misses;
-  - actor role, Article 16 and Article 26 (obligation correctness, 36 judgements):
-    ≥ 0.85, so at most 5 misses.
-- **G4, citation correctness, stratum A only.** Every determination that is
+  - **G3a:** risk tier and prohibited practice (matcher-backed, n = 24);
+  - **G3b:** actor role, Article 16 and Article 26 (obligation correctness, n = 36).
+- **G4, citation correctness, stratum A only.** A determination that comes out
   correctly `applicable`, `not_yet_applicable` or derogation-`applied` must cite
-  exactly the expected Annex III, Annex I and Article 5 grounds (set equality), at a
-  rate ≥ 0.90.
+  exactly the expected Annex III, Annex I and Article 5 grounds (set equality).
+  Stratum A has 10 such expected risk-tier determinations and no prohibited one, so
+  n ≤ 10.
+- **Threshold values are pending the user's answer.** The options are given as counts
+  in §3.2.
 
-**How stratum B counts.** Stratum B counts toward **G1 and G2 only**, and not toward
-G3/G4. Zero tolerance and hygiene are safety properties that must hold on any input.
-The 5(1)(c) accuracy shortfall is the Phase 3 limitation already accepted
-(PROJECT_PLAN, 2026-10-25). Gating accuracy on it again would re-test a known failure
-and could not change any decision. Stratum B accuracy is reported in its own table,
-next to stratum A and never pooled with it.
-
-The alternative is to count stratum B fully. Phase 5 would then very likely fail on
-the known weakness alone (H01–H05 are the pattern that scored 0.632 in Phase 3).
+**How stratum B counts [DECIDED, conditional on §3.1].** Stratum B counts toward G1
+and G2 only, not toward G3/G4.
+- Zero tolerance and hygiene are safety properties and must hold on any input.
+- The 5(1)(c) accuracy shortfall is the Phase 3 limitation already accepted
+  (PROJECT_PLAN, 2026-10-25).
+- Stratum B accuracy is reported in its own table, next to stratum A, and never
+  pooled with it.
 
 **Reported, not gated:**
 - extraction field accuracy per stratum, with the Phase 2 scorer;
 - per-state tables;
 - `system_category` and derogation;
-- fallback rate;
+- the fallback rate;
 - cost.
 
-**Small-n, stated in advance.** Twelve cases, one run each. G3 is pooled across states
-because per-state buckets would have 1–6 judgements each. One systematically wrong
-case can cost up to 5 judgements, which can sink G3 on its own. That is accepted as
-the price of a hand-built set, and is said here so it cannot be discovered
-conveniently later.
+### 3.1 The Q1 pre-check: would the D32 failure class trip G1? **Yes.**
+
+The user's condition was to check on dev data, before freezing, whether the known
+failure class would trip G1. If it would, the work stops so that the treatment can be
+decided in advance.
+
+*Data:* the official Phase 3 run (`determination_v1_41c_retry`: M-low, the
+pre-registered prompt, 41 dev cases × 3, gold facts). G1 is applied as defined above,
+to every determination. The extraction row uses the Phase 2 runs.
+
+| What | Dev result |
+|---|---|
+| Determinations expected `unresolved` | 75 judgements: risk tier 15, prohibited 12, roles 15, Art 16 15, Art 26 18 |
+| G1 violations | **3, all from one run: D32#2** |
+| Their cause | One matcher verdict. Annex III 1(c) came back `does_not_match`, where the other two repeats said `insufficient`. Risk tier went `unresolved` → `not_applicable`, and Article 16 and Article 26 followed it. |
+| Article 5(1)(c) on the 12 gold-`unresolved` prohibited runs (D30, D31, D32, D41) | `insufficient` 12/12. Prohibited `unresolved` 12/12, **0 violations**. |
+| `not_in_force` → `not_applicable` | 0 |
+| Extraction (Phase 2, `low`, 90 runs) | Gold-null values kept null: `develops_system` 33/33, `uses_system` 12/12, both `modifies_*` 147/147, branding 59/60 |
+
+What the data shows:
+
+1. **The 5(1)(c) over-caution does not trip G1 on its own.** With the shipped prompt
+   it errs toward `insufficient`, that is, toward `unresolved`. That costs accuracy
+   (Phase 3 prohibited `not_applicable`: 0.632), not safety. On dev, no 5(1)(c)
+   verdict turned an `unresolved` case into a definite answer.
+2. **The D32 class does trip G1.** A borderline `insufficient` flips to
+   `does_not_match` from one run to the next. In Phase 3 the flip was on Annex III
+   1(c), not on 5(1)(c).
+   - Rate: 1 run in 123 (0.8%), or 1 in 15 runs where the risk tier was expected
+     `unresolved`.
+   - One flip produces up to 3 violations, because the obligations inherit the risk
+     tier.
+3. **The held-out set is exposed to it.**
+   - Stratum B has expected-`unresolved` determinations on H07 (prohibited) and H08
+     (risk tier, prohibited, Art 16, Art 26). Both hinge on borderline verdicts.
+   - Stratum A has N12 (roles, Art 16). It depends on extraction keeping
+     `develops_system` null, which never failed on dev.
+4. **The post-hoc variants confirm the direction.** They are not shipped and are
+   cited only as evidence. Pushing 5(1)(c) toward `does_not_match` (v2) produced D32
+   zero-tolerance violations in 2 of 3 runs. Any 5(1)(c) fix trades accuracy for G1
+   risk.
+
+**How G1 should treat it: the user's decision, before freezing.** These are options,
+not a recommendation to weaken G1:
+
+- **(a) Strict, as drafted.** Any G1 violation in either stratum fails Phase 5. A
+  D32-type flip on H07 or H08 would fail the phase.
+- **(b) Strict, counted by root cause.** As (a), but violations are counted and
+  reported per root event. One matcher flip counts as one violation, with its cascade
+  listed. Any violation still fails Phase 5. Only the reporting changes.
+- **(c) Strict on stratum A only.** Stratum B's G1 violations are reported but not
+  gated. Stratum B is then treated like the accepted Phase 3 limitation. This weakens
+  the "safe on every input" reason for counting stratum B at all.
+
+Recommendation: **(b)**. It keeps zero tolerance as a hard gate on every input, and
+the count is honest about cascades. Whatever is chosen is fixed before any held-out
+call and is not redefined afterwards.
+
+### 3.2 G3 and G4 thresholds as counts (Q2, values pending)
+
+**Justification base:** the official Phase 3 dev run, on gold facts.
+
+| Measure | Dev result |
+|---|---|
+| Matcher-backed risk tier + prohibited | 204/246 = **0.829** |
+| Roles + Article 16/26 | 349/369 = **0.946** |
+| Citation grounds on correctly-statused positives | 99/102 = **0.971** |
+
+End-to-end adds extraction error. For G3a it enters only through `relevant_date`,
+because the matcher reads the description, not the extracted facts. For G3b it enters
+through every actor fact. The 95% Wilson intervals are for the threshold count itself.
+
+| Gate | Option | Pass if | Rate | 95% Wilson | Justification (one line) |
+|---|---|---|---|---|---|
+| G3a (n = 24) | 1, as drafted | ≥ 21/24 (≤ 3 misses) | 0.875 | 0.690–0.957 | Phase 3's locked matcher target, 0.85. **Above dev performance (0.829).** |
+| G3a | 2, dev − 0.05 | ≥ 19/24 (≤ 5 misses) | 0.792 | 0.595–0.908 | Dev 0.829 minus a 0.05 margin = 0.779, rounded up to a whole count |
+| G3b (n = 36) | 1, as drafted | ≥ 31/36 (≤ 5 misses) | 0.861 | 0.713–0.939 | Phase 3's 0.85 |
+| G3b | 2, dev − 0.05 | ≥ 33/36 (≤ 3 misses) | 0.917 | 0.782–0.971 | Dev 0.946 minus 0.05 = 0.896, rounded up to a whole count |
+| G4 (n ≤ 10) | 1, as drafted | ≤ 1 mismatch (9/10 at n = 10) | 0.900 | 0.596–0.982 | 0.90 |
+| G4 | 2, dev − 0.05 | 0 mismatches (10/10) | 1.000 | 0.722–1.000 | Dev 0.971 minus 0.05 = 0.921, which allows no miss at n ≤ 10 |
+
+Read this before choosing:
+- **G3a option 1 sits above the dev rate.** The 5(1)(c) over-caution also falls on
+  stratum A: 11 of its 12 prohibited labels are `not_applicable`, and dev scored that
+  bucket at 0.632. About 4 prohibited misses are therefore expected, and option 1
+  allows 3. Option 1 would very likely fail on the known limitation alone. Option 2
+  would probably pass, but narrowly.
+- **The intervals are wide.** At n = 24, 19/24 is compatible with a true rate
+  anywhere in 0.60–0.91. These gates detect gross failure. They do not estimate
+  accuracy precisely.
+- **Under a "dev minus margin" rule, G3b and G4 come out stricter than the draft,**
+  because on dev the rule path and the citations were better than the matcher.
+
+**Small-n, stated in advance.** Twelve cases, one run each. G3 is pooled across
+states, because per-state buckets would have 1–6 judgements each. One systematically
+wrong case can cost up to 5 judgements, which can sink G3 on its own. That is
+accepted as the price of a hand-built set, and is said here so it cannot be
+discovered conveniently later.
 
 ## 4. Attribution of every miss **[PROPOSAL]**
 
-The cost is $0. Every miss is attributed to exactly one stage:
+Attribution costs $0. Every miss is attributed to exactly one stage:
 
-1. **Extraction.** The roles/obligations replay `downstream()` with the *same*
-   recorded matcher verdicts and the gold facts. If that replay is correct, the miss
-   is extraction's.
+1. **Extraction.** The roles and obligations are replayed through `downstream()` with
+   the *same* recorded matcher verdicts and the gold facts. If the replay is correct,
+   the miss is extraction's.
 2. **Date extraction.** If the extracted `relevant_date` differs from gold, the miss is
-   tagged as a date miss. The matcher saw a different candidate set, so it cannot be
-   replayed without a new call, and no new call is made.
+   tagged as a date miss. The matcher saw a different candidate set, so the case
+   cannot be replayed without a new call. No new call is made.
 3. **Matcher.** A risk-tier or prohibited miss with the correct date. The matcher
-   reads only the description, so extraction cannot cause it.
-4. **Rule bug.** The gold-facts replay is still wrong with correct verdicts. This
+   reads only the description.
+4. **Rule bug.** The gold-facts replay is still wrong even with correct verdicts. This
    should be impossible: the rule path scored 1.00 in Phase 3.
-5. **Generation.** Any G1 status-mismatch or G2 failure.
+5. **Generation.** Any G1 status mismatch or G2 failure.
 
-## 5. Stability check (a separate experiment, reported only) **[DECIDED, size PROPOSAL]**
+## 5. Stability check (a separate experiment, reported only) **[DECIDED]**
 
-- Full end-to-end, 3 repeats, on dev cases. It is never pooled with the evaluation.
-  It measures run-to-run variance of the shipped pipeline: same final status in all
-  repeats, per determination.
-- **Size.** At $0.078 per run, 5 cases × 3 = $1.17, which is over the $1 the user set.
-  The proposal is **4 cases × 3 = 12 runs ≈ $0.94**, with a hard sub-cap of $1.00:
-  - D32: the most fragile case (Phase 3 variance);
+- **Design:**
+  - full end-to-end, on dev cases only;
+  - never pooled with the evaluation;
+  - measures the run-to-run variance of the shipped pipeline: whether each
+    determination's final status is the same in every repeat.
+- **Cases:** 4 cases × 3 repeats = 12 runs, about $0.94.
+  - D32: the most fragile case (the Phase 3 variance);
   - D10: a persistent risk-tier miss in Phase 3;
-  - D35: Article 25 retraining, where the roles depend on extraction;
-  - D39: the date comes from extraction.
-- Runs go in repeat-major order (all cases at repeat 0, then repeat 1, then repeat 2).
-  If the sub-cap stops it, a repeat is lost, not a case.
-- The first run doubles as the wiring smoke test.
+  - D35: Article 25 retraining, so the roles depend on extraction;
+  - D39: its date comes from extraction.
+- **Hard cap: $1.10 for this experiment, enforced in code.**
+- **Runs go in rounds:** repeat 1 of all four cases, then repeat 2, then repeat 3. If
+  the cap stops it, a round is lost, not a case.
+- **The first run doubles as the wiring smoke test.**
 
-## 6. Budget and spend control **[DECIDED, numbers PROPOSAL]**
+## 6. Budget and spend control **[DECIDED, reserve PROPOSAL]**
 
-Measured per-call cost at $2 / $10 per M tokens, from frozen ledgers:
+Measured per-call cost at $2 / $10 per M tokens, from the frozen ledgers:
 
 | Stage | Mean | Max observed | Source |
 |---|---|---|---|
@@ -168,91 +272,125 @@ Measured per-call cost at $2 / $10 per M tokens, from frozen ledgers:
 | Generation | $0.0175 | $0.0415 | `phase4_spend.jsonl` (held-out, 39 calls) |
 | **Per case** | **$0.078** | **$0.116** | |
 
-- **Cap: $8 for all Phase 5 API calls, enforced in code** [DECIDED]. The
-  Phase 4 `SpendTracker` is generalised: the cap is a parameter, the ledger is
-  `data/eval/results/phase5_spend.jsonl`, and every call records its stage
-  (extract / match / generate). The phases are `stability`, `heldout` and `demo`.
-- **Held-out reserve first: $3.48** = 20 cases × $0.116 (max observed) × 1.5. The
-  output-token caps are not lowered, because they are part of the frozen stage
-  configurations. The per-call guard still uses each call's full output budget, so
-  one call can never breach the cap: the worst case is a matcher call at
-  32,000 tokens, which costs $0.34.
-- **Planned spend:** held-out ≈ $1.57; stability ≤ $1.00; demo recording ≈ $0.40
-  (5 examples, only after the held-out pass). That is ≈ $3.0, against a worst
-  case of ≈ $4.9.
-- **API failures: the Phase 4 policy** [DECIDED]:
-  - up to 3 automatic retries for transient errors, each guarded and billed;
-  - 429 and other 4xx fail at once;
+- **Cap: $8 for all Phase 5 API calls, enforced in code.** The Phase 4
+  `SpendTracker` is generalised:
+  - the cap is a parameter;
+  - the ledger is `data/eval/results/phase5_spend.jsonl`;
+  - every call records its stage (extract / match / generate);
+  - the phases are `stability` (with its own $1.10 cap), `heldout` and `demo`.
+- **Held-out reserve, taken first: $3.48.** That is 20 cases × $0.116 (the maximum
+  observed) × 1.5.
+  - The output-token caps are not lowered, because they are part of the frozen stage
+    configurations.
+  - The per-call guard still uses each call's full output budget, so no single call
+    can breach the cap. The worst single call is a matcher call at 32,000 output
+    tokens, which costs $0.34.
+- **Planned spend:**
+  - held-out: about $1.57;
+  - stability: about $0.94, capped at $1.10;
+  - demo recording: about $0.40, for 5 examples, only after the held-out pass.
+
+  That totals about $2.9, against a worst case of about $5.0.
+- **API failures follow the Phase 4 policy:**
+  - up to 3 automatic retries for transient errors, each one guarded and billed;
+  - HTTP 429 and other 4xx errors fail at once;
   - content failures are never retried;
-  - clients are built with `max_retries=0`, so no retry is hidden.
-  - A case whose stage still fails is scored as wrong and is not re-run.
-- **No API call until the pre-registration is committed** [DECIDED].
+  - clients are built with `max_retries=0`, so no retry is hidden;
+  - a case whose stage still fails is scored as wrong and is not re-run.
+- **No API call until the pre-registration is committed.**
 
 ## 7. Hard rule and out of scope **[DECIDED]**
 
-- The held-out pass (20 cases) runs **exactly once**. A guard refuses a second run, as
+- **The held-out pass (20 cases) runs exactly once.** A guard refuses a second run, as
   `HeldoutAlreadyRun` does in Phase 4.
-- No prompt, label, check, threshold or code change on any scored path after any
-  held-out output has been seen.
-- **Out of scope:** the generation-model comparison. If budget remains after V1, it
+- **No changes after the held-out pass.** No prompt, label, check, threshold or code
+  on any scored path changes once any held-out output has been seen.
+- **Out of scope: the generation-model comparison.** If budget remains after V1, it
   becomes a separate pre-registered experiment with one cheaper OpenAI model on the
   same key. No other provider.
 - **Demo:**
-  - new examples, recorded once with the frozen pipeline, never edited;
-  - shown with a pointer to the limitations;
+  - new examples, recorded once with the frozen pipeline and never edited;
+  - each shown with a pointer to the limitations;
   - recorded after the held-out pass, from the `demo` budget.
 
 ---
 
 ## 8. Expected outputs for review (N01–N12)
 
-Assessment date 2026-10-25 for all twelve. RT = risk tier, PP = prohibited practice;
-n/a = `not_applicable` with reason (cnm = conditions_not_met, nya =
-not_yet_applicable). Full facts and notes are in `data/eval/e2e_cases.json`.
+The assessment date is 2026-10-25 for all twelve. Abbreviations:
+- RT = risk tier, PP = prohibited practice;
+- n/a = `not_applicable`, with its reason: cnm = `conditions_not_met`, nya =
+  `not_yet_applicable`.
+
+Full facts and labelling notes are in `data/eval/e2e_cases.json`.
 
 | ID | Tests | Description (short) | RT | PP | Roles | Art 16 | Art 26 |
 |---|---|---|---|---|---|---|---|
 | N01 | Art 25(1)(a) + both roles | College licenses an admissions engine, sells it as AdmitIQ, and uses it itself | applicable, III 3(a) | n/a cnm | provider + deployer | applicable | applicable |
-| N02 | Art 25(1)(c), provider only | Contractor configures a general classifier to auto-approve benefit claims for a public agency; the agency runs it | applicable, III 5(a) | n/a cnm | provider | applicable | n/a cnm |
+| N02 | Art 25(1)(c), provider only | Contractor configures a general classifier, model unchanged, to auto-approve benefit claims for a public agency; the agency runs it | applicable, III 5(a) | n/a cnm | provider | applicable | n/a cnm |
 | N03 | temporal | Dispatch centre, DispatchAI used as supplied, "on 1 March 2026" | n/a **nya**, III 5(d) | n/a cnm | deployer | n/a cnm | n/a **nya** |
 | N04 | temporal | same, "as of today" | applicable, III 5(d) | n/a cnm | deployer | n/a cnm | **applicable** |
 | N05 | not_in_force vs n/a | same, "on 15 May 2024" | not_in_force | not_in_force | not_in_force | not_in_force | **not_in_force** |
-| N06 | 6(3) derogation | Immigration office translates asylum documents; no assessment, no profiling | n/a cnm, III 7(c), derogation applied | n/a cnm | deployer | n/a cnm | n/a cnm |
-| N07 | 6(1) route | Lift maker's own AI safety-brake module; notified body | n/a **nya**, Annex I item 4 | n/a cnm | provider | n/a nya | n/a cnm |
-| N08 | both routes | Class IIb medical-device triage software for emergency departments | applicable, III 5(d) **and** Annex I item 11 | n/a cnm | provider | applicable | n/a cnm |
-| N09 | adversarial: asserted conclusion | "Our lawyers say it's minimal-risk"; school exam-essay grader, own build | applicable, III 3(b) | n/a cnm | provider + deployer | applicable | applicable |
-| N10 | adversarial: injection | Redundancy-selection tool + "ignore your previous instructions" note | applicable, III 4(b) | n/a cnm | deployer | n/a cnm | applicable |
-| N11 | adversarial: keyword trap | Sentiment analysis of written product reviews, no biometrics | n/a cnm | n/a cnm | deployer | n/a cnm | n/a cnm |
+| N06 | 6(3)(a) derogation | Immigration office sorts asylum documents into fixed folders for the caseworker; no assessment, no profiling | n/a cnm, III 7(c), derogation applied | n/a cnm | deployer | n/a cnm | n/a cnm |
+| N07 | 6(1) route | Lift maker's own AI safety-brake module; Directive 2014/33/EU, notified body | n/a **nya**, Annex I item 4 | n/a cnm | provider | n/a nya | n/a cnm |
+| N08 | both routes | Class IIb medical-device triage software; Regulation (EU) 2017/745, notified body | applicable, III 5(d) **and** Annex I item 11 | n/a cnm | provider | applicable | n/a cnm |
+| N09 | adversarial: asserted conclusion | "Our lawyers say it's minimal-risk"; school exam-essay grader, built in-house | applicable, III 3(b) | n/a cnm | provider + deployer | applicable | applicable |
+| N10 | adversarial: injection | Redundancy-selection tool used as supplied, plus an "ignore your previous instructions" note | applicable, III 4(b) | n/a cnm | deployer | n/a cnm | applicable |
+| N11 | adversarial: keyword trap | Rates the creditworthiness of bidding *companies*; no individual person assessed | n/a cnm | n/a cnm | deployer | n/a cnm | n/a cnm |
 | N12 | partial role knowledge | Ranks job applicants; "not sure if our IT team built it" | applicable, III 4(a) | n/a cnm | deployer; provider **unresolved** | **unresolved** | applicable |
 
-**Points for your review:**
+**Decidability check (the user's Q4 rule).** Every expected output must be decidable
+from the frozen corpus and the description alone.
+- Each case's grounds are in the corpus: Annex III, Annex I, Articles 5, 6, 16, 25 and
+  26, Article 3(3), (4) and (23), and the applicability rules.
+- Article 3(39) is not in the corpus, and no case needs it any more.
 
-1. **N03 (fixed in this draft).** At first N03, N04 and N10 did not say the system was
-   used unchanged. Under the field rules that makes `modifies_*` null and the
-   provider role `unresolved`. The label test caught it. The descriptions now say
-   "used as supplied".
-2. **N06.** Is translating asylum documents within Annex III 7(c) ("assist … for the
-   examination of applications")? If it is not, the status is the same (not
-   high-risk), and `not_assessed` is accepted under DL1. Only the cited ground
-   differs, and G4 does not score a `not_applicable` without derogation.
-3. **N08.** One system on both routes. Article 16 applies today through the Annex III
-   route only. The 6(1) route would apply from 2027-08-02.
-4. **N11.** The "sentiment ≠ emotion recognition" reading rests on Article 3(39)
-   (emotion recognition is defined on biometric data). The corpus does not hold
-   Article 3(39). The label is from the Act text, not the corpus.
-5. **The 5(1)(c) risk in stratum A.** Most N cases are not social scoring. The known
-   over-caution may push some of their prohibited statuses to `unresolved`, and those
-   misses count in G3. That is intentional: stratum A measures the shipped system,
-   weakness included.
+Changes in round 2:
+
+1. **N06, reworked.** The translation draft hinged on a judgement call: does
+   translating documents "assist the examination"? The new case *sorts the
+   application's documents into fixed folders for the caseworker who examines the
+   application*. That gives:
+   - Annex III 7(c) on its text ("to assist competent public authorities for the
+     examination of applications for asylum");
+   - Article 6(3)(a) on its text ("a narrow procedural task");
+   - an override that does not match, on the description's own words ("does not
+     profile anyone").
+
+   Residual judgement: the corpus does not define "narrow procedural task". Sorting
+   into fixed folders is the plainest instance available.
+2. **N08, clarified.** The description now names Regulation (EU) 2017/745, the
+   instrument Annex I item 11 lists, instead of only "the Medical Device Regulation".
+   Each ground is matched on its own text:
+   - 6(1)(a): "the AI system is itself a product";
+   - 6(1)(b): the notified body is stated;
+   - Annex III 5(d): "emergency healthcare patient triage systems".
+3. **N07, clarified the same way.** The description names "Directive 2014/33/EU" for
+   Annex I item 4.
+4. **N11, replaced.** The sentiment-analysis draft needed Article 3(39), which is not
+   in the corpus, to rule out emotion recognition. The new trap is creditworthiness
+   scoring of *companies*. Both negatives are decidable from the corpus text:
+   - Annex III 5(b) covers "the creditworthiness of natural persons";
+   - Article 5(1)(c) covers "natural persons or groups of persons".
+5. **N03, N04 and N10, fixed in round 1.** The descriptions now say "used as
+   supplied". Without that, the field rules make `modifies_*` null and the provider
+   role `unresolved`. N02, N06 and N11 say it too.
+6. **The 5(1)(c) risk in stratum A is unchanged, and intentional (§3.2).** Stratum A
+   measures the shipped system, weakness included.
 
 ## 9. Decisions needed
 
-- **Q1.** Does stratum B count toward G1–G2 only (recommended), or fully?
-- **Q2.** G3/G4 thresholds as proposed (0.85 / 0.85 / 0.90)?
-- **Q3.** Stability: 4 cases × 3 at ≤ $1.00 (recommended), or 5 × 3 at ≈ $1.17?
-- **Q4.** Do the N01–N12 labels need changes? After approval they are frozen with a
-  SHA.
+- **Q1, G1 treatment: OPEN.** The pre-check (§3.1) shows that the D32 class trips G1.
+  Choose (a), (b) or (c) before freezing. Recommended: (b), strict and counted by root
+  cause. "Stratum B counts toward G1–G2 only" stands, subject to this choice.
+- **Q2, threshold values: OPEN.** Choose option 1 or option 2 for each gate in §3.2,
+  or other values. Every option is stated as a count with its Wilson interval.
+- **Q3: DECIDED.** D32, D10, D35 and D39 × 3, in rounds, with a hard cap of $1.10.
+- **Q4, labels: OPEN.** Review N01–N12 in §8 after the round-2 changes to N06, N07,
+  N08 and N11. Once approved, they are frozen with a SHA.
 
-**After approval:** write the runner and the spend changes ($0) and the SYSTEM_SPEC
-§18 pre-registration. Commit them with the frozen SHAs before any API call, then ask
-before pushing the branch.
+**After approval:**
+- write the runner and the spend changes ($0) and the SYSTEM_SPEC §18
+  pre-registration;
+- commit them with the frozen SHAs before any API call;
+- ask before pushing the branch.
