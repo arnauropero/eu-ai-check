@@ -64,13 +64,20 @@ pre-registration are **frozen**.
 
 ## Next steps, each only with the user's go-ahead
 
-1. Push the branch (the user asks first).
-2. Stability check: `eu-ai-check eval-e2e --mode stability`. This is the first API
-   call, and its first run is the wiring smoke test.
-3. Held-out pass: `eu-ai-check eval-e2e --mode heldout --confirm-heldout`. It runs
-   once and cannot be rerun. After a crash: add `--resume` (resume rule, §18).
-4. After that:
-   - record the demo examples;
-   - write the full README (architecture, rejected alternatives, limitations, setup
-     with the user's own key);
-   - write the PR.
+**Status (2026-11-04, end of day).**
+- Done: the stability check (v2), the held-out pass (acceptance MET, G1–G4 pass),
+  the demo recording, `eu-ai-check assess` and the README.
+- The README commit `3dd99f5` is local only. The branch on origin is at `2acb180`.
+- No PR, merge or tag yet.
+
+Remaining work:
+1. The user reads the README as a first-time visitor.
+2. If it fails the 60-second test, trim the README further.
+3. Open the PR `phase-5/end-to-end` → `master`, merge it, and tag `phase-5`. Each
+   step only with the user's explicit approval.
+4. Update PROJECT_PLAN.
+5. Build the visual demo page.
+
+Open point: the README limitation "V1 will never claim that all five phases met
+their acceptance criteria" uses "five". PROJECT_PLAN numbers the phases 0–5, so there
+are six. Left unchanged pending the user's decision.
