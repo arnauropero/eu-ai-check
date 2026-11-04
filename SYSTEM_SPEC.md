@@ -2665,6 +2665,9 @@ retuned. The runner is `src/eu_ai_check/e2e/` (`eu-ai-check eval-e2e`).
     - A pass cannot start or resume while any scored-path file differs from HEAD
       (modified, staged or untracked).
     - Each case result is appended to the runs file as soon as the case finishes.
+      A case whose stage still fails after the API-failure policy is a recorded
+      result: it ships no answer, it fails G2, all its G3 judgements are misses, and
+      `--resume` does not run it again.
     - On resume, every recorded result is replayed at $0 from its recorded facts and
       verdicts, and must reproduce the record, or the resume is refused.
     - A case cut off mid-way has no recorded result. It runs again, and the calls it

@@ -472,3 +472,39 @@ def test_additions_are_in_the_preregistration() -> None:
     assert "**Resume rule for the held-out pass.**" in SPEC
     for p in ("`src/eu_ai_check`", "`data/corpus`", "`pyproject.toml`", "`uv.lock`"):
         assert p in SPEC
+
+
+def test_a_failed_stage_is_a_recorded_result_and_is_not_rerun_on_resume(tmp_path) -> None:
+    """N02's matcher fails on every attempt (transient, retries exhausted); then the
+    pass is interrupted at N07. On resume N02 is not called again, and it still
+    counts as a G2 failure and five G3 misses."""
+    def failing(stage, case, n):
+        if stage == "provision_verdicts" and case["id"] == "N02":
+            return openai.APIConnectionError(request=REQ)
+        if stage == "provision_verdicts" and case["id"] == "N07":
+            return KeyboardInterrupt()
+        return None
+
+    first = FakeOpenAI(CASES, raise_on=failing)
+    with pytest.raises(KeyboardInterrupt):
+        heldout(tmp_path, first)
+    assert first.calls.count(("provision_verdicts", "N02")) == 1 + runner.MAX_TRANSIENT_RETRIES
+    rows = [json.loads(l) for l in
+            (tmp_path / "e2e_heldout.runs.jsonl").read_text(encoding="utf-8").splitlines()]
+    n02 = next(r for r in rows if r["case_id"] == "N02")
+    assert n02["stage_failed"] == "match" and n02["generation"] is None
+
+    again = FakeOpenAI(CASES)
+    out, t = heldout(tmp_path, again, resume=True)
+    assert not [c for c in again.calls if c[1] == "N02"]            # not re-run
+    g2 = out["gates"]["G2_output_hygiene"]
+    assert g2["pass"] is False and g2["failures"]["N02"][0].startswith("no answer shipped (match:")
+    misses = [m for m in out["misses"] if m["case"] == "N02"]
+    assert len(misses) == 5 and {m["stage"] for m in misses} == {"stage_failure:match"}
+    assert out["gates"]["G3a_risk_tier_prohibited"]["k"] == 22
+    assert out["gates"]["G3b_roles_obligations"]["k"] == 33
+    assert out["stage_failures"]["N02"].startswith("match:")
+    assert out["phase5_acceptance_met"] is False
+    # Every failed attempt stays in the ledger and is never repeated.
+    n02_calls = [e for e in t.entries if e["ref"] == "N02#0" and e["stage"] == "match"]
+    assert [e["attempt"] for e in n02_calls] == [1, 2, 3, 4]
