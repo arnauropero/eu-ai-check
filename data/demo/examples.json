@@ -1,0 +1,36 @@
+{
+  "notice": "Phase 5 demo examples (approved 2026-11-04). New descriptions, none taken from the evaluation sets (N01-N12, H01-H08) or the dev data (D01-D41, E01-E30, S01-S03). Recorded once with the frozen pipeline by `eu-ai-check eval-e2e --mode demo` and never edited. They are a demonstration, not an evaluation: they carry no labels and no score. Every date is explicit, and the demo clock is pinned to the recording date 2026-11-04. The legal text is the frozen 2024-08-01 corpus snapshot.",
+  "demo_clock": "2026-11-04",
+  "examples": [
+    {
+      "id": "X01",
+      "covers": "applicable",
+      "description": "We run a chain of language schools. We built PlaceRight, a tool that scores each new student's online entry test and decides which course level they are placed in; staff do not review the placement. We use it in our own schools under our own name. Which AI Act rules apply to us on 1 November 2026?",
+      "note": null
+    },
+    {
+      "id": "X02",
+      "covers": "unresolved, with follow-up questions",
+      "description": "Our company is planning to use an AI tool in human resources to help with decisions about our staff. Which AI Act rules apply to us on 1 November 2026?",
+      "note": null
+    },
+    {
+      "id": "X03",
+      "covers": "not_in_force",
+      "description": "Our bakery uses an AI tool, bought from a software vendor and used as supplied, that forecasts how many loaves to bake each day from past sales. Which AI Act rules applied to us on 1 June 2024?",
+      "note": null
+    },
+    {
+      "id": "X04",
+      "covers": "a prohibited practice",
+      "description": "Our political consultancy developed software that analyses photos of voters' faces to infer their political opinions, and we use the results to target campaign messages. Which AI Act rules apply to us on 1 November 2026?",
+      "note": "Known limitation: when a prohibited practice applies, the answer still lists high-risk obligations as applying, without flagging the inconsistency (README, Limitations)."
+    },
+    {
+      "id": "X05",
+      "covers": "a cautious unresolved",
+      "description": "Our recruitment team uses DocCheck, a tool we license and use as supplied, that checks each job application for missing documents (CV, certificates, ID) and returns incomplete applications to the candidate before any recruiter reads them. Which AI Act rules apply to us on 1 November 2026?",
+      "note": "Known caution: when the description does not say whether the system profiles people, the Article 6(3) profiling exception stays undecided, so the answer can be unresolved where a lawyer might apply the derogation (README, Limitations)."
+    }
+  ]
+}

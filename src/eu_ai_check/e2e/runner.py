@@ -244,10 +244,11 @@ class CaseRun:
         return out
 
 
-def assessment_date(case: dict) -> date:
-    on = date.fromisoformat(case["assessment_date"]) if case.get("assessment_date") else EVAL_CLOCK
-    if on > EVAL_CLOCK:
-        raise ValueError(f"{case['id']}: assessment_date {on} is after the pinned clock {EVAL_CLOCK}")
+def assessment_date(case: dict, clock: date = EVAL_CLOCK) -> date:
+    """`clock` is EVAL_CLOCK for every scored run; only the demo passes DEMO_CLOCK."""
+    on = date.fromisoformat(case["assessment_date"]) if case.get("assessment_date") else clock
+    if on > clock:
+        raise ValueError(f"{case['id']}: assessment_date {on} is after the pinned clock {clock}")
     return on
 
 
@@ -263,8 +264,8 @@ def _adapter_statuses(inp: GenerationInput) -> dict[str, str]:
 
 def run_case(case: dict, stratum: str, repeat: int, phase: str, stages: Stages,
              tracker: E2ESpend, corpus: Corpus, pipeline: Pipeline,
-             corpus_texts: dict[str, str]) -> CaseRun:
-    on_assess = assessment_date(case)
+             corpus_texts: dict[str, str], clock: date = EVAL_CLOCK) -> CaseRun:
+    on_assess = assessment_date(case, clock)
     ref = f"{case['id']}#{repeat}"
     run = CaseRun(case["id"], stratum, repeat, on_assess.isoformat())
     desc = case["description"]

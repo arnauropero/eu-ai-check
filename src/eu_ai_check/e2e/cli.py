@@ -4,6 +4,8 @@
     --mode stability   D32, D10, D35, D39 × 3, in rounds, under the $1.50 cap
     --mode heldout     the single 20-case pass (needs --confirm-heldout); add --resume
                        to continue a crashed pass (same scored-path tree hash only)
+    --mode demo        record the five demo examples once (data/demo/), after the
+                       held-out pass, under the same $8 cap
 
 Every API call goes through the Phase 5 spend tracker ($8 cap, $3.48 held-out
 reserve). No API call may be made before the §18 pre-registration is committed.
@@ -32,6 +34,13 @@ def cmd_eval_e2e(args: argparse.Namespace) -> int:
     stages = runner.Stages.frozen(runner.default_client())
     if args.mode == "stability":
         out = runner.run_stability(stages, tracker, label=args.label)
+    elif args.mode == "demo":
+        from .demo import run_demo
+
+        out = run_demo(stages, tracker)
+        out = {k: v for k, v in out.items() if k != "examples"} | {
+            "examples": [{k: x[k] for k in ("id", "covers", "stage_failed", "fallback",
+                                            "spend_usd")} for x in out["examples"]]}
     elif args.mode == "heldout":
         out = runner.run_heldout(stages, tracker, confirm=args.confirm_heldout,
                                  resume=args.resume)
@@ -43,7 +52,7 @@ def cmd_eval_e2e(args: argparse.Namespace) -> int:
 
 def register(sub) -> None:
     p = sub.add_parser("eval-e2e", help="Phase 5 end-to-end runner")
-    p.add_argument("--mode", required=True, choices=["status", "stability", "heldout"])
+    p.add_argument("--mode", required=True, choices=["status", "stability", "heldout", "demo"])
     p.add_argument("--label", default="v1", help="stability results label")
     p.add_argument("--confirm-heldout", action="store_true",
                    help="required for the single held-out pass")
