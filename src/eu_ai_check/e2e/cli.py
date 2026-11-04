@@ -7,7 +7,10 @@
     --mode demo        record the five demo examples once (data/demo/), after the
                        held-out pass, under the same $8 cap
 
-Every API call goes through the Phase 5 spend tracker ($8 cap, $3.48 held-out
+`eu-ai-check assess TEXT` runs the same frozen pipeline on your own description
+(see e2e/assess.py). It writes nothing and is capped by --max-cost.
+
+Every evaluation API call goes through the Phase 5 spend tracker ($8 cap, $3.48 held-out
 reserve). No API call may be made before the §18 pre-registration is committed.
 """
 
@@ -50,7 +53,39 @@ def cmd_eval_e2e(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_assess(args: argparse.Namespace) -> int:
+    import sys
+
+    sys.stdout.reconfigure(encoding="utf-8")
+    from . import runner
+    from .assess import CostCapExceeded, assess, render
+
+    stages = runner.Stages.frozen(runner.default_client())
+    try:
+        result = assess(args.text, args.date, stages, max_cost=args.max_cost)
+    except CostCapExceeded as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+    print(render(result))
+    return 0 if result["answer"] is not None else 1
+
+
 def register(sub) -> None:
+    from datetime import date
+
+    from .assess import DEFAULT_MAX_COST_USD
+
+    a = sub.add_parser("assess", help="assess your own description with the full frozen "
+                                      "pipeline (calls the OpenAI API)")
+    a.add_argument("text", help="free-text description of the AI system and its use")
+    a.add_argument("--date", type=date.fromisoformat, default=date.today(),
+                   help="assessment date, YYYY-MM-DD (default: today). A date stated in "
+                        "the description takes precedence")
+    a.add_argument("--max-cost", type=float, default=DEFAULT_MAX_COST_USD,
+                   help=f"USD cap for this run (default {DEFAULT_MAX_COST_USD}); refused "
+                        "before any call if the worst case is above it")
+    a.set_defaults(func=cmd_assess)
+
     p = sub.add_parser("eval-e2e", help="Phase 5 end-to-end runner")
     p.add_argument("--mode", required=True, choices=["status", "stability", "heldout", "demo"])
     p.add_argument("--label", default="v1", help="stability results label")

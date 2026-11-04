@@ -56,13 +56,28 @@ about.
   1. Install with `uv sync`.
   2. Set `OPENAI_API_KEY` to your own key. The project runs no hosted service and
      ships no key.
-- `eu-ai-check extract "<description>" --date 2026-11-01` shows the extracted facts.
-- `eu-ai-check match "<description>" --date 2026-11-01` shows the provision verdicts
-  and the cost of the call.
-- There is not yet a single command that prints the full answer for your own
-  description. To see full answers, read the recorded demo in
+- Run:
+
+  ```
+  eu-ai-check assess "We run a chain of language schools. We built a tool that places each new student in a course level from an online test. Which AI Act rules apply to us on 1 November 2026?"
+  ```
+
+  This runs the full pipeline (extraction, matching, rules, answer with checks and
+  template fallback) and prints the answer. At the end it prints the cost of the
+  run and a pointer to the limitations.
+- **Dates.** `--date YYYY-MM-DD` sets the assessment date; the default is today. A
+  date stated in the description takes precedence.
+- **Cost.**
+  - An assessment costs about **$0.08** on average (held-out pass, `gpt-6.1-sol` at
+    $2 / $10 per million input / output tokens). The dearest held-out case cost
+    $0.101.
+  - `--max-cost` (default $0.75) caps the run. Before any call, the command checks
+    the worst case of all three calls at their full output budgets, about $0.60,
+    and refuses to start if that is over the cap. Every call is then guarded again,
+    so a run cannot spend more than the cap.
+- `assess` writes no files.
+- To see full answers without a key, read the recorded demo in
   `data/demo/recording.md`.
-- A full assessment costs about $0.08 on average (see "End-to-end results").
 
 **Results at a glance.**
 - The pre-registered end-to-end evaluation passed all four of its gates, two of them

@@ -10,6 +10,7 @@
     eu-ai-check eval-extraction run the Phase 2 extraction evaluation harness
     eu-ai-check eval-generation the Phase 4 generation harness (see generation/cli.py)
     eu-ai-check eval-e2e        the Phase 5 end-to-end runner (see e2e/cli.py)
+    eu-ai-check assess TEXT     assess your own description with the full pipeline
 
 Ingestion exits non-zero when an invariant is broken. A broken invariant is not a
 warning to scroll past: per SYSTEM_SPEC.md §12.1 it would resurface later as a
