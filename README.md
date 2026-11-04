@@ -219,16 +219,31 @@ verdict. Results are in `data/eval/results/e2e_stability_v2.json`.
     obligations.
   - The Phase 4 raters reported the same thing (SYSTEM_SPEC.md §18). It comes from
     the shared determinations and renderer, not from the generator.
-- **The Article 6(3) profiling exception makes answers cautious.**
+- **The checks verify citations and quotes, not the legal reasoning.**
+  - The matcher must quote both the description and the provision, and the answer's
+    claims must cite real evidence items. Code checks all of that.
+  - No check judges whether applying a provision to the description is correct.
+  - Demo example X05 shows the gap. The matcher marked Article 6(3)(b) (improving
+    the result of a previously completed human activity), although the description
+    mentions no previous human activity. The quotes were verbatim, so every check
+    passed.
+  - The matcher can also add grounds on its own: in demo example X04 it added
+    Annex III 8(b) (influencing elections or voting behaviour), which nobody had
+    anticipated for that example.
+- **Behaviour on the Article 6(3) profiling question varies with the description.**
   - Suppose a system listed in Annex III meets an Article 6(3) condition (for
-    example, a narrow procedural task), but its description does not say whether it
-    profiles people. The profiling exception then stays undecided, and so does the
-    risk tier.
-  - A lawyer might apply the derogation in such a case, where the system says
-    `unresolved`.
-  - Dev case D10 shows this. Article 6(3)(a) and (c) matched, the profiling
-    exception came back undecided, and the risk tier was `unresolved` in all three
+    example, a narrow procedural task). The derogation then hinges on whether the
+    system profiles people. If the matcher judges that the description does not
+    answer that, the risk tier stays `unresolved`, where a lawyer might apply the
+    derogation.
+  - Dev case D10 went that way. Article 6(3)(a) and (c) matched, the profiling
+    question stayed undecided, and the risk tier was `unresolved` in all three
     stability repeats. Its label is `not_applicable`.
+  - Demo example X05 went the other way. The matcher judged that "checks each job
+    application for missing documents" answers the profiling question (no
+    profiling), and applied the derogation.
+  - A definite answer can therefore rest on an inference from a sparse
+    description.
 - **G2 mixes output quality with infrastructure noise.** The held-out pass made 70
   recorded call attempts: 59 completed and 11 transient connection errors, all
   recovered by the pre-registered retries. G2 passing depended on that recovery as
