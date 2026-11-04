@@ -111,6 +111,7 @@ def assess(description: str, on: date, stages: runner.Stages, *,
         "relevant_date": run.relevant_date if run else None,
         "statuses": run.predicted if run else {},
         "worst_case_usd": round(bound, 4),
+        "max_cost_usd": max_cost,
         "cost_usd": round(tracker.spent, 6),
         "calls": tracker.entries,
     }
@@ -130,7 +131,7 @@ def render(result: dict[str, Any]) -> str:
               f"Assessed for {result['relevant_date'] or 'n/a'} with the frozen pipeline "
               f"({runner.MODEL}).",
               f"Cost of this run: ${result['cost_usd']:.4f} ({len(calls)} API call"
-              f"{'s' if len(calls) != 1 else ''}; worst case allowed "
-              f"${result['worst_case_usd']:.2f}).",
+              f"{'s' if len(calls) != 1 else ''}; worst case checked before the run "
+              f"${result['worst_case_usd']:.2f}, cap --max-cost ${result['max_cost_usd']:.2f}).",
               LIMITATIONS_POINTER]
     return "\n".join(lines)

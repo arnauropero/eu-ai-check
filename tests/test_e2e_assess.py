@@ -56,6 +56,8 @@ def test_assess_runs_the_full_frozen_pipeline_and_prints_cost_and_limitations() 
     text = A.render(result)
     assert text.startswith(result["answer"])
     assert f"Cost of this run: ${result['cost_usd']:.4f} (3 API calls" in text
+    assert (f"worst case checked before the run ${result['worst_case_usd']:.2f}, "
+            f"cap --max-cost {chr(36)}0.75)") in text
     assert text.rstrip().endswith(A.LIMITATIONS_POINTER)
     assert "Not legal advice" in text
 
