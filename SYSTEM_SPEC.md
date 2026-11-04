@@ -2599,10 +2599,12 @@ retuned. The runner is `src/eu_ai_check/e2e/` (`eu-ai-check eval-e2e`).
   - cost.
 - **Hard rule.**
   - **The held-out pass (N01–N12 + H01–H08) runs exactly once.** A marker is written
-    before its first call. The runner refuses a second pass, or a pass after a crash.
+    before its first call. The runner refuses a second pass. A crashed or interrupted
+    pass may only be resumed under the resume rule below.
   - **No tuning after any result.** No prompt, label, check, threshold or code on any
     scored path changes against H01–H08 or N01–N12 once any of their output, or any
-    stability output, has been seen.
+    stability output, has been seen. The only exception is the wiring-fix carve-out
+    below.
   - Any future fix needs a new held-out set (README, future work).
 - **Stability check: a separate experiment, reported only, never pooled.**
   - Dev cases D32, D10, D35 and D39 × 3, full end-to-end.
@@ -2641,6 +2643,32 @@ retuned. The runner is `src/eu_ai_check/e2e/` (`eu-ai-check eval-e2e`).
   reported as one.
 - **Out of scope:** the generation-model comparison (design §7). The demo is recorded
   after the held-out pass, from the same $8 cap.
+- **Additions approved 2026-11-04, before any push or API call.**
+  - **Wiring-fix carve-out.** Once stability output has been seen, a fix is allowed
+    **only** if it changes no stage configuration, prompt, label, check, threshold
+    or scoring logic. Each such fix must:
+    - be verified by tests;
+    - be recorded as a dated deviation note in this section;
+    - be shown to the user before the held-out pass.
+
+    Anything else falls under the no-tuning rule above.
+  - **Resume rule for the held-out pass.**
+    - After a crash or interruption, the runner (`--resume`) may continue with the
+      cases that have no recorded result. It never re-runs a case with a recorded
+      result.
+    - It may do so only if the git tree hash of all scored-path files equals the hash
+      recorded in the marker. Anything else is refused.
+    - The scored paths are `src/eu_ai_check`, `data/corpus`, the two case files,
+      `pyproject.toml` and `uv.lock`. The hash is the git object hash of each at
+      HEAD, combined with SHA-256. It is written into the marker before the first
+      call.
+    - A pass cannot start or resume while any scored-path file differs from HEAD
+      (modified, staged or untracked).
+    - Each case result is appended to the runs file as soon as the case finishes.
+    - On resume, every recorded result is replayed at $0 from its recorded facts and
+      verdicts, and must reproduce the record, or the resume is refused.
+    - A case cut off mid-way has no recorded result. It runs again, and the calls it
+      had already made stay in the ledger and count toward the caps.
 
 ---
 

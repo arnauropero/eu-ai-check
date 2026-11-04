@@ -355,6 +355,26 @@ Measured per-call cost at $2 / $10 per M tokens, from the frozen ledgers:
   - new examples, recorded once with the frozen pipeline and never edited;
   - each shown with a pointer to the limitations;
   - recorded after the held-out pass, from the `demo` budget.
+- **Added 2026-11-04 (SYSTEM_SPEC §18):**
+  - *wiring-fix carve-out:* after stability output is seen, the only fixes allowed are
+    those that change no stage configuration, prompt, label, check, threshold or
+    scoring logic. Each one is tested, recorded as a dated §18 deviation note and shown
+    to the user before the held-out pass;
+  - *resume rule:* a crashed held-out pass may continue only with the cases that have
+    no recorded result, and only if the scored-path git tree hash equals the one in the
+    marker.
+
+### 7.1 Limitations of this evaluation (stated before any run)
+
+- **The new cases are not independent of the system's builder.** N01–N12 were written
+  by the project author and Claude Code, and their labels were reviewed by a second
+  Claude session. They test the system against its builders' reading of the Act, not
+  against an independent annotator's. Systematic misreadings shared by the builders
+  and the labels would not show up as misses.
+- **The G3 thresholds come from a different setting.** They derive from dev
+  performance with gold facts (Phase 3). The end-to-end run also includes extraction
+  error, so the same pipeline would be expected to score lower here than on dev.
+  The thresholds are not adjusted for this (design §3.2).
 
 ---
 

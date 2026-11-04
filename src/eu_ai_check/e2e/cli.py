@@ -2,7 +2,8 @@
 
     --mode status      spend so far, reserve and budgets ($0, no client)
     --mode stability   D32, D10, D35, D39 × 3, in rounds, under the $1.50 cap
-    --mode heldout     the single 20-case pass (needs --confirm-heldout)
+    --mode heldout     the single 20-case pass (needs --confirm-heldout); add --resume
+                       to continue a crashed pass (same scored-path tree hash only)
 
 Every API call goes through the Phase 5 spend tracker ($8 cap, $3.48 held-out
 reserve). No API call may be made before the §18 pre-registration is committed.
@@ -32,7 +33,8 @@ def cmd_eval_e2e(args: argparse.Namespace) -> int:
     if args.mode == "stability":
         out = runner.run_stability(stages, tracker, label=args.label)
     elif args.mode == "heldout":
-        out = runner.run_heldout(stages, tracker, confirm=args.confirm_heldout)
+        out = runner.run_heldout(stages, tracker, confirm=args.confirm_heldout,
+                                 resume=args.resume)
     else:
         raise SystemExit(f"unknown mode {args.mode}")
     print(json.dumps(out, indent=2, default=str, ensure_ascii=False))
@@ -45,4 +47,7 @@ def register(sub) -> None:
     p.add_argument("--label", default="v1", help="stability results label")
     p.add_argument("--confirm-heldout", action="store_true",
                    help="required for the single held-out pass")
+    p.add_argument("--resume", action="store_true",
+                   help="continue a crashed held-out pass: only cases without a recorded "
+                        "result, only if the scored-path tree hash matches the marker")
     p.set_defaults(func=cmd_eval_e2e)

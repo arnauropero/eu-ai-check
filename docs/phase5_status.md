@@ -24,6 +24,10 @@ pre-registration are **frozen**.
   - a stability cap of **$1.50**, raised from $1.10 before freezing and before any
     API call, because the worst-case-per-call check would have cut round 3 short;
   - stability statistics use complete rounds only.
+- **Additions (2026-11-04, before any push or API call):** the wiring-fix carve-out
+  and the held-out resume rule (scored-path git tree hash in the marker), in §18.
+  The limitations of the eval set (builder-written cases, G3 thresholds from gold-fact
+  dev runs) are in design §7.1 and the README.
 - **Clock:** pinned to 2026-10-25. No system-clock call on the evaluation path
   (tested). Expected outputs are relative to the 2024-08-01 corpus snapshot.
 
@@ -64,7 +68,7 @@ pre-registration are **frozen**.
 2. Stability check: `eu-ai-check eval-e2e --mode stability`. This is the first API
    call, and its first run is the wiring smoke test.
 3. Held-out pass: `eu-ai-check eval-e2e --mode heldout --confirm-heldout`. It runs
-   once and cannot be rerun.
+   once and cannot be rerun. After a crash: add `--resume` (resume rule, §18).
 4. After that:
    - record the demo examples;
    - write the full README (architecture, rejected alternatives, limitations, setup

@@ -425,46 +425,145 @@ def run_stability(stages: Stages, tracker: E2ESpend, *, label: str = "v1",
 
 
 # --------------------------------------------------------------------------
+# Scored-path tree hash (resume rule, §18 addition 2026-11-04)
+# --------------------------------------------------------------------------
+
+#: Everything that can change a scored output: the code, the corpus, the two case
+#: files and the locked dependencies.
+SCORED_PATHS = ("src/eu_ai_check", "data/corpus", "data/eval/e2e_cases.json",
+                "data/eval/determination_heldout_5_1_c.json", "pyproject.toml", "uv.lock")
+
+
+class ScoredTreeError(RuntimeError):
+    pass
+
+
+def scored_tree(root: Path = Path(".")) -> dict[str, Any]:
+    """The git object hashes of the scored-path files at HEAD. Refused if any of
+    them differs from HEAD (modified, staged or untracked), because then HEAD would
+    not describe the code that runs."""
+    import subprocess
+
+    def git(*args: str) -> str:
+        return subprocess.run(["git", *args], cwd=root, check=True, capture_output=True,
+                              text=True).stdout.strip()
+
+    dirty = git("status", "--porcelain", "--untracked-files=all", "--", *SCORED_PATHS)
+    if dirty:
+        raise ScoredTreeError(f"scored-path files differ from HEAD:\n{dirty}")
+    paths = {p: git("rev-parse", f"HEAD:{p}") for p in SCORED_PATHS}
+    combined = hashlib.sha256(json.dumps(paths, sort_keys=True).encode()).hexdigest()
+    return {"paths": paths, "combined_sha256": combined}
+
+
+# --------------------------------------------------------------------------
 # The single held-out pass
 # --------------------------------------------------------------------------
 
-def run_heldout(stages: Stages, tracker: E2ESpend, *, confirm: bool,
-                results_dir: Path = RESULTS) -> dict[str, Any]:
-    """Exactly once. A marker is written before the first call, so even a crashed
-    pass cannot be re-run."""
+class ResumeRefused(RuntimeError):
+    pass
+
+
+def restore(rec: dict[str, Any], case: dict, env: "_Env") -> CaseRun:
+    """A recorded case result, rebuilt at $0 for scoring: the determination is
+    replayed from the recorded facts and verdicts and must reproduce the record."""
+    from ..generation.adapter import ReplayMatcher
+
+    keep = {k: v for k, v in rec.items() if k not in ("facts", "determination", "gen_input")}
+    run = CaseRun(**keep)
+    facts = (rec.get("extraction") or {}).get("facts")
+    if facts is None or not rec.get("predicted"):
+        return run
+    run.facts = CaseFacts.model_validate(facts)
+    on = date.fromisoformat(rec["relevant_date"])
+    det = env.pipeline.determine(run.facts, case["description"], on, ReplayMatcher(
+        {"verdicts": rec["verdicts"], "match_error": rec["matcher_error"]}))
+    if json.loads(json.dumps(predicted_labels(det))) != rec["predicted"]:
+        raise ResumeRefused(f"{rec['case_id']}: recorded result does not replay")
+    run.determination = det
+    if rec.get("adapter_statuses"):
+        inp = adapt(det, run.facts, on, env.corpus, env.pipeline, f"{rec['case_id']}#0")
+        if _adapter_statuses(inp) != rec["adapter_statuses"]:
+            raise ResumeRefused(f"{rec['case_id']}: recorded adapter input does not replay")
+        run.gen_input = inp
+    return run
+
+
+def _append_jsonl(path: Path, row: dict) -> None:
+    with path.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(row, ensure_ascii=False, default=str) + "\n")
+
+
+def run_heldout(stages: Stages, tracker: E2ESpend, *, confirm: bool, resume: bool = False,
+                results_dir: Path = RESULTS, tree=scored_tree) -> dict[str, Any]:
+    """Exactly once. The marker, written before the first call, records the
+    scored-path tree hash. Each case result is appended to the runs file as soon
+    as the case finishes.
+
+    Resume rule (§18 addition, 2026-11-04): after a crash or interruption,
+    `resume=True` continues with the cases that have no recorded result. It never
+    re-runs a case with a recorded result, and only if the scored-path tree hash
+    equals the one in the marker. Anything else is refused."""
     stages.check_frozen()
     marker = results_dir / HELDOUT_MARKER.name
     runs_path, summary_path = results_dir / HELDOUT_RUNS.name, results_dir / HELDOUT_SUMMARY.name
     if not confirm:
         raise HeldoutAlreadyRun("the held-out pass needs explicit confirmation (--confirm-heldout)")
-    if marker.exists() or runs_path.exists() or summary_path.exists() or tracker.calls("heldout"):
-        raise HeldoutAlreadyRun("the held-out pass has already been started; it runs exactly once")
     cases = heldout_cases()
     if [c["id"] for _, c in cases] != [f"N{i:02d}" for i in range(1, 13)] + [
             f"H{i:02d}" for i in range(1, 9)]:
         raise RuntimeError("the held-out set must be exactly N01-N12 + H01-H08")
-    tracker.preflight_heldout()
+    current_tree = tree()
+    if resume:
+        if summary_path.exists():
+            raise ResumeRefused("the held-out pass is complete; nothing to resume")
+        if not marker.exists():
+            raise ResumeRefused("no held-out marker: there is no started pass to resume")
+        started = json.loads(marker.read_text(encoding="utf-8"))
+        if started.get("scored_tree", {}).get("combined_sha256") != current_tree["combined_sha256"]:
+            raise ResumeRefused("scored-path tree hash differs from the one in the marker")
+    else:
+        if marker.exists() or runs_path.exists() or summary_path.exists() or tracker.calls("heldout"):
+            raise HeldoutAlreadyRun("the held-out pass has already been started; it runs exactly "
+                                    "once (a crashed pass may only be resumed)")
+        tracker.preflight_heldout()
     env = _Env()
-    results_dir.mkdir(parents=True, exist_ok=True)
-    marker.write_text(json.dumps(_meta(stages)) + "\n", encoding="utf-8")
+    by_id = {c["id"]: c for _, c in cases}
+    done: dict[str, CaseRun] = {}
+    if resume and runs_path.exists():
+        for line in runs_path.read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                rec = json.loads(line)
+                if rec["case_id"] in done:
+                    raise ResumeRefused(f"{rec['case_id']} recorded twice")
+                done[rec["case_id"]] = restore(rec, by_id[rec["case_id"]], env)
+    if not resume:
+        results_dir.mkdir(parents=True, exist_ok=True)
+        marker.write_text(json.dumps({**_meta(stages), "scored_tree": current_tree}) + "\n",
+                          encoding="utf-8")
 
-    runs: list[CaseRun] = []
     budget_stop = None
     for stratum, case in cases:
-        if budget_stop:
-            runs.append(CaseRun(case["id"], stratum, 0, case["assessment_date"], "budget",
-                                f"not called: {budget_stop}"))
+        if case["id"] in done:          # never re-run a case with a recorded result
             continue
-        try:
-            runs.append(run_case(case, stratum, 0, "heldout", stages, tracker, env.corpus,
-                                 env.pipeline, env.texts))
-        except BudgetExceeded as exc:  # should be impossible with the reserve
-            budget_stop = str(exc)
-            runs.append(CaseRun(case["id"], stratum, 0, case["assessment_date"], "budget",
-                                f"not called: {budget_stop}"))
-    summary = {**score_heldout(runs, {c["id"]: c for _, c in cases}, env.pipeline),
-               "budget_stop": budget_stop, "spent_heldout_usd": round(tracker.spent_in("heldout"), 6),
-               "spent_total_usd": round(tracker.spent, 6), **_meta(stages)}
-    _write_jsonl(runs_path, [r.record() for r in runs])
+        if budget_stop:
+            run = CaseRun(case["id"], stratum, 0, case["assessment_date"], "budget",
+                          f"not called: {budget_stop}")
+        else:
+            try:
+                run = run_case(case, stratum, 0, "heldout", stages, tracker, env.corpus,
+                               env.pipeline, env.texts)
+            except BudgetExceeded as exc:  # should be impossible with the reserve
+                budget_stop = str(exc)
+                run = CaseRun(case["id"], stratum, 0, case["assessment_date"], "budget",
+                              f"not called: {budget_stop}")
+        _append_jsonl(runs_path, run.record())
+        done[case["id"]] = run
+    runs = [done[c["id"]] for _, c in cases]
+    summary = {**score_heldout(runs, by_id, env.pipeline),
+               "budget_stop": budget_stop, "resumed": resume,
+               "spent_heldout_usd": round(tracker.spent_in("heldout"), 6),
+               "spent_total_usd": round(tracker.spent, 6), **_meta(stages),
+               "scored_tree": current_tree}
     summary_path.write_text(json.dumps(summary, indent=2, default=str) + "\n", encoding="utf-8")
     return summary

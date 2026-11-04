@@ -36,3 +36,17 @@ rests on a retrieval miss. Evidence text comes from the corpus by provision id.
 Retrieval was built and measured in Phase 1 and is still used by the score-cutoff
 baseline and by `eu-ai-check search`, but the end-to-end evaluation does not exercise
 it. See the dated note in SYSTEM_SPEC.md §18 (2026-10-25).
+
+## Known limitations of the evaluation
+
+These are stated before any Phase 5 run (SYSTEM_SPEC.md §18, Phase 5
+pre-registration). The full list of limitations will be added here.
+
+- **The end-to-end cases are not independent of the system's builder.** The 12 new
+  cases (N01–N12) were written by the project author and Claude Code. A second
+  Claude session reviewed their labels. A misreading of the Act shared by the
+  builders and the labels would not show up as a miss.
+- **The G3 thresholds come from a different setting.** They come from development
+  performance measured with gold (hand-labelled) facts. The end-to-end run also
+  includes fact-extraction error, so it is a harder setting than the one the
+  thresholds came from.

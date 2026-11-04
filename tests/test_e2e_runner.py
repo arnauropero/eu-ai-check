@@ -31,9 +31,17 @@ def stages(fake: FakeOpenAI) -> runner.Stages:
     return runner.Stages.frozen(runner.RecordingClient(fake))
 
 
-def heldout(tmp_path, fake: FakeOpenAI) -> tuple[dict, E2ESpend]:
+TREE = {"paths": {"src/eu_ai_check": "t1"}, "combined_sha256": "c1"}
+
+
+def tree():
+    return TREE
+
+
+def heldout(tmp_path, fake: FakeOpenAI, **kw) -> tuple[dict, E2ESpend]:
     t = E2ESpend(tmp_path / "spend.jsonl", eval_clock=runner.EVAL_CLOCK)
-    return runner.run_heldout(stages(fake), t, confirm=True, results_dir=tmp_path), t
+    return runner.run_heldout(stages(fake), t, confirm=True, results_dir=tmp_path, tree=tree,
+                              **kw), t
 
 
 @pytest.fixture(autouse=True)
@@ -135,6 +143,7 @@ def test_results_and_marker_are_written(oracle_run) -> None:
     assert marker["eval_clock"] == "2026-10-25"
     assert marker["e2e_cases_sha256"] == out["e2e_cases_sha256"]
     assert marker["generator"]["prompt_sha"] == runner.GENERATION_PROMPT_SHA
+    assert marker["scored_tree"] == TREE
     rows = (d / "e2e_heldout.runs.jsonl").read_text(encoding="utf-8").splitlines()
     assert [json.loads(r)["case_id"] for r in rows] == [c["id"] for c in CASES]
 
@@ -143,11 +152,11 @@ def test_heldout_runs_exactly_once(tmp_path) -> None:
     fake = FakeOpenAI(CASES)
     t = E2ESpend(tmp_path / "s.jsonl", eval_clock=runner.EVAL_CLOCK)
     with pytest.raises(runner.HeldoutAlreadyRun, match="confirmation"):
-        runner.run_heldout(stages(fake), t, confirm=False, results_dir=tmp_path)
-    runner.run_heldout(stages(fake), t, confirm=True, results_dir=tmp_path)
+        runner.run_heldout(stages(fake), t, confirm=False, results_dir=tmp_path, tree=tree)
+    runner.run_heldout(stages(fake), t, confirm=True, results_dir=tmp_path, tree=tree)
     calls = len(fake.calls)
     with pytest.raises(runner.HeldoutAlreadyRun):
-        runner.run_heldout(stages(fake), t, confirm=True, results_dir=tmp_path)
+        runner.run_heldout(stages(fake), t, confirm=True, results_dir=tmp_path, tree=tree)
     assert len(fake.calls) == calls
 
 
@@ -156,7 +165,7 @@ def test_a_crashed_heldout_pass_cannot_be_rerun(tmp_path) -> None:
     fake = FakeOpenAI(CASES)
     t = E2ESpend(tmp_path / "s.jsonl", eval_clock=runner.EVAL_CLOCK)
     with pytest.raises(runner.HeldoutAlreadyRun):
-        runner.run_heldout(stages(fake), t, confirm=True, results_dir=tmp_path)
+        runner.run_heldout(stages(fake), t, confirm=True, results_dir=tmp_path, tree=tree)
     assert fake.calls == []
 
 
@@ -166,7 +175,7 @@ def test_only_the_frozen_configuration_runs(tmp_path) -> None:
     s.matcher.effort = "medium"
     t = E2ESpend(tmp_path / "s.jsonl", eval_clock=runner.EVAL_CLOCK)
     with pytest.raises(RuntimeError, match="frozen configuration"):
-        runner.run_heldout(s, t, confirm=True, results_dir=tmp_path)
+        runner.run_heldout(s, t, confirm=True, results_dir=tmp_path, tree=tree)
     assert not (tmp_path / "e2e_heldout.started").exists() and fake.calls == []
 
 
@@ -179,6 +188,107 @@ def test_frozen_configuration_values() -> None:
         "gpt-6.1-sol", "low", "baseline")
     assert (s.generator.model, s.generator.effort, s.generator.max_output_tokens) == (
         "gpt-6.1-sol", "low", 5000)
+
+
+# --------------------------------------------------------------------------
+# Resume rule (§18 addition, 2026-11-04)
+# --------------------------------------------------------------------------
+
+def _interrupt_at(case_id):
+    def boom(stage, case, n):
+        if stage == "provision_verdicts" and case["id"] == case_id:
+            return KeyboardInterrupt()
+        return None
+    return boom
+
+
+def _recorded(tmp_path) -> list[str]:
+    return [json.loads(l)["case_id"] for l in
+            (tmp_path / "e2e_heldout.runs.jsonl").read_text(encoding="utf-8").splitlines()]
+
+
+def test_resume_continues_only_cases_without_a_recorded_result(tmp_path, oracle_run) -> None:
+    with pytest.raises(KeyboardInterrupt):
+        heldout(tmp_path, FakeOpenAI(CASES, raise_on=_interrupt_at("N07")))
+    recorded = _recorded(tmp_path)
+    assert recorded == ["N01", "N02", "N03", "N04", "N05", "N06"]
+    with pytest.raises(runner.HeldoutAlreadyRun):          # a fresh start is refused
+        heldout(tmp_path, FakeOpenAI(CASES))
+    again = FakeOpenAI(CASES)
+    out, _ = heldout(tmp_path, again, resume=True)
+    called = {ref for _, ref in again.calls if ref != "gen"}
+    assert called == {c["id"] for c in CASES} - set(recorded)
+    assert out["resumed"] is True
+    full, _, _ = oracle_run
+    assert out["gates"] == full["gates"]                  # restored cases score the same
+    assert sorted(_recorded(tmp_path)) == sorted(c["id"] for c in CASES)
+    with pytest.raises(runner.ResumeRefused, match="complete"):
+        heldout(tmp_path, FakeOpenAI(CASES), resume=True)
+
+
+def test_resume_is_refused_if_the_scored_tree_changed(tmp_path, monkeypatch) -> None:
+    with pytest.raises(KeyboardInterrupt):
+        heldout(tmp_path, FakeOpenAI(CASES, raise_on=_interrupt_at("N03")))
+    monkeypatch.setitem(TREE, "combined_sha256", "c2")
+    fake = FakeOpenAI(CASES)
+    with pytest.raises(runner.ResumeRefused, match="tree hash"):
+        heldout(tmp_path, fake, resume=True)
+    assert fake.calls == []
+
+
+def test_resume_without_a_started_pass_is_refused(tmp_path) -> None:
+    with pytest.raises(runner.ResumeRefused, match="no held-out marker"):
+        heldout(tmp_path, FakeOpenAI(CASES), resume=True)
+
+
+def test_resume_refuses_a_recorded_result_that_does_not_replay(tmp_path) -> None:
+    with pytest.raises(KeyboardInterrupt):
+        heldout(tmp_path, FakeOpenAI(CASES, raise_on=_interrupt_at("N03")))
+    runs = tmp_path / "e2e_heldout.runs.jsonl"
+    rows = [json.loads(l) for l in runs.read_text(encoding="utf-8").splitlines()]
+    rows[0]["predicted"]["risk_tier"] = "unresolved"
+    runs.write_text("".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8")
+    fake = FakeOpenAI(CASES)
+    with pytest.raises(runner.ResumeRefused, match="does not replay"):
+        heldout(tmp_path, fake, resume=True)
+    assert fake.calls == []
+
+
+def _git(root, *args) -> None:
+    import subprocess
+    subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@t", "-c",
+                    "core.autocrlf=false", *args], cwd=root, check=True, capture_output=True)
+
+
+def test_scored_tree_hash_requires_a_clean_scored_path(tmp_path) -> None:
+    for p in runner.SCORED_PATHS:
+        f = tmp_path / p if Path(p).suffix else tmp_path / p / "x.py"
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_text("1\n", encoding="utf-8")
+    _git(tmp_path, "init", "-q")
+    _git(tmp_path, "add", ".")
+    _git(tmp_path, "commit", "-q", "-m", "x")
+    first = runner.scored_tree(tmp_path)
+    assert set(first["paths"]) == set(runner.SCORED_PATHS)
+    assert runner.scored_tree(tmp_path) == first
+    (tmp_path / "src/eu_ai_check/x.py").write_text("2\n", encoding="utf-8")
+    with pytest.raises(runner.ScoredTreeError):
+        runner.scored_tree(tmp_path)
+    _git(tmp_path, "commit", "-qam", "y")
+    assert runner.scored_tree(tmp_path)["combined_sha256"] != first["combined_sha256"]
+    (tmp_path / "data/corpus/new.json").write_text("{}\n", encoding="utf-8")
+    with pytest.raises(runner.ScoredTreeError):              # untracked counts too
+        runner.scored_tree(tmp_path)
+    (tmp_path / "data/corpus/new.json").unlink()
+    (tmp_path / "notes.txt").write_text("not scored\n", encoding="utf-8")
+    runner.scored_tree(tmp_path)                             # outside the scored paths
+
+
+def test_scored_paths_cover_code_corpus_cases_and_locks() -> None:
+    assert runner.SCORED_PATHS == ("src/eu_ai_check", "data/corpus", "data/eval/e2e_cases.json",
+                                   "data/eval/determination_heldout_5_1_c.json",
+                                   "pyproject.toml", "uv.lock")
+    assert all(Path(p).exists() for p in runner.SCORED_PATHS)
 
 
 # --------------------------------------------------------------------------
@@ -355,3 +465,10 @@ def test_stability_stops_after_a_failed_smoke_run(tmp_path) -> None:
     out = runner.run_stability(stages(fake), t, results_dir=tmp_path)
     assert out["smoke_test_failed"].startswith("extract:")
     assert len(fake.calls) == 1 and out["runs"] == 1
+
+
+def test_additions_are_in_the_preregistration() -> None:
+    assert "**Wiring-fix carve-out.**" in SPEC
+    assert "**Resume rule for the held-out pass.**" in SPEC
+    for p in ("`src/eu_ai_check`", "`data/corpus`", "`pyproject.toml`", "`uv.lock`"):
+        assert p in SPEC
