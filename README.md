@@ -10,8 +10,67 @@ a free-text description of an AI system and determines four things:
 Every determination cites the provisions it rests on. Each one comes out as
 `applicable`, `not_applicable`, `unresolved` or `not_in_force`.
 
-> This README is being written as part of Phase 5. Architecture, rejected
-> alternatives, known limitations and setup instructions will be added here.
+## In plain words
+
+**The question it answers.** "Which EU AI Act rules apply to my AI system, and to
+my organisation, on a given date?" You describe the system in your own words,
+including what it does, who built it, who uses it and the date you are asking
+about.
+
+**What you get back.**
+- **Four determinations:**
+  - the risk tier;
+  - whether the use is a prohibited practice;
+  - your role (provider and/or deployer);
+  - whether the Article 16 (provider) and Article 26 (deployer) obligations apply.
+- **Each determination comes with:**
+  - one of four statuses: applies, does not apply, could not be determined, or not
+    yet in force on that date;
+  - the exact provisions it rests on, quoted from the Act;
+  - when it could not be determined, a list of what you would need to tell it.
+
+**What it is not.**
+- It is not legal advice.
+- It covers only the provisions listed above.
+- It reads the Act as published on 2024-08-01, with no later amendments.
+- When the description leaves a point open, it says so rather than guess, so expect
+  `unresolved` answers.
+
+**How it works, in four steps:**
+1. **Fact extraction.** A language model turns your description into a fixed set of
+   plain facts (who built it, who uses it, what it does, which date). It is not
+   allowed to draw legal conclusions.
+2. **Provision matching.** A second model call checks your description against every
+   candidate provision in the scope: Annex III, Article 5, Article 6(3), and Annex I
+   with Article 6(1). It must quote both your text and the Act, and code checks the
+   quotes. A verdict that fails the check is downgraded to "insufficient".
+3. **Rules.** Fixed code turns the facts and verdicts into the four determinations.
+   This step applies the Act's dates and its rules on roles and obligations, and has
+   no model in it.
+4. **Answer.** A third model call writes short explanations. Code sets every status,
+   citation and "what we would need to know" list, and checks the text. If the text
+   fails a check, a plain template answer is shown instead.
+
+**Trying it with your own key.**
+- Setup:
+  1. Install with `uv sync`.
+  2. Set `OPENAI_API_KEY` to your own key. The project runs no hosted service and
+     ships no key.
+- `eu-ai-check extract "<description>" --date 2026-11-01` shows the extracted facts.
+- `eu-ai-check match "<description>" --date 2026-11-01` shows the provision verdicts
+  and the cost of the call.
+- There is not yet a single command that prints the full answer for your own
+  description. To see full answers, read the recorded demo in
+  `data/demo/recording.md`.
+- A full assessment costs about $0.08 on average (see "End-to-end results").
+
+**Results at a glance.**
+- The pre-registered end-to-end evaluation passed all four of its gates, two of them
+  by a single event.
+- Every miss was cautious: "could not be determined" where a definite answer was
+  expected.
+- See [End-to-end results (Phase 5)](#end-to-end-results-phase-5) and
+  [Limitations](#limitations).
 
 ## Legal text version
 
@@ -68,17 +127,19 @@ are in `e2e_heldout.runs.jsonl`.
 | G3b, actor roles + Article 16/26 (N01–N12) | 34/36 = 0.944 | ≥ 33/36 | 0.819–0.985 |
 | G4, citation grounds (N01–N12) | 10/10, 0 mismatches | 0 mismatches | 0.722–1.000 |
 
-**Three of the gates were each one event away from failing:**
-- **G3a** passed at 20/24 against a threshold of 19, so one more miss would have
+**Two gates passed by a single event:**
+- **G3a** passed at 20/24 against a threshold of 19. One more miss would have
   failed it.
 - **G2** needed the last allowed retry. N06's extraction succeeded on its fourth
   and final attempt, after three connection errors. One more failure would have
   left N06 with no answer, and G2 would have failed.
-- **G1** allows no violation at all, so any single event would have failed it.
 
-**All 13 misses were on the cautious side.** Each produced `unresolved` where the
-label had a definite answer. None produced a definite answer where the label was
-`unresolved`. By stage:
+**G1 allows no violation at all.**
+
+**All 13 missed judgements were on the cautious side.** They fall in 9 of the 20
+cases: N01, N02, N07, N10, N12, H02, H04, H06 and H08. Each produced `unresolved`
+where the label had a definite answer. None produced a definite answer where the
+label was `unresolved`. By stage:
 - **Matcher (6):** the prohibited-practice determination of N01, N02, N10, N12, H02
   and H04. In each, the Article 5(1)(c) verdict was `insufficient`, which is the
   Phase 3 limitation.
@@ -91,6 +152,14 @@ label had a definite answer. None produced a definite answer where the label was
 - `system_category`: 11/11;
 - spend: $1.61 for the held-out pass and $2.57 for all of Phase 5, against an $8
   cap. The spend ledger (`phase5_spend.jsonl`) sums to the same total.
+- **typical cost per assessment:** about **$0.08** on average over the held-out
+  pass (20 cases, three model calls each, at `gpt-6.1-sol` prices of $2 / $10 per
+  million input / output tokens).
+  - The dearest held-out case cost $0.101.
+  - The dearest combination observed across the earlier phases' ledgers is $0.116
+    per case, and the budget used it as the planning maximum.
+  - A case dated before the Act entered into force needs no matcher call and costs
+    about $0.007.
 
 **Stratum B (H01–H08), reported but not gated:**
 
@@ -111,13 +180,15 @@ verdict. Results are in `data/eval/results/e2e_stability_v2.json`.
     `does_not_match` ("attention, not emotion"). Its risk tier went from the expected
     `unresolved` to `not_applicable`, and Articles 16 and 26 followed it. In Phase 3
     the same case failed this way in 1 of 3 runs.
-  - In the evaluation set, only H07 and H08 have expected-`unresolved`
-    determinations that rest on borderline matcher verdicts. Each ran once. No case
+  - In the evaluation set, three cases have any expected-`unresolved`
+    determination: N12, H07 and H08 (checked against the case files). N12's come
+    from an actor fact the description leaves open, not from a matcher verdict. So
+    the cases exposed to this failure class are H07 and H08. Each ran once. No case
     reproduces D32's own borderline (Annex III 1(c)).
   - G1 shows that this failure did not happen in those runs, not that it cannot
     happen.
-- **The stratum B extraction scores reflect a labelling convention, not a system
-  fault.**
+- **The stratum B extraction scores reflect a mismatch between the reference labels
+  and the extraction rules.**
   - The stratum B reference facts set `modifies_intended_purpose` and
     `modifies_safety_relevant_components` to `false` in all eight cases. The
     extraction rules return null when a description does not say the system is
@@ -146,7 +217,8 @@ verdict. Results are in `data/eval/results/e2e_stability_v2.json`.
 - **G2 mixes output quality with infrastructure noise.** The held-out pass made 70
   recorded call attempts: 59 completed and 11 transient connection errors, all
   recovered by the pre-registered retries. G2 passing depended on that recovery as
-  well as on answer quality.
+  well as on answer quality. The errors may be specific to the machine and network
+  used for the run.
 - **The new cases are not independent of the system's builder.** N01–N12 were
   written by the project author and Claude Code, and a second Claude session reviewed
   their labels. A misreading of the Act shared by the builders and the labels would
