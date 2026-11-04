@@ -118,3 +118,29 @@ def test_n08_route_statuses_follow_route_dates() -> None:
     assert rt["route_status"]["annex_iii_high_risk"] == "applicable"
     assert rt["route_status"]["article_6_1_high_risk"] == "not_applicable/not_yet_applicable"
     assert rt["status"] == "applicable"  # one applicable route is enough (§9.1)
+
+
+#: SHA-256 of each file's `cases` content, frozen in the Phase 5 pre-registration
+#: (SYSTEM_SPEC.md §18, 2026-11-04). Any later change must be flagged post_hoc.
+FROZEN_E2E_SHA = "a50afdabda92f3ee3724047d93dcd9d5e329e3adec517f697660a5d5fff8c0d4"
+FROZEN_HELDOUT_5_1_C_SHA = "11e564939375d5482dcd53145a5b245507d1b52542e665c69d9cc693ac1d401c"
+
+
+def _content_sha(cases: list[dict]) -> str:
+    import hashlib
+
+    return hashlib.sha256(json.dumps(cases, sort_keys=True, ensure_ascii=False)
+                          .encode("utf-8")).hexdigest()
+
+
+def test_eval_set_is_frozen() -> None:
+    assert _content_sha(NEW) == FROZEN_E2E_SHA
+    assert _content_sha(HELDOUT) == FROZEN_HELDOUT_5_1_C_SHA
+    spec = (ROOT / "SYSTEM_SPEC.md").read_text(encoding="utf-8")
+    assert FROZEN_E2E_SHA in spec and FROZEN_HELDOUT_5_1_C_SHA in spec
+
+
+def test_n04_n07_n08_ask_about_1_october_2026() -> None:
+    for cid in ("N04", "N07", "N08"):
+        assert "1 October 2026" in BY_ID[cid]["description"], cid
+        assert BY_ID[cid]["gold_facts"]["relevant_date"] == "2026-10-01", cid

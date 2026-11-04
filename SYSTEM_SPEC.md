@@ -2485,6 +2485,163 @@ Phase 3 score-cutoff baseline (`determination/baseline.py`) and by `eu-ai-check
 search`. The Phase 5 end-to-end evaluation therefore measures extraction,
 determination and generation, not retrieval. The README states this.
 
+**End-to-end — Phase 5 pre-registration (APPROVED 2026-11-04).** Design:
+`docs/phase5_design.md` (Q1–Q4 decided 2026-10-25). Everything below was approved by
+the user and committed **before any Phase 5 API call**: no smoke test, no stability
+run, no held-out call. It is binding. A miss is reported as a miss and nothing is
+retuned. The runner is `src/eu_ai_check/e2e/` (`eu-ai-check eval-e2e`).
+
+- **What runs.** One case is one free-text description plus its fixed
+  `assessment_date`. The runner chains the shipped configuration of every stage,
+  with nothing gold in between:
+  - extraction: `OpenAIExtractor`, `gpt-6.1-sol`, effort `low`, `baseline` prompt
+    (Phase 2 accepted);
+  - `Case.from_facts` with the case's own `assessment_date`;
+  - determination: `Pipeline.determine` + `OpenAIMatcher`, M-low, the pre-registered
+    matcher prompt (`baseline`, SHA-pinned in `tests/test_determination.py`);
+  - `adapt`, as in Phase 4;
+  - generation: `OpenAIGenerator`, `gpt-6.1-sol`, effort `low`, `max_output_tokens`
+    5000, prompt v2 (`a6b4a491…`), checks C0–C8 and the template fallback. This is the
+    Phase 4 harness function `evaluate_item`, unchanged.
+
+  The runner refuses to run any other configuration. Retrieval is not on this path
+  (note above).
+- **Pinned clock and frozen legal text.**
+  - The evaluation clock is the constant **2026-10-25**. Nothing on the evaluation
+    path reads the system clock. A test checks the runner's whole import closure
+    statically. It also checks at runtime that the one clocked function there (the
+    Phase 4 ledger timestamp) is never called. The Phase 5 ledger carries a sequence
+    number, the pinned clock and the API's own `created_at`, not a local timestamp.
+  - Each case's `assessment_date` is fixed in its file: 2026-10-25 for N01–N12 and
+    2026-10-04 for H01–H08. No case may be dated after the clock.
+  - Descriptions use explicit dates, never relative time words (a test checks this).
+    N04, N07 and N08 ask about "1 October 2026".
+  - **All expected outputs are relative to the frozen corpus snapshot**
+    (`data/corpus/provisions.json`). It holds the Act's text as in force from
+    **2024-08-01**, with no amendments; all 110 provisions have
+    `text_valid_from = 2024-08-01`. A later amendment would need a new corpus version
+    and new labels. It does not change these.
+- **The evaluation set, frozen.** 20 cases, each run **once**.
+  - **Stratum A, N01–N12:** `data/eval/e2e_cases.json`, cases-content SHA-256
+    `a50afdabda92f3ee3724047d93dcd9d5e329e3adec517f697660a5d5fff8c0d4`.
+  - **Stratum B, H01–H08:** `data/eval/determination_heldout_5_1_c.json`, frozen in
+    `6b98c76` and unchanged since. Cases-content SHA-256
+    `11e564939375d5482dcd53145a5b245507d1b52542e665c69d9cc693ac1d401c`.
+  - Both SHAs are pinned in `tests/test_e2e_cases.py`.
+  - N08's expected risk tier is given per route:
+    - Annex III 5(d): **applicable** (from 2026-08-02);
+    - Annex I item 11 (Regulation (EU) 2017/745, notified body):
+      **not_applicable / not_yet_applicable** until 2027-08-02;
+    - overall: **applicable**, because one applicable route is enough (§9.1).
+- **Acceptance rule: all of G1–G4 must hold.** If any fails, Phase 5 acceptance is
+  NOT MET, the phase is not tagged, and nothing is retuned. Every result is reported
+  with its 95% Wilson interval, whether it passes or fails.
+  - **G1, zero tolerance, both strata (20 cases), strict, counted by root cause.**
+    Any violation fails Phase 5. One root event, such as one matcher verdict, counts
+    as one violation, and its cascade is listed with it. Violations:
+    - an expected `unresolved` produced as `applicable` or `not_applicable`, on any
+      determination (including a single actor role);
+    - an expected `not_in_force` produced as `not_applicable`;
+    - a positive conclusion resting on a verdict that failed code verification;
+    - extraction leakage: an excluded field, or a conclusion term in any value (the
+      Phase 2 lexicon);
+    - a shipped answer whose rendered status differs from the pipeline's
+      determination.
+
+    **Stated plainly:** a D32-type event (one borderline verdict flipping to a
+    definite one; 1 in 123 dev runs in Phase 3) on H07 or H08 **would fail G1, and
+    with it Phase 5.** The held-out pass cannot be rerun, so such an event stands.
+  - **G2, output hygiene, both strata (20 cases).** Every case ships an answer that
+    passes C0–C8, so every citation resolves to a real evidence item whose text
+    equals the corpus text of its `versioned_provision_id` (C1–C3). A template
+    fallback counts as shipped, and the fallback rate is reported. *Clarification:*
+    a case whose stage still fails after the API-failure policy ships no answer, so
+    it fails G2. All its G3 judgements count as misses, and it is not re-run.
+  - **G3, determination correctness, stratum A only.** Exact status match,
+    including the `not_applicable` reason:
+    - **G3a** (risk tier + prohibited practice, n = 24): pass if **≥ 19/24**. The
+      threshold's 95% Wilson interval is 0.595–0.908.
+    - **G3b** (actor roles + Article 16 + Article 26, n = 36): pass if **≥ 33/36**.
+      Its 95% Wilson interval is 0.782–0.971.
+  - **G4, citation correctness, stratum A only.** A risk-tier determination that
+    comes out correctly `applicable`, `not_yet_applicable` or derogation-`applied`
+    must cite exactly the expected Annex III and Annex I grounds (set equality).
+    Stratum A has no expected prohibited positive.
+    - **G4** (citation grounds, n ≤ 10): pass if **0 mismatches**. The 95% Wilson
+      interval at 10/10 is 0.722–1.000.
+    - **G4 is brittle:** with n ≤ 10 and no miss allowed, a single wrong citation
+      fails the gate, and with it Phase 5.
+  - The thresholds follow one rule: dev performance minus 0.05, rounded up to a
+    whole count. The dev bases (Phase 3 official run, gold facts) are 204/246 = 0.829,
+    349/369 = 0.946 and 99/102 = 0.971 (design §3.2). The intervals are wide. These
+    gates detect gross failure; they do not estimate accuracy precisely.
+- **Stratum B counts toward G1 and G2 only.** Its accuracy (risk tier, prohibited
+  practice, roles, Article 16/26) is reported in its own table. It is never pooled
+  with stratum A and never gated, because the Article 5(1)(c) shortfall is the
+  accepted Phase 3 limitation.
+- **Attribution, $0.** Every miss is attributed to exactly one stage:
+  - a stage failure;
+  - date extraction (the extracted `relevant_date` differs from gold);
+  - the matcher (a risk-tier or prohibited miss with the correct date, or a
+    role/obligation miss that comes from a wrong risk tier);
+  - extraction (replaying roles and obligations with the same recorded verdicts and
+    the gold facts gives the right answer);
+  - the rules (still wrong on gold inputs);
+  - generation (a G1 status mismatch or a G2 failure).
+- **Reported, not gated:**
+  - extraction field accuracy per stratum: booleans and `relevant_date` exact, free
+    text as null / non-null agreement, because the e2e labels are gold facts, not
+    Phase 2 concept groups;
+  - per-state tables;
+  - `system_category`;
+  - the fallback rate;
+  - misses by stage;
+  - cost.
+- **Hard rule.**
+  - **The held-out pass (N01–N12 + H01–H08) runs exactly once.** A marker is written
+    before its first call. The runner refuses a second pass, or a pass after a crash.
+  - **No tuning after any result.** No prompt, label, check, threshold or code on any
+    scored path changes against H01–H08 or N01–N12 once any of their output, or any
+    stability output, has been seen.
+  - Any future fix needs a new held-out set (README, future work).
+- **Stability check: a separate experiment, reported only, never pooled.**
+  - Dev cases D32, D10, D35 and D39 × 3, full end-to-end.
+  - Run in rounds: repeat 1 of all four cases, then repeat 2, then repeat 3. The
+    first run is the wiring smoke test, and the experiment stops if it fails.
+  - It runs before the held-out pass.
+  - **Statistics use complete rounds only.** A partial round is flagged and listed,
+    and no conclusion is drawn from partial data.
+- **Spend (binding).** One cap, **$8**, for every Phase 5 API call, enforced in code
+  (`e2e/spend.py`). Prices are $2 / $10 per million input / output tokens.
+  - A held-out reserve of **$3.48** (20 cases × $0.116 × 1.5) is set aside first.
+    No other call may use it until the held-out pass has started.
+  - The stability experiment has its own hard cap of **$1.50**.
+  - Before every call, the guard refuses it if its worst case (input at 3 characters
+    per token plus the full output budget) could breach a cap. The output budgets
+    are not lowered, because they are part of the frozen stage configurations.
+  - Every call, failed ones included, is recorded with its stage
+    (extract / match / generate) in `data/eval/results/phase5_spend.jsonl`.
+  - **Amendment made before freezing and before any API call (2026-11-04):** the
+    stability cap was raised from $1.10 to $1.50. Reason: with the worst-case-per-call
+    check (a matcher call is up to about $0.34), a $1.10 cap would have cut round 3
+    short at the planned spend (about $0.94). At mean cost the last matcher call now
+    fits: about $0.86 spent plus $0.34 is about $1.20. At the maximum observed case
+    cost ($0.116) it would still not fit (about $1.28 + $0.34). In that case round 3
+    ends partial and is handled by the complete-rounds rule above. The $8 total and
+    the $3.48 reserve are unchanged.
+- **API failures, the Phase 4 policy:**
+  - up to 3 retries for transient errors (connection, timeout, HTTP 5xx), each one
+    guarded, billed and recorded;
+  - HTTP 429 and other 4xx errors fail at once;
+  - content failures are never retried;
+  - the client is built with `max_retries=0`.
+- **Tests are plumbing checks only.** The test suite runs the full chain offline,
+  with a fake client that answers from the labels. That shows only that the labels
+  survive the shipped code and that the guards work. It is not a result and is never
+  reported as one.
+- **Out of scope:** the generation-model comparison (design §7). The demo is recorded
+  after the held-out pass, from the same $8 cap.
+
 ---
 
 ## 19. The Invariants (Updated Post-Corpus-Validation)

@@ -9,6 +9,7 @@
     eu-ai-check extract TEXT    extract case facts from a description (Phase 2)
     eu-ai-check eval-extraction run the Phase 2 extraction evaluation harness
     eu-ai-check eval-generation the Phase 4 generation harness (see generation/cli.py)
+    eu-ai-check eval-e2e        the Phase 5 end-to-end runner (see e2e/cli.py)
 
 Ingestion exits non-zero when an invariant is broken. A broken invariant is not a
 warning to scroll past: per SYSTEM_SPEC.md §12.1 it would resurface later as a
@@ -550,6 +551,8 @@ def main(argv: list[str] | None = None) -> int:
 
     from .generation.cli import register as register_generation  # Phase 4
     register_generation(sub)
+    from .e2e.cli import register as register_e2e  # Phase 5
+    register_e2e(sub)
 
     args = parser.parse_args(argv)
     return args.func(args)

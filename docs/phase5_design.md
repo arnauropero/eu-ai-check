@@ -1,13 +1,14 @@
 # Phase 5 — End-to-end evaluation and polish: design note
 
-Status: **DRAFT, round 3** (2026-10-25, branch `phase-5/end-to-end`). Q1–Q4 are
-decided. Nothing is frozen yet: the labels and thresholds wait for one last look from
-the user (see `docs/phase5_status.md`).
+Status: **FROZEN** (2026-11-04, branch `phase-5/end-to-end`). The user approved the
+§8 labels and the thresholds on 2026-11-04. The binding text is the Phase 5
+pre-registration in SYSTEM_SPEC §18, which wins over this note wherever the two
+differ. The case SHAs are pinned in `tests/test_e2e_cases.py`, and the runner is
+`src/eu_ai_check/e2e/`. No Phase 5 API call has been made.
 
-No Phase 5 code beyond the eval-set label tests exists, and no Phase 5 API call has
-been made. Items marked **[DECIDED]** come from the user's decisions of 2026-10-25.
-Items marked **[PROPOSAL]** need the user's approval. Once approved, the binding text
-moves to SYSTEM_SPEC §18 in the pre-registration commit, as in Phases 3 and 4.
+One change was made at freezing, before any API call: the stability cap went from
+$1.10 to $1.50 (§5). The earlier [PROPOSAL] items (§4 attribution, §6 reserve) were
+approved as written.
 
 Grounded in:
 - PROJECT_PLAN Phase 5 and §8 (including the Phase 3 deviation, `ce8e60d`);
@@ -262,7 +263,7 @@ wrong case can cost up to 5 judgements, which can sink G3 on its own. That is
 accepted as the price of a hand-built set, and is said here so it cannot be
 discovered conveniently later.
 
-## 4. Attribution of every miss **[PROPOSAL]**
+## 4. Attribution of every miss **[APPROVED 2026-11-04]**
 
 Attribution costs $0. Every miss is attributed to exactly one stage:
 
@@ -290,12 +291,19 @@ Attribution costs $0. Every miss is attributed to exactly one stage:
   - D10: a persistent risk-tier miss in Phase 3;
   - D35: Article 25 retraining, so the roles depend on extraction;
   - D39: its date comes from extraction.
-- **Hard cap: $1.10 for this experiment, enforced in code.**
+- **Hard cap: $1.50 for this experiment, enforced in code.** It was raised from
+  $1.10 on 2026-11-04, before freezing and before any API call. The guard checks each
+  call's worst case, and a matcher call can cost up to about $0.34. At $1.10 that
+  check would have cut round 3 short at the planned spend (about $0.94). At $1.50 the
+  last matcher call fits at mean cost (about $0.86 + $0.34). At the maximum observed
+  case cost it still would not fit.
+- **Statistics use complete rounds only.** A partial round is flagged and listed, and
+  no conclusion is drawn from it.
 - **Runs go in rounds:** repeat 1 of all four cases, then repeat 2, then repeat 3. If
   the cap stops it, a round is lost, not a case.
 - **The first run doubles as the wiring smoke test.**
 
-## 6. Budget and spend control **[DECIDED, reserve PROPOSAL]**
+## 6. Budget and spend control **[DECIDED; reserve APPROVED 2026-11-04]**
 
 Measured per-call cost at $2 / $10 per M tokens, from the frozen ledgers:
 
@@ -311,7 +319,7 @@ Measured per-call cost at $2 / $10 per M tokens, from the frozen ledgers:
   - the cap is a parameter;
   - the ledger is `data/eval/results/phase5_spend.jsonl`;
   - every call records its stage (extract / match / generate);
-  - the phases are `stability` (with its own $1.10 cap), `heldout` and `demo`.
+  - the phases are `stability` (with its own $1.50 cap), `heldout` and `demo`.
 - **Held-out reserve, taken first: $3.48.** That is 20 cases × $0.116 (the maximum
   observed) × 1.5.
   - The output-token caps are not lowered, because they are part of the frozen stage
@@ -321,10 +329,11 @@ Measured per-call cost at $2 / $10 per M tokens, from the frozen ledgers:
     tokens, which costs $0.34.
 - **Planned spend:**
   - held-out: about $1.57;
-  - stability: about $0.94, capped at $1.10;
+  - stability: about $0.94, capped at $1.50;
   - demo recording: about $0.40, for 5 examples, only after the held-out pass.
 
-  That totals about $2.9, against a worst case of about $5.0.
+  That totals about $2.9, against a worst case of about $5.4 (the held-out reserve
+  of $3.48, plus the stability cap of $1.50, plus the demo).
 - **API failures follow the Phase 4 policy:**
   - up to 3 automatic retries for transient errors, each one guarded and billed;
   - HTTP 429 and other 4xx errors fail at once;
@@ -445,10 +454,12 @@ Changes in round 2:
   - G3a ≥ 19/24, G3b ≥ 33/36, G4 0 mismatches;
   - results are always reported with Wilson intervals;
   - G4 is brittle at n ≤ 10.
-- **Q3: DECIDED.** D32, D10, D35 and D39 × 3, in rounds, with a hard cap of $1.10.
+- **Q3: DECIDED.** D32, D10, D35 and D39 × 3, in rounds. The hard cap was $1.10,
+  raised to $1.50 on 2026-11-04 before freezing (§5).
 - **Q4: DECIDED, labels approved against the Act text, with two round-3 changes.**
   - Time stability: a pinned clock, and explicit dates in N04, N07 and N08.
   - N08's expected output is given per route.
 
-**Next:** the user looks once more at the §8 table and the thresholds. After an OK,
-the work follows the order in `docs/phase5_status.md`.
+**Frozen 2026-11-04.** The user approved the labels and thresholds. The
+pre-registration is in SYSTEM_SPEC §18. Next, each step only with the user's
+go-ahead: the stability check, then the held-out pass (`docs/phase5_status.md`).
