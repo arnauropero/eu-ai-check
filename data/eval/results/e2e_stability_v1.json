@@ -1,0 +1,45 @@
+{
+  "runs": 1,
+  "complete_rounds": 0,
+  "partial_round": {
+    "repeat": 0,
+    "runs_excluded_from_statistics": [
+      "D32#0"
+    ],
+    "note": "partial data: no conclusion is drawn from it"
+  },
+  "determinations_stable": {
+    "k": 0,
+    "n": 0,
+    "rate": null,
+    "wilson95": null
+  },
+  "per_case": {},
+  "stopped_by_budget": null,
+  "smoke_test_failed": "extract: AuthenticationError: Error code: 401 - {'error': {'message': 'Your API key has expired. Create a new API key to continue.', 'type': 'invalid_request_error', 'code': 'expired_secret_",
+  "spent_stability_usd": 0.0,
+  "spent_total_usd": 0.0,
+  "eval_clock": "2026-10-25",
+  "corpus_snapshot": "2024-08-01",
+  "e2e_cases_sha256": "a50afdabda92f3ee3724047d93dcd9d5e329e3adec517f697660a5d5fff8c0d4",
+  "heldout_5_1_c_sha256": "11e564939375d5482dcd53145a5b245507d1b52542e665c69d9cc693ac1d401c",
+  "extractor": {
+    "model": "gpt-6.1-sol",
+    "effort": "low",
+    "prompt_variant": "baseline",
+    "system_prompt_sha256": "80a13431265124b13da71f77a675788c8cf6a4a4d20934a990c1490582094428"
+  },
+  "matcher": {
+    "model": "gpt-6.1-sol",
+    "effort": "low",
+    "prompt_variant": "baseline",
+    "system_prompt_sha256": "bfa07b53dc211375946962793df92d451a97ae786a77c09b21c609809c5b43af"
+  },
+  "generator": {
+    "model": "gpt-6.1-sol",
+    "effort": "low",
+    "max_output_tokens": 5000,
+    "prompt_version": "v2",
+    "prompt_sha": "a6b4a491da53588b40fd575d34756d0432068fb9f87d7bbc4313cdd68aece0f6"
+  }
+}
