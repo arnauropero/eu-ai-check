@@ -4,6 +4,8 @@ Recorded once on 2026-11-04 with the frozen pipeline (`gpt-6.1-sol` for every st
 
 Total demo spend: $0.3540.
 
+The example titles and notes are our annotations. They were revised after the recording (2026-11-04); the model outputs are unchanged.
+
 ---
 
 ## X01: applicable
@@ -235,11 +237,11 @@ Sources: Article 26(1) (aiact:art_26:para_1@2024-08-01); Article 26(2) (aiact:ar
 
 ---
 
-## X05: a cautious unresolved
+## X05: Document completeness check
 
 **Input:** Our recruitment team uses DocCheck, a tool we license and use as supplied, that checks each job application for missing documents (CV, certificates, ID) and returns incomplete applications to the candidate before any recruiter reads them. Which AI Act rules apply to us on 1 November 2026?
 
-> **Note.** Known caution: when the description does not say whether the system profiles people, the Article 6(3) profiling exception stays undecided, so the answer can be unresolved where a lawyer might apply the derogation (README, Limitations).
+> **Note.** This example was chosen to show caution. Instead, the matcher judged that the description answers the profiling question and applied the Article 6(3) derogation, so the answer is not high-risk. The matcher also marked Article 6(3)(b), which the description does not support: it mentions no previous human activity. The automatic checks passed because they verify that citations exist and quote the provision, not that applying it is correct (README, Limitations).
 
 **Answer:**
 

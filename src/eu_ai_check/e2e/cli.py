@@ -6,6 +6,8 @@
                        to continue a crashed pass (same scored-path tree hash only)
     --mode demo        record the five demo examples once (data/demo/), after the
                        held-out pass, under the same $8 cap
+    --mode demo-page   re-render data/demo/recording.md from the saved recording with
+                       the current titles and notes ($0, no client, outputs unchanged)
 
 `eu-ai-check assess TEXT` runs the same frozen pipeline on your own description
 (see e2e/assess.py). It writes nothing and is capped by --max-cost.
@@ -33,6 +35,12 @@ def cmd_eval_e2e(args: argparse.Namespace) -> int:
               "eval_clock": runner.EVAL_CLOCK.isoformat()}
     print(json.dumps(status))
     if args.mode == "status":
+        return 0
+    if args.mode == "demo-page":
+        from .demo import rerender_page
+
+        rerender_page()
+        print("re-rendered data/demo/recording.md from data/demo/recording.json")
         return 0
     stages = runner.Stages.frozen(runner.default_client())
     if args.mode == "stability":
@@ -87,7 +95,8 @@ def register(sub) -> None:
     a.set_defaults(func=cmd_assess)
 
     p = sub.add_parser("eval-e2e", help="Phase 5 end-to-end runner")
-    p.add_argument("--mode", required=True, choices=["status", "stability", "heldout", "demo"])
+    p.add_argument("--mode", required=True, choices=["status", "stability", "heldout", "demo",
+                                                        "demo-page"])
     p.add_argument("--label", default="v1", help="stability results label")
     p.add_argument("--confirm-heldout", action="store_true",
                    help="required for the single held-out pass")

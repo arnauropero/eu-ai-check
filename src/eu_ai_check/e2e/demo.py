@@ -70,7 +70,10 @@ def _example_record(example: dict, run: runner.CaseRun, ledger: list[dict]) -> d
     }
 
 
-def render_page(recording: dict[str, Any]) -> str:
+def render_page(recording: dict[str, Any],
+                annotations: dict[str, dict[str, Any]] | None = None) -> str:
+    """`annotations` (id -> covers / note), when given, replaces our labels and notes.
+    They are ours, not the model's: the recorded outputs are always shown unchanged."""
     lines = ["# EU AI Check — demo recording", "",
              f"Recorded once on {recording['demo_clock']} with the frozen pipeline "
              f"(`{recording['model']}` for every stage). The answers below are shown exactly "
@@ -78,10 +81,18 @@ def render_page(recording: dict[str, Any]) -> str:
              "examples have no labels and are not scored. The legal text is the frozen "
              "2024-08-01 corpus snapshot. See the README for results and limitations.", "",
              f"Total demo spend: ${recording['spend_usd']:.4f}.", ""]
+    if annotations is not None:
+        revised = sorted({a["annotation_revised"] for a in annotations.values()
+                          if a.get("annotation_revised")})
+        if revised:
+            lines += ["The example titles and notes are our annotations. They were revised "
+                      f"after the recording ({', '.join(revised)}); the model outputs are "
+                      "unchanged.", ""]
     for x in recording["examples"]:
-        lines += ["---", "", f"## {x['id']}: {x['covers']}", "", f"**Input:** {x['input']}", ""]
-        if x["note"]:
-            lines += [f"> **Note.** {x['note']}", ""]
+        a = (annotations or {}).get(x["id"], x)
+        lines += ["---", "", f"## {x['id']}: {a['covers']}", "", f"**Input:** {x['input']}", ""]
+        if a["note"]:
+            lines += [f"> **Note.** {a['note']}", ""]
         if x["shipped_answer"] is None:
             lines += [f"*No answer shipped: {x['stage_failed']}: {x['error']}*", ""]
         else:
@@ -91,6 +102,21 @@ def render_page(recording: dict[str, Any]) -> str:
                   f"cost ${x['spend_usd']:.4f} · unedited output"
                   + (" (template fallback)" if x["fallback"] else "") + "*", ""]
     return "\n".join(lines)
+
+
+def rerender_page(recording_path: Path = OUT_DIR / RECORDING,
+                  examples_path: Path = EXAMPLES, page_path: Path = OUT_DIR / PAGE) -> str:
+    """Re-render the page at $0 from the saved recording, with the current labels and
+    notes of `examples.json`. The recording itself is read, never written."""
+    recording = json.loads(recording_path.read_text(encoding="utf-8"))
+    examples = {e["id"]: e for e in json.loads(examples_path.read_text(encoding="utf-8"))
+                ["examples"]}
+    for x in recording["examples"]:
+        if examples[x["id"]]["description"] != x["input"]:
+            raise ValueError(f"{x['id']}: examples.json input differs from the recording")
+    page = render_page(recording, examples)
+    page_path.write_text(page + "\n", encoding="utf-8")
+    return page
 
 
 def run_demo(stages: runner.Stages, tracker: E2ESpend, *, examples_path: Path = EXAMPLES,
@@ -136,4 +162,5 @@ def run_demo(stages: runner.Stages, tracker: E2ESpend, *, examples_path: Path = 
     return recording
 
 
-__all__ = ["DEMO_CLOCK", "DemoAlreadyRecorded", "load_examples", "render_page", "run_demo"]
+__all__ = ["DEMO_CLOCK", "DemoAlreadyRecorded", "load_examples", "render_page",
+           "rerender_page", "run_demo"]

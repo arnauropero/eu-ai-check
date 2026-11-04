@@ -60,10 +60,16 @@ def test_five_examples_cover_the_approved_situations() -> None:
     assert [x["id"] for x in EXAMPLES] == ["X01", "X02", "X03", "X04", "X05"]
     assert [x["covers"] for x in EXAMPLES] == [
         "applicable", "unresolved, with follow-up questions", "not_in_force",
-        "a prohibited practice", "a cautious unresolved"]
+        "a prohibited practice", "Document completeness check"]
     assert [x["id"] for x in EXAMPLES if x["note"]] == ["X04", "X05"]
     assert "prohibited practice applies" in EXAMPLES[3]["note"]
-    assert "profiling exception" in EXAMPLES[4]["note"]
+    x05 = EXAMPLES[4]
+    assert x05["chosen_to_cover"] == "a cautious unresolved"
+    assert x05["annotation_revised"] == "2026-11-04"
+    for phrase in ("chosen to show caution", "answers the profiling question",
+                   "Article 6(3)(b)", "no previous human activity",
+                   "not that applying it is correct"):
+        assert phrase in x05["note"], phrase
 
 
 def test_example_dates_are_explicit_and_not_after_the_demo_clock() -> None:
@@ -177,3 +183,37 @@ def test_demo_calls_stay_under_the_8_dollar_cap(tmp_path) -> None:
     out = demo.run_demo(runner.Stages.frozen(runner.RecordingClient(fake)), t,
                         out_dir=tmp_path / "demo", heldout_summary=tmp_path / "e2e_heldout.json")
     assert out["budget_stop"] and t.spent <= 8.0
+
+
+# --------------------------------------------------------------------------
+# The published page, re-rendered at $0 from the saved recording
+# --------------------------------------------------------------------------
+
+RECORDING = ROOT / "data/demo/recording.json"
+
+
+def test_rerender_changes_only_our_annotations_never_the_outputs(tmp_path) -> None:
+    before = RECORDING.read_bytes()
+    page = demo.rerender_page(RECORDING, ROOT / "data/demo/examples.json", tmp_path / "p.md")
+    assert RECORDING.read_bytes() == before                     # the recording is read only
+    recording = json.loads(before)
+    for x in recording["examples"]:
+        assert x["shipped_answer"] in page                      # outputs, unchanged
+    assert "## X05: Document completeness check" in page
+    assert "a cautious unresolved" not in page.split("## X05")[1]
+    assert EXAMPLES[4]["note"] in page
+    assert "revised after the recording (2026-11-04)" in page
+    assert recording["examples"][4]["covers"] == "a cautious unresolved"   # as recorded
+
+
+def test_the_committed_page_is_the_rerendered_one(tmp_path) -> None:
+    page = demo.rerender_page(RECORDING, ROOT / "data/demo/examples.json", tmp_path / "p.md")
+    assert (ROOT / "data/demo/recording.md").read_text(encoding="utf-8") == page + "\n"
+
+
+def test_rerender_refuses_if_an_input_changed(tmp_path) -> None:
+    data = json.loads((ROOT / "data/demo/examples.json").read_text(encoding="utf-8"))
+    data["examples"][0]["description"] += " Edited."
+    (tmp_path / "e.json").write_text(json.dumps(data), encoding="utf-8")
+    with pytest.raises(ValueError, match="differs from the recording"):
+        demo.rerender_page(RECORDING, tmp_path / "e.json", tmp_path / "p.md")
