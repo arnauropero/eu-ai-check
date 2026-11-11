@@ -1,6 +1,6 @@
 # Demo: five recorded examples
 
-Five new descriptions, run once on 2026-11-04 through the frozen pipeline (`gpt-6.1-sol` for every stage). The answers are shown **exactly as produced, unedited**. This is a demonstration, not an evaluation: the examples have no labels and are not scored. Titles and notes are our annotations.
+Five new descriptions, run once on 2026-11-04 through the frozen pipeline (`gpt-6.1-sol` for every stage). The answers are shown **exactly as produced, unedited** (X04 is re-rendered by code; see its note). This is a demonstration, not an evaluation: the examples have no labels and are not scored. Titles and notes are our annotations.
 
 Total demo spend: $0.3540. The same output in raw form is in [`data/demo/recording.md`](../data/demo/recording.md); the full record is [`recording.json`](../data/demo/recording.json). Known weaknesses visible here are listed in [limitations.md](limitations.md).
 
@@ -196,24 +196,31 @@ Cost: $0.0067 (2 API calls). Template fallback: no.
 
 > Our political consultancy developed software that analyses photos of voters' faces to infer their political opinions, and we use the results to target campaign messages. Which AI Act rules apply to us on 1 November 2026?
 
+**Important: a prohibited practice applies (Article 5). The described system may not be placed on the market, put into service or used for this practice. The high-risk classification and obligations below are listed for reference only; meeting them would not make the practice lawful.**
+
 | Determination | Answer |
 |---|---|
-| Risk tier (Article 6) | high-risk. |
+| Risk tier (Article 6) | high-risk. *(for reference only)* |
 | Prohibited practices (Article 5) | the described practice falls under a prohibition. |
 | Role (deployer) | you are a deployer of this system. |
 | Role (provider) | you are a provider of this system. |
-| Article 16 | applies to this case. |
-| Article 26 | applies to this case. |
+| Article 16 | applies to this case. *(for reference only)* |
+| Article 26 | applies to this case. *(for reference only)* |
 
 Cost: $0.0874 (3 API calls). Template fallback: no.
 
-**Note:** Known limitation: when a prohibited practice applies, the answer still lists high-risk obligations as applying, without flagging the inconsistency (README, Limitations).
+**Re-rendered on 2026-11-11** with the current renderer, at $0 and with no API call, from this example's recorded facts, matcher verdicts and model text. The model's words are unchanged. Only code-written lines differ from the recording: the prohibited-practice notice at the top and the "for reference only" marks, added after the evaluation so that the high-risk sections no longer read as a way to comply. The answer as originally recorded is in [`data/demo/recording.md`](../data/demo/recording.md#x04-a-prohibited-practice).
+
+**Note:** the prohibition (Article 5(1)(g), biometric categorisation inferring political opinions) is the finding that matters. The high-risk classification and Articles 16 and 26 are still determined and shown, marked as for reference only. Some quoted Article 26 paragraphs do not fit this case, such as 26(10) on criminal investigations (see [limitations.md](limitations.md)).
 
 <details>
-<summary>Full answer, unedited</summary>
+<summary>Full answer (model text unedited)</summary>
 
 ```text
+Important: a prohibited practice applies (Article 5). The described system may not be placed on the market, put into service or used for this practice. The high-risk classification and obligations below are listed for reference only; meeting them would not make the practice lawful.
+
 ## Risk tier (Article 6): high-risk.
+(For reference only: a prohibited practice applies; see Prohibited practices (Article 5).)
 - Article 6(2) links the system’s classification to the listed uses: biometric categorisation based on inferred sensitive or protected characteristics, and influencing election outcomes or voting behaviour. The described system fits both categories. [Article 6(2); Annex III(1)(b); Annex III(8)(b)]
 - Article 6(3) distinguishes systems without significant risks or material influence on decisions, while retaining the classification for systems that profile natural persons. The findings do not establish grounds for departing from the listed-use classification. [Article 6(3), third subparagraph]
 Sources: Article 6(2) (aiact:art_6:para_2@2024-08-01); Article 6(1)(a) (aiact:art_6:para_1:point_a@2024-08-01); Annex III(1)(b) (aiact:anx_III:area_1:item_b@2024-08-01); Annex III(8)(b) (aiact:anx_III:area_8:item_b@2024-08-01); Article 6(3), third subparagraph (aiact:art_6:para_3:subpara_3@2024-08-01)
@@ -229,6 +236,7 @@ Sources: Article 3(4) (aiact:art_3:point_4@2024-08-01)
 Sources: Article 3(3) (aiact:art_3:point_3@2024-08-01); Article 25(1)(a) (aiact:art_25:para_1:point_a@2024-08-01); Article 25(1)(b) (aiact:art_25:para_1:point_b@2024-08-01); Article 3(23) (aiact:art_3:point_23@2024-08-01); Article 25(1)(c) (aiact:art_25:para_1:point_c@2024-08-01)
 
 ## Article 16: applies to this case.
+(For reference only: a prohibited practice applies; see Prohibited practices (Article 5).)
 - For this system, the provider must ensure compliance with the system requirements, identify itself and its contact address, maintain a quality management system, retain documentation, and keep automatically generated logs under its control. [Article 16(a); Article 16(b); Article 16(c); Article 16(d); Article 16(e)]
 - The provider must arrange the relevant conformity assessment before marketing or putting the system into service, draw up an EU declaration of conformity, affix the CE marking, and meet registration obligations. [Article 16(f); Article 16(g); Article 16(h); Article 16(i)]
 - The provider must take necessary corrective action and provide the required information, demonstrate conformity upon a reasoned request from a national competent authority, and ensure compliance with accessibility requirements. [Article 16(j); Article 16(k); Article 16(l)]
@@ -247,6 +255,7 @@ Sources: Article 3(3) (aiact:art_3:point_3@2024-08-01); Article 25(1)(a) (aiact:
 Sources: Article 16(a) (aiact:art_16:point_a@2024-08-01); Article 16(b) (aiact:art_16:point_b@2024-08-01); Article 16(c) (aiact:art_16:point_c@2024-08-01); Article 16(d) (aiact:art_16:point_d@2024-08-01); Article 16(e) (aiact:art_16:point_e@2024-08-01); Article 16(f) (aiact:art_16:point_f@2024-08-01); Article 16(g) (aiact:art_16:point_g@2024-08-01); Article 16(h) (aiact:art_16:point_h@2024-08-01); Article 16(i) (aiact:art_16:point_i@2024-08-01); Article 16(j) (aiact:art_16:point_j@2024-08-01); Article 16(k) (aiact:art_16:point_k@2024-08-01); Article 16(l) (aiact:art_16:point_l@2024-08-01)
 
 ## Article 26: applies to this case.
+(For reference only: a prohibited practice applies; see Prohibited practices (Article 5).)
 - The deployer must use technical and organisational measures to follow the system’s instructions and assign oversight to people with appropriate competence, training, authority and support. Data under the deployer’s control must be relevant and sufficiently representative for the system’s intended purpose; these duties preserve other legal obligations and organisational discretion over oversight resources. [Article 26(1); Article 26(2); Article 26(3); Article 26(4)]
 - The deployer must monitor operation, notify the relevant parties of risks or serious incidents, and suspend use when the stated risk conditions arise. Automatically generated logs under its control must generally be retained for at least six months, with adjustments for other governing law and financial-sector arrangements. [Article 26(5); Article 26(6)]
 - For workplace use, employers must inform workers’ representatives and affected workers beforehand; public-sector deployers must meet registration duties and refrain from using a system absent from the required database. Where a data protection impact assessment is required, the deployer must use the information provided for that purpose. [Article 26(7); Article 26(8); Article 26(9)]
@@ -269,7 +278,7 @@ Sources: Article 26(1) (aiact:art_26:para_1@2024-08-01); Article 26(2) (aiact:ar
 
 </details>
 
-## X05: Recruitment document completeness check
+## X05: Where it goes wrong: recruitment document check
 
 > Our recruitment team uses DocCheck, a tool we license and use as supplied, that checks each job application for missing documents (CV, certificates, ID) and returns incomplete applications to the candidate before any recruiter reads them. Which AI Act rules apply to us on 1 November 2026?
 
@@ -284,7 +293,7 @@ Sources: Article 26(1) (aiact:art_26:para_1@2024-08-01); Article 26(2) (aiact:ar
 
 Cost: $0.0732 (3 API calls). Template fallback: no.
 
-**Note:** Known caution: when the description does not say whether the system profiles people, the Article 6(3) profiling exception stays undecided, so the answer can be unresolved where a lawyer might apply the derogation (README, Limitations).
+**Shown because it goes wrong.** The answer is "not high-risk" through the Article 6(3) derogation. That is debatable: returning incomplete applications before any recruiter reads them is close to "filtering applications", which Annex III(4)(a) lists as high-risk, and a lawyer could go either way. The matcher also cited Article 6(3)(b) (improving a previously completed human activity), which nothing in the description supports. Every automatic check passed, because the checks verify that citations exist and quote the Act, not that applying them is correct. Also, "Article 26 does not apply" does not mean no obligations at all: provisions outside this tool's scope, such as Article 4 (AI literacy), can still apply. See [limitations.md](limitations.md).
 
 <details>
 <summary>Full answer, unedited</summary>

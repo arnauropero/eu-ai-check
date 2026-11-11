@@ -12,13 +12,18 @@ The full list. The [README](../README.md) shows the four that matter most. Resul
   - The other 7 missed judgements came from extraction. They also went to
     `unresolved`.
 - **A prohibited practice does not suppress the high-risk obligations.**
-  - When a prohibited practice applies, the answer still lists the high-risk
-    obligations as applying, without flagging the inconsistency.
+  - When a prohibited practice applies, the risk tier and Articles 16 and 26 are
+    still determined and shown as applying.
   - In the held-out pass, H06 came out prohibited under Article 5(1)(c). Its answer
     still says "Article 26: applies to this case" and lists the Article 26
-    obligations.
+    obligations, with nothing flagging the inconsistency.
   - The Phase 4 raters reported the same thing (SYSTEM_SPEC.md §18). It comes from
     the shared determinations and renderer, not from the generator.
+  - **Partly fixed after the evaluation (2026-11-11).** The answer now opens with a
+    notice that the practice is prohibited and may not be carried out, and marks
+    the high-risk sections "for reference only". The statuses are unchanged. This
+    is a presentation change made after the held-out pass, so it is not evaluated
+    (SYSTEM_SPEC.md §18). Demo example X04 shows it.
 - **The checks verify citations and quotes, not the legal reasoning.**
   - The matcher must quote both the description and the provision, and the answer's
     claims must cite real evidence items. Code checks all of that.

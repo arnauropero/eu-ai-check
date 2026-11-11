@@ -88,8 +88,10 @@ The four that matter most:
 - **The checks verify citations, not reasoning.** Code confirms that every quote and
   citation is real, but not that applying the provision is correct. Demo example X05
   cites Article 6(3)(b) on facts that do not support it, and passes every check.
-- **A prohibited system is still listed with high-risk obligations,** without the
-  answer flagging the inconsistency (demo example X04).
+- **A prohibited system still gets a high-risk verdict and obligations.** Since a
+  post-evaluation fix, the answer opens by saying the practice is prohibited and
+  marks those sections "for reference only" (demo example X04), but the statuses
+  themselves are unchanged.
 - **Small, self-written test set.** The 12 scored cases were written by the author
   with Claude Code. The intervals are wide, and a misreading of the Act shared by the builders and the
   labels would not show up.

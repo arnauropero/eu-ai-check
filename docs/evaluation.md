@@ -51,6 +51,10 @@ call. It ran once, on 2026-11-04, over 20 cases:
 - N01–N12: new, hand-labelled cases;
 - H01–H08: the Article 5(1)(c) held-out set.
 
+One presentation change was made after this pass: the prohibited-practice notice
+(see [limitations.md](limitations.md) and SYSTEM_SPEC.md §18, 2026-11-11). It
+changes no status, citation or check, and the results below were not re-scored.
+
 Every stage used its frozen configuration: extraction, the provision matcher, the
 adapter and the generator, all on `gpt-6.1-sol`. The pass was not interrupted or
 resumed. Results are in `data/eval/results/e2e_heldout.json` and the per-case records

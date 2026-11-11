@@ -2673,6 +2673,23 @@ retuned. The runner is `src/eu_ai_check/e2e/` (`eu-ai-check eval-e2e`).
     - A case cut off mid-way has no recorded result. It runs again, and the calls it
       had already made stay in the ledger and count toward the caps.
 
+- **Post-evaluation renderer change (2026-11-11, after the held-out pass; not
+  evaluated).** When the prohibited-practice determination is `applicable`, the
+  rendered answer now starts with a notice that the practice may not be carried out
+  and that the high-risk sections are for reference only, and each `applicable`
+  risk-tier and obligation section carries a "for reference only" line
+  (`generation/render.py`, `PROHIBITED_NOTICE` / `REFERENCE_ONLY`).
+  - Presentation only: no status, citation, check, prompt or determination changes.
+    The model's claims are rendered as before.
+  - Its purpose is the limitation reported by the Phase 4 raters and seen in H06 and
+    demo X04: the high-risk obligations read as a route to compliance for a
+    prohibited practice.
+  - The held-out results above were produced by the earlier renderer at `405cd0c`
+    and are not re-scored. Of the five demo answers, only X04 differs when rebuilt
+    at $0 from its recorded facts, verdicts and model text; the rebuilt answer
+    passes every check. `docs/demo.md` shows it, marked as re-rendered;
+    `data/demo/recording.json` and `recording.md` are unchanged.
+
 ---
 
 ## 19. The Invariants (Updated Post-Corpus-Validation)

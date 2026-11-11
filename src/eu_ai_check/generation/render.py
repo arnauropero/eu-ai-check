@@ -29,6 +29,15 @@ from .schema import Claim, GeneratedAnswer
 ORDER = (RISK_TIER, PROHIBITED, ACTOR_ROLE, OBLIGATION)
 NEED_TO_KNOW = "To decide this, we would need to know:"
 NEED_TO_KNOW_HEADING = "What we would need to know"
+#: Shown first when a prohibited practice applies (added 2026-11-11, after the Phase 5
+#: held-out pass): the high-risk sections must not read as a compliance route.
+PROHIBITED_NOTICE = ("Important: a prohibited practice applies (Article 5). The described "
+                     "system may not be placed on the market, put into service or used for "
+                     "this practice. The high-risk classification and obligations below are "
+                     "listed for reference only; meeting them would not make the practice "
+                     "lawful.")
+REFERENCE_ONLY = ("(For reference only: a prohibited practice applies; see Prohibited "
+                  "practices (Article 5).)")
 
 
 def title(d: Determination) -> str:
@@ -101,6 +110,8 @@ class RenderedAnswer:
     arm: str                            # "template" | "llm"
     sections: tuple[Section, ...]
     extra: tuple[str, ...] = field(default=())   # claims whose determination is unknown
+    #: The prohibited-practice determination is `applicable`.
+    prohibited_applies: bool = False
 
     def need_to_know_groups(self) -> list[tuple[str, tuple[str, ...], tuple[str, ...]]]:
         """Each distinct question once, in first-seen rendering order, with the
@@ -119,8 +130,14 @@ class RenderedAnswer:
         groups = self.need_to_know_groups()
         number = {q: i for i, (q, _, _) in enumerate(groups, 1)}
         lines: list[str] = []
+        if self.prohibited_applies:
+            lines += [PROHIBITED_NOTICE, ""]
         for s in self.sections:
             lines += [f"## {s.status_line}"]
+            if (self.prohibited_applies and s.status == APPLICABLE
+                    and s.determination_id != PROHIBITED
+                    and not s.determination_id.startswith(ACTOR_ROLE)):
+                lines.append(REFERENCE_ONLY)
             for c in s.claims:
                 lines.append(f"- {c.text} [{'; '.join(c.citations)}]")
                 if c.quote:
@@ -207,4 +224,7 @@ def render(inp: GenerationInput, answer: GeneratedAnswer | None = None) -> Rende
         ))
     known = {d.determination_id for d in inp.determinations}
     extra = tuple(c.claim_id for c in claims if c.determination_id not in known)
-    return RenderedAnswer(inp.case_ref, "llm" if answer else "template", tuple(sections), extra)
+    prohibited = any(d.determination_id == PROHIBITED and d.applicability_status == APPLICABLE
+                     for d in inp.determinations)
+    return RenderedAnswer(inp.case_ref, "llm" if answer else "template", tuple(sections), extra,
+                          prohibited_applies=prohibited)
