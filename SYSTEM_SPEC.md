@@ -11,7 +11,7 @@ matcher (§2, §4.2), the Article 6 route combination and Annex I (§9.1), and f
 corpus defect: trailing paragraph-level text was dropped (§9.1). **Phase 4 design
 (2026-10-06)** records what Phase 3 actually outputs (§16.1), then defines the
 generation input and output (§16.2–16.3) and the generation checks (§18). This document is the
-technical source of truth for implementation in Claude Code. Where a decision rests on
+technical source of truth for implementation. Where a decision rests on
 assumption rather than verified source material, it is marked **[ASSUMPTION]**. Where a
 decision has been checked against the actual EUR-Lex / AI Act Explorer text, it is marked
 **[VERIFIED]**.
@@ -269,7 +269,7 @@ Responses API (`src/eu_ai_check/extraction/openai_extractor.py`; the default in
   model from the extractor, so no output is graded by the model that produced it.
   `low` effort matches the effort the pre-registered judge used.
 - **Method unchanged.** The judge's system prompt and verdict schema are identical
-  to the pre-registration (`fe0b0f6`); tests pin their SHA-256. Only the provider and
+  to the pre-registration (`832d63c`); tests pin their SHA-256. Only the provider and
   model changed.
 - **It never defines or changes the ground truth.** The judge sees the label's
   reference sentence and the extracted value, read-only, and only for text fields
@@ -285,9 +285,9 @@ Responses API (`src/eu_ai_check/extraction/openai_extractor.py`; the default in
 ### 3.5.3 Provenance
 
 Both changes were made on 2026-10-02: *after* the eval set was pre-registered
-(`fe0b0f6`) and *before* any API call.
+(`832d63c`) and *before* any API call.
 
-1. **Extractor:** Claude Opus 5.5 → GPT-6.1 Sol (commit `7434d4d`).
+1. **Extractor:** Claude Opus 5.5 → GPT-6.1 Sol (commit `b6d3739`).
 2. **Judge:** Claude Opus 5.5 → GPT-6 Astra, making the stack OpenAI-only.
 
 Unchanged by either: eval set, labels, labelling rules, null discipline, leakage
@@ -298,7 +298,7 @@ result had been seen. The Claude Opus 5.5 extractor remains available as an opti
 non-evaluated `extract --provider anthropic`, behind the `anthropic` package extra.
 Nothing in the evaluation workflow imports it.
 
-**Review record.** The user reviewed all 30 labels before pre-registration. One
+**Review record.** The author reviewed all 30 labels before pre-registration. One
 label changed during that review, E18 `puts_own_name_or_trademark` false → null
 (L3: the payroll provider's tool is not named). Because the change was made before
 any API run, it is *not* post-hoc. Any change after the first run is.
@@ -1851,7 +1851,7 @@ fixed, pass `--out` an undotted name.
   path.
 - *Baseline.* Phase 0 contained **no extraction accuracy measurement**; it deferred
   the number to Phase 2 (`src/eu_ai_check/corpus/baseline.py`). The "Phase 0
-  baseline" in the acceptance criterion is therefore the frozen v1 run (`82467bb`),
+  baseline" in the acceptance criterion is therefore the frozen v1 run (`8ef12af`),
   the committed Phase 2 baseline used for this target check.
 - *Locked target.* Overall field-level accuracy **≥ 0.95**, measured with the
   pre-registered primary concept-group scorer on the frozen 30-case v1 eval set, in
@@ -1864,7 +1864,7 @@ fixed, pass `--out` an undotted name.
 
 | criterion | committed result | outcome |
 |---|---|---|
-| overall field accuracy ≥ 0.95 (`low`, v1 `82467bb`) | 0.967 | met |
+| overall field accuracy ≥ 0.95 (`low`, v1 `8ef12af`) | 0.967 | met |
 | zero leaks | 0 in v1 (180 runs); also 0 in all 360 v2 runs | met |
 
 The post-hoc `affected_persons` re-score is **not** used for acceptance. The official
@@ -1916,7 +1916,7 @@ not retuned.
   decision rule. Clearing 0.85 alone does not adopt it.
 
 **Determination — Phase 3 pre-registration [2026-10-03].** The eval set (labels
-reviewed and approved by the user), arms, scoring and decision rule below are
+reviewed and approved by the author), arms, scoring and decision rule below are
 committed and binding. The τ values, the matcher prompt and the verification code
 were committed afterwards, still before the first determination run (Phase 2
 precedent; see "Pre-registration completed" below).
@@ -2034,7 +2034,7 @@ scoring rule or case changed.
   D30#1–2, D31, D32, D34#0–1, D35#2, D36, D37, D39, D40 and D41, all repeats unless
   marked. They fall in the last stretch of the run, which points to a network
   outage. The harness scored each one as wrong. B had no errors.
-- *Retry of the API-failed calls only (user decision, 2026-10-04).* The
+- *Retry of the API-failed calls only (author decision, 2026-10-04).* The
   pre-registration did not say how to handle transport failures. Only the 26 failed
   (case, repeat) pairs were re-called, once each, with the same model, effort,
   prompt and labels. The 97 successful M-low runs were not re-called: they were
@@ -2101,7 +2101,7 @@ against this set") in one respect, and is labelled accordingly:
 - *Scope:* the 5(1)(c) over-caution pattern only. The risk-tier misses above (D10,
   D26, D28) and the D32#2 variance have different causes and are outside this
   intervention.
-- *Held-out set, frozen before any matcher change (`6b98c76`).*
+- *Held-out set, frozen before any matcher change (`53eeeec`).*
   `data/eval/determination_heldout_5_1_c.json` has 8 cases, from angles not in the
   failing dev cases:
   - H01 payment fraud, H02 workplace productivity, H03 churn, H04 motor telematics
@@ -2113,11 +2113,11 @@ against this set") in one respect, and is labelled accordingly:
   The rule-based labels were checked offline (24/24). **This set was never run**,
   because the intervention stopped on the dev set. It stays untouched and could
   serve as a confirmation set for a future, separately pre-registered change.
-- *Hard stop, set by the user before v2 ran:* v2 is the last dev iteration. A
+- *Hard stop, set by the author before v2 ran:* v2 is the last dev iteration. A
   zero-tolerance violation or a clear regression on the dev set ends the
   intervention as NOT ADOPTED, with no v3.
 
-**Variant `social-scoring-v1` (`5b5d186`).** One rule was appended to the
+**Variant `social-scoring-v1` (`4d1c1e8`).** One rule was appended to the
 pre-registered system prompt. It said that an evaluation of people used for its
 own stated purpose, in the same context as its data, is lawful purpose-specific
 evaluation, not social scoring, so the answer is `does_not_match`. It added that
@@ -2126,7 +2126,7 @@ the description need not rule out every element of the provision, and that
 treatment is left open. No domain examples were given. The variant text is
 SHA-pinned in `tests/test_determination.py`.
 
-**Variant `social-scoring-v2` (`897c22e`).** v1's rule sat in the system prompt
+**Variant `social-scoring-v2` (`2587e00`).** v1's rule sat in the system prompt
 and spilled over to other provisions. For v2, the restriction was made structural:
 the system prompt is byte-identical to the pre-registered one, and the guidance is
 printed only as a `note:` line inside the Article 5(1)(c) candidate's block of the
@@ -2283,7 +2283,7 @@ It is binding. As with Phase 3, a miss is reported as a miss and is not retuned.
   - If the hygiene criterion fails, that is recorded and the template ships as the
     Phase 4 generator. There is no retry.
   - API failures during the held-out pass count as failures. They are not re-run,
-    unless the user decides otherwise before the results are looked at, as in
+    unless the author decides otherwise before the results are looked at, as in
     Phase 3.
 - **Model:** `gpt-6.1-sol` at effort `low`, configurable. The comparison with cheaper
   models is deferred to Phase 5 as a pre-registered comparison.
@@ -2392,8 +2392,8 @@ It is binding. As with Phase 3, a miss is reported as a miss and is not retuned.
   held-out pass is $1.0114.
 
 - **[Note, 2026-10-06, before any held-out call and before any held-out result
-  exists] API-failure policy for the held-out pass.** The user decided this before
-  looking at any held-out result, as the hard rule above allows ("unless the user
+  exists] API-failure policy for the held-out pass.** The author decided this before
+  looking at any held-out result, as the hard rule above allows ("unless the author
   decides otherwise before the results are looked at"). The pre-registration is not
   edited.
   - *Transient errors* (connection failures, timeouts, HTTP 5xx) are retried
@@ -2411,27 +2411,27 @@ It is binding. As with Phase 3, a miss is reported as a miss and is not retuned.
   - The summaries report `retries` and `retry_cost_usd`.
 
 - **[Deviation, 2026-10-06, after the held-out pass, before any rating exists] The
-  pairwise rating is done by an LLM rater.** This is the user's decision. The
+  pairwise rating is done by an LLM rater.** This is the author's decision. The
   pre-registration is not edited.
-  - *Rater.* The pre-registered human rater (the user) will not rate all 20 pairs.
+  - *Rater.* The pre-registered human rater (the author) will not rate all 20 pairs.
     An independent LLM rater, Claude in the claude.ai chat (not the session that built
     and ran Phase 4), rates all 20 blinded pairs from the committed sheet. The result
     is labelled **"LLM-rated (Claude)"** everywhere, and never "human-rated".
   - *Rule unchanged.* Blind pairwise preference ≥ 15/20, ties to the template.
     Scoring still reports both 15/20 and x/18 (the 2 not_in_force pairs are
     identical by construction).
-  - *Human validation, reported only.* The user rates 6 of the 18 informative pairs:
+  - *Human validation, reported only.* The author rates 6 of the 18 informative pairs:
     R04, R05, R06, R07, R12, R17, drawn with seed 20261008. The R01/R02 pairs are
     excluded. Their agreement with the LLM rater is reported (preference x/6,
     faithfulness x/6) and never changes the adoption decision. With 6 pairs the
     agreement estimate is coarse, and 4 of the 6 are unresolved-class pairs.
   - *Files.* `data/eval/generation_rating_validation.json` (the frozen ids and seed)
-    and `data/eval/results/generation_ratings_validation.json` (the user's ratings).
+    and `data/eval/results/generation_ratings_validation.json` (the author's ratings).
     The A/B key is opened only by the scorer, after both rating files are complete.
 
 - **[Note, 2026-10-06, after rating] Rating outcome and adoption decision.** The
   pre-registration is not edited. The scorer opened the A/B key only after both
-  rating files were committed (9d88c9f). The key matched its committed SHA-256
+  rating files were committed (7af45d4). The key matched its committed SHA-256
   (`41231e32…01222`).
   - *Pairwise, LLM-rated (Claude).* The model arm was preferred in **17/20** pairs
     (17/18 informative pairs). The template arm was preferred in 0, and 3 were ties:
@@ -2467,6 +2467,228 @@ It is binding. As with Phase 3, a miss is reported as a miss and is not retuned.
 Extraction errors are evaluated separately from downstream errors, since an extraction
 mistake silently poisons every later stage — an end-to-end failure must be attributable
 to a specific stage, not just logged as "wrong answer."
+
+**[Note, 2026-10-25, Phase 5 design] Retrieval is not on the shipped determination
+path.** This note records the as-built pipeline. The §2 diagram is left as written.
+The diagram puts retrieval between extraction and determination. In the code it is
+not there:
+- `Pipeline.determine` (`determination/pipeline.py`) passes the matcher the closed,
+  exhaustive candidate set of every scope (`determination/scopes.py`): every
+  date-eligible Annex III, Article 5(1), Article 6(3), Annex I and Article 6(1)(b)
+  provision. It never passes a retrieval top-k.
+- The adapter takes evidence text from the corpus by `versioned_provision_id`
+  (`generation/adapter.py`), not from retrieval results.
+
+This follows from the Phase 3 design (§4.2): a negative determination must never rest
+on a retrieval miss. Phase 1 retrieval stays a measured component. It is used by the
+Phase 3 score-cutoff baseline (`determination/baseline.py`) and by `eu-ai-check
+search`. The Phase 5 end-to-end evaluation therefore measures extraction,
+determination and generation, not retrieval. The README states this.
+
+**End-to-end — Phase 5 pre-registration (APPROVED 2026-11-04).** Design:
+`docs/phase5_design.md` (Q1–Q4 decided 2026-10-25). Everything below was approved by
+the author and committed **before any Phase 5 API call**: no smoke test, no stability
+run, no held-out call. It is binding. A miss is reported as a miss and nothing is
+retuned. The runner is `src/eu_ai_check/e2e/` (`eu-ai-check eval-e2e`).
+
+- **What runs.** One case is one free-text description plus its fixed
+  `assessment_date`. The runner chains the shipped configuration of every stage,
+  with nothing gold in between:
+  - extraction: `OpenAIExtractor`, `gpt-6.1-sol`, effort `low`, `baseline` prompt
+    (Phase 2 accepted);
+  - `Case.from_facts` with the case's own `assessment_date`;
+  - determination: `Pipeline.determine` + `OpenAIMatcher`, M-low, the pre-registered
+    matcher prompt (`baseline`, SHA-pinned in `tests/test_determination.py`);
+  - `adapt`, as in Phase 4;
+  - generation: `OpenAIGenerator`, `gpt-6.1-sol`, effort `low`, `max_output_tokens`
+    5000, prompt v2 (`a6b4a491…`), checks C0–C8 and the template fallback. This is the
+    Phase 4 harness function `evaluate_item`, unchanged.
+
+  The runner refuses to run any other configuration. Retrieval is not on this path
+  (note above).
+- **Pinned clock and frozen legal text.**
+  - The evaluation clock is the constant **2026-10-25**. Nothing on the evaluation
+    path reads the system clock. A test checks the runner's whole import closure
+    statically. It also checks at runtime that the one clocked function there (the
+    Phase 4 ledger timestamp) is never called. The Phase 5 ledger carries a sequence
+    number, the pinned clock and the API's own `created_at`, not a local timestamp.
+  - Each case's `assessment_date` is fixed in its file: 2026-10-25 for N01–N12 and
+    2026-10-04 for H01–H08. No case may be dated after the clock.
+  - Descriptions use explicit dates, never relative time words (a test checks this).
+    N04, N07 and N08 ask about "1 October 2026".
+  - **All expected outputs are relative to the frozen corpus snapshot**
+    (`data/corpus/provisions.json`). It holds the Act's text as in force from
+    **2024-08-01**, with no amendments; all 110 provisions have
+    `text_valid_from = 2024-08-01`. A later amendment would need a new corpus version
+    and new labels. It does not change these.
+- **The evaluation set, frozen.** 20 cases, each run **once**.
+  - **Stratum A, N01–N12:** `data/eval/e2e_cases.json`, cases-content SHA-256
+    `a50afdabda92f3ee3724047d93dcd9d5e329e3adec517f697660a5d5fff8c0d4`.
+  - **Stratum B, H01–H08:** `data/eval/determination_heldout_5_1_c.json`, frozen in
+    `53eeeec` and unchanged since. Cases-content SHA-256
+    `11e564939375d5482dcd53145a5b245507d1b52542e665c69d9cc693ac1d401c`.
+  - Both SHAs are pinned in `tests/test_e2e_cases.py`.
+  - N08's expected risk tier is given per route:
+    - Annex III 5(d): **applicable** (from 2026-08-02);
+    - Annex I item 11 (Regulation (EU) 2017/745, notified body):
+      **not_applicable / not_yet_applicable** until 2027-08-02;
+    - overall: **applicable**, because one applicable route is enough (§9.1).
+- **Acceptance rule: all of G1–G4 must hold.** If any fails, Phase 5 acceptance is
+  NOT MET, the phase is not tagged, and nothing is retuned. Every result is reported
+  with its 95% Wilson interval, whether it passes or fails.
+  - **G1, zero tolerance, both strata (20 cases), strict, counted by root cause.**
+    Any violation fails Phase 5. One root event, such as one matcher verdict, counts
+    as one violation, and its cascade is listed with it. Violations:
+    - an expected `unresolved` produced as `applicable` or `not_applicable`, on any
+      determination (including a single actor role);
+    - an expected `not_in_force` produced as `not_applicable`;
+    - a positive conclusion resting on a verdict that failed code verification;
+    - extraction leakage: an excluded field, or a conclusion term in any value (the
+      Phase 2 lexicon);
+    - a shipped answer whose rendered status differs from the pipeline's
+      determination.
+
+    **Stated plainly:** a D32-type event (one borderline verdict flipping to a
+    definite one; 1 in 123 dev runs in Phase 3) on H07 or H08 **would fail G1, and
+    with it Phase 5.** The held-out pass cannot be rerun, so such an event stands.
+  - **G2, output hygiene, both strata (20 cases).** Every case ships an answer that
+    passes C0–C8, so every citation resolves to a real evidence item whose text
+    equals the corpus text of its `versioned_provision_id` (C1–C3). A template
+    fallback counts as shipped, and the fallback rate is reported. *Clarification:*
+    a case whose stage still fails after the API-failure policy ships no answer, so
+    it fails G2. All its G3 judgements count as misses, and it is not re-run.
+  - **G3, determination correctness, stratum A only.** Exact status match,
+    including the `not_applicable` reason:
+    - **G3a** (risk tier + prohibited practice, n = 24): pass if **≥ 19/24**. The
+      threshold's 95% Wilson interval is 0.595–0.908.
+    - **G3b** (actor roles + Article 16 + Article 26, n = 36): pass if **≥ 33/36**.
+      Its 95% Wilson interval is 0.782–0.971.
+  - **G4, citation correctness, stratum A only.** A risk-tier determination that
+    comes out correctly `applicable`, `not_yet_applicable` or derogation-`applied`
+    must cite exactly the expected Annex III and Annex I grounds (set equality).
+    Stratum A has no expected prohibited positive.
+    - **G4** (citation grounds, n ≤ 10): pass if **0 mismatches**. The 95% Wilson
+      interval at 10/10 is 0.722–1.000.
+    - **G4 is brittle:** with n ≤ 10 and no miss allowed, a single wrong citation
+      fails the gate, and with it Phase 5.
+  - The thresholds follow one rule: dev performance minus 0.05, rounded up to a
+    whole count. The dev bases (Phase 3 official run, gold facts) are 204/246 = 0.829,
+    349/369 = 0.946 and 99/102 = 0.971 (design §3.2). The intervals are wide. These
+    gates detect gross failure; they do not estimate accuracy precisely.
+- **Stratum B counts toward G1 and G2 only.** Its accuracy (risk tier, prohibited
+  practice, roles, Article 16/26) is reported in its own table. It is never pooled
+  with stratum A and never gated, because the Article 5(1)(c) shortfall is the
+  accepted Phase 3 limitation.
+- **Attribution, $0.** Every miss is attributed to exactly one stage:
+  - a stage failure;
+  - date extraction (the extracted `relevant_date` differs from gold);
+  - the matcher (a risk-tier or prohibited miss with the correct date, or a
+    role/obligation miss that comes from a wrong risk tier);
+  - extraction (replaying roles and obligations with the same recorded verdicts and
+    the gold facts gives the right answer);
+  - the rules (still wrong on gold inputs);
+  - generation (a G1 status mismatch or a G2 failure).
+- **Reported, not gated:**
+  - extraction field accuracy per stratum: booleans and `relevant_date` exact, free
+    text as null / non-null agreement, because the e2e labels are gold facts, not
+    Phase 2 concept groups;
+  - per-state tables;
+  - `system_category`;
+  - the fallback rate;
+  - misses by stage;
+  - cost.
+- **Hard rule.**
+  - **The held-out pass (N01–N12 + H01–H08) runs exactly once.** A marker is written
+    before its first call. The runner refuses a second pass. A crashed or interrupted
+    pass may only be resumed under the resume rule below.
+  - **No tuning after any result.** No prompt, label, check, threshold or code on any
+    scored path changes against H01–H08 or N01–N12 once any of their output, or any
+    stability output, has been seen. The only exception is the wiring-fix carve-out
+    below.
+  - Any future fix needs a new held-out set (README, future work).
+- **Stability check: a separate experiment, reported only, never pooled.**
+  - Dev cases D32, D10, D35 and D39 × 3, full end-to-end.
+  - Run in rounds: repeat 1 of all four cases, then repeat 2, then repeat 3. The
+    first run is the wiring smoke test, and the experiment stops if it fails.
+  - It runs before the held-out pass.
+  - **Statistics use complete rounds only.** A partial round is flagged and listed,
+    and no conclusion is drawn from partial data.
+- **Spend (binding).** One cap, **$8**, for every Phase 5 API call, enforced in code
+  (`e2e/spend.py`). Prices are $2 / $10 per million input / output tokens.
+  - A held-out reserve of **$3.48** (20 cases × $0.116 × 1.5) is set aside first.
+    No other call may use it until the held-out pass has started.
+  - The stability experiment has its own hard cap of **$1.50**.
+  - Before every call, the guard refuses it if its worst case (input at 3 characters
+    per token plus the full output budget) could breach a cap. The output budgets
+    are not lowered, because they are part of the frozen stage configurations.
+  - Every call, failed ones included, is recorded with its stage
+    (extract / match / generate) in `data/eval/results/phase5_spend.jsonl`.
+  - **Amendment made before freezing and before any API call (2026-11-04):** the
+    stability cap was raised from $1.10 to $1.50. Reason: with the worst-case-per-call
+    check (a matcher call is up to about $0.34), a $1.10 cap would have cut round 3
+    short at the planned spend (about $0.94). At mean cost the last matcher call now
+    fits: about $0.86 spent plus $0.34 is about $1.20. At the maximum observed case
+    cost ($0.116) it would still not fit (about $1.28 + $0.34). In that case round 3
+    ends partial and is handled by the complete-rounds rule above. The $8 total and
+    the $3.48 reserve are unchanged.
+- **API failures, the Phase 4 policy:**
+  - up to 3 retries for transient errors (connection, timeout, HTTP 5xx), each one
+    guarded, billed and recorded;
+  - HTTP 429 and other 4xx errors fail at once;
+  - content failures are never retried;
+  - the client is built with `max_retries=0`.
+- **Tests are plumbing checks only.** The test suite runs the full chain offline,
+  with a fake client that answers from the labels. That shows only that the labels
+  survive the shipped code and that the guards work. It is not a result and is never
+  reported as one.
+- **Out of scope:** the generation-model comparison (design §7). The demo is recorded
+  after the held-out pass, from the same $8 cap.
+- **Additions approved 2026-11-04, before any push or API call.**
+  - **Wiring-fix carve-out.** Once stability output has been seen, a fix is allowed
+    **only** if it changes no stage configuration, prompt, label, check, threshold
+    or scoring logic. Each such fix must:
+    - be verified by tests;
+    - be recorded as a dated deviation note in this section;
+    - be shown to the author before the held-out pass.
+
+    Anything else falls under the no-tuning rule above.
+  - **Resume rule for the held-out pass.**
+    - After a crash or interruption, the runner (`--resume`) may continue with the
+      cases that have no recorded result. It never re-runs a case with a recorded
+      result.
+    - It may do so only if the git tree hash of all scored-path files equals the hash
+      recorded in the marker. Anything else is refused.
+    - The scored paths are `src/eu_ai_check`, `data/corpus`, the two case files,
+      `pyproject.toml` and `uv.lock`. The hash is the git object hash of each at
+      HEAD, combined with SHA-256. It is written into the marker before the first
+      call.
+    - A pass cannot start or resume while any scored-path file differs from HEAD
+      (modified, staged or untracked).
+    - Each case result is appended to the runs file as soon as the case finishes.
+      A case whose stage still fails after the API-failure policy is a recorded
+      result: it ships no answer, it fails G2, all its G3 judgements are misses, and
+      `--resume` does not run it again.
+    - On resume, every recorded result is replayed at $0 from its recorded facts and
+      verdicts, and must reproduce the record, or the resume is refused.
+    - A case cut off mid-way has no recorded result. It runs again, and the calls it
+      had already made stay in the ledger and count toward the caps.
+
+- **Post-evaluation renderer change (2026-11-11, after the held-out pass; not
+  evaluated).** When the prohibited-practice determination is `applicable`, the
+  rendered answer now starts with a notice that the practice may not be carried out
+  and that the high-risk sections are for reference only, and each `applicable`
+  risk-tier and obligation section carries a "for reference only" line
+  (`generation/render.py`, `PROHIBITED_NOTICE` / `REFERENCE_ONLY`).
+  - Presentation only: no status, citation, check, prompt or determination changes.
+    The model's claims are rendered as before.
+  - Its purpose is the limitation reported by the Phase 4 raters and seen in H06 and
+    demo X04: the high-risk obligations read as a route to compliance for a
+    prohibited practice.
+  - The held-out results above were produced by the earlier renderer at `3a3aad8`
+    and are not re-scored. Of the five demo answers, only X04 differs when rebuilt
+    at $0 from its recorded facts, verdicts and model text; the rebuilt answer
+    passes every check. `docs/demo.md` shows it, marked as re-rendered;
+    `data/demo/recording.json` and `recording.md` are unchanged.
 
 ---
 
@@ -2629,6 +2851,7 @@ to a specific stage, not just logged as "wrong answer."
 - Splitting `relevant_date` into `event_date` / `assessment_date` / `deployment_date`.
 - Multi-jurisdiction support (using the already-captured but currently unused
   `jurisdiction` field).
-- Incorporating the pending Digital Omnibus amendment to Article 5 once it has a
-  confirmed effective date — a live, real-world exercise of the text-versioning model
-  rather than a synthetic one.
+- Incorporating Regulation (EU) 2026/1744 (Digital Omnibus on AI, in force since
+  27 July 2026) as a new corpus version — a live, real-world exercise of the
+  text-versioning model rather than a synthetic one. Not done: the project closed in
+  November 2026 on the 2024 text.

@@ -11,6 +11,8 @@ from eu_ai_check.generation.inputs import Inputs
 from eu_ai_check.generation.render import (
     NEED_TO_KNOW,
     NEED_TO_KNOW_HEADING,
+    PROHIBITED_NOTICE,
+    REFERENCE_ONLY,
     render,
     status_line,
 )
@@ -87,6 +89,28 @@ def test_applicable_obligations_show_their_text_and_sources() -> None:
     s26 = next(s for s in render(inp).sections if s.determination_id == "obligation:aiact:art_26")
     assert len(s26.obligation_texts) == len(s26.citations) == 12
     assert s26.citations[1] == ("Article 26(2)", "aiact:art_26:para_2@2024-08-01")
+
+
+def test_prohibited_practice_comes_first_and_marks_high_risk_sections_reference_only() -> None:
+    answer = render(load_input("D21#0"))      # prohibited, high-risk, deployer, Art 26 applies
+    assert answer.prohibited_applies
+    text = answer.to_text()
+    assert text.startswith(PROHIBITED_NOTICE + "\n\n## ")
+    for s in answer.sections:
+        block = text.split(f"## {s.status_line}\n", 1)[1].split("\n## ", 1)[0]
+        marked = block.startswith(REFERENCE_ONLY)
+        expected = s.determination_id in ("risk_tier", "obligation:aiact:art_26")
+        assert marked == expected, s.determination_id
+    # Statuses are untouched: the notice is presentation only.
+    assert [(s.status, s.status_line) for s in answer.sections] == [
+        (s.status, s.status_line) for s in render(load_input("D21#0")).sections]
+
+
+def test_no_prohibition_no_notice() -> None:
+    answer = render(load_input("D01#0"))
+    assert not answer.prohibited_applies
+    text = answer.to_text()
+    assert PROHIBITED_NOTICE not in text and REFERENCE_ONLY not in text
 
 
 def test_status_line_is_a_function_of_the_input_only() -> None:

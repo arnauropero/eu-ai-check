@@ -347,7 +347,7 @@ and the template satisfies it.
   only on this machine, so back the file up **without opening it**. If it is lost,
   the pairwise rating cannot be unblinded.
 - **Procedure:** the rating sheets show A and B for each sample, with no arm names.
-  The user rates every pair (A / B / tie) and the faithfulness of both, and
+  The author rates every pair (A / B / tie) and the faithfulness of both, and
   commits the ratings. Only then is the key opened, its hash checked and the result
   computed.
 - **[Note, 2026-10-06, before any held-out call] Two pairs tie by construction.** The
@@ -360,7 +360,7 @@ and the template satisfies it.
   sample.** All 20 pairs are rated by an independent LLM rater (Claude in the
   claude.ai chat, not the Phase 4 session). The result is labelled "LLM-rated
   (Claude)", and never "human-rated". The rule (≥ 15/20, ties to the template) and
-  the 15/20 and x/18 reporting are unchanged. The user rates a validation sample of 6
+  the 15/20 and x/18 reporting are unchanged. The author rates a validation sample of 6
   of the 18 informative pairs: R04, R05, R06, R07, R12, R17. They were drawn with
   `random.Random(20261008).sample(sorted(ids), 6)` (Python 3.12), with R01/R02
   excluded, before any rating existed and without opening the key or the sheet.
@@ -381,7 +381,7 @@ and the template satisfies it.
 - If the hygiene criterion fails, that is recorded and the template ships as the
   Phase 4 generator. There is no retry.
 - API failures during the held-out pass count as failures. They are not re-run,
-  unless the user decides otherwise before the results are looked at (the Phase 3
+  unless the author decides otherwise before the results are looked at (the Phase 3
   precedent).
 
 ---
@@ -479,7 +479,7 @@ matcher):
 
 ## 7. Edits to SYSTEM_SPEC and PROJECT_PLAN
 
-- `34acd2a`:
+- `6c425c9`:
   - SYSTEM_SPEC §16 as-built note and §16.1 (what Phase 3 really produces);
   - §16.2 (adapter input, per-article obligations);
   - §16.3 (claims-first output, template renderer);
@@ -512,7 +512,7 @@ matcher):
 - **Q9:** the $5 cap, with held-out reserved first, plus the hard rule.
 - **Addition:** synthetic `not_in_force` dev cases S01–S03.
 
-**Next step:** the smoke test (one call on a made-up input). It waits for the user's
+**Next step:** the smoke test (one call on a made-up input). It waits for the author's
 go-ahead after they check the OpenAI balance.
 
 ## Outcome (2026-10-06)

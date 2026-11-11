@@ -1,7 +1,8 @@
 # PROJECT_PLAN.md — EU AI Act Compliance Determination System
 
-Status: V1 scope locked. Companion document to SYSTEM_SPEC.md (technical source of
-truth). This document governs scope, milestones, and portfolio narrative.
+Status: **project complete (November 2026), not maintained.** V1 is complete with one
+documented exception (Phase 3 acceptance not met; see §8). Companion document to
+SYSTEM_SPEC.md (technical source of truth). This document governs scope, milestones, and portfolio narrative.
 
 ---
 
@@ -210,7 +211,7 @@ one rule-matching engine → cited, fail-closed output.
   optional, non-evaluated provider behind the `anthropic` extra.
 - Status: extractor (originally Claude Opus 5.5, structured outputs, refusal fallbacks), harness
   (`eu-ai-check eval-extraction`), conclusion-leakage check and a 30-case labelled eval
-  set were committed **before the first API run**. The labels were reviewed by the user
+  set were committed **before the first API run**. The labels were reviewed by the author
   first, and one changed in that review (E18, documented as pre-registration, not
   post-hoc). Field rules and labelling decisions L1–L9 are in SYSTEM_SPEC.md §3.4. The
   accuracy target is locked after the first run.
@@ -237,7 +238,7 @@ one rule-matching engine → cited, fail-closed output.
   output.
 - Deliverable: extraction eval set (hand-labeled free-text → expected fields).
   **Delivered:** `data/eval/extraction_cases.json`, 30 cases, user-reviewed and
-  committed before any API call (`fe0b0f6`); its content is SHA-pinned in tests.
+  committed before any API call (`832d63c`); its content is SHA-pinned in tests.
 - Acceptance: field-level accuracy meets the target locked during this phase against
   the Phase 0 baseline (SYSTEM_SPEC.md §18); extraction **never** outputs a value for
   an excluded (conclusion-level) field — this is a zero-tolerance check, not a
@@ -245,7 +246,7 @@ one rule-matching engine → cited, fail-closed output.
   **Met.**
   - *Accuracy:* target overall field accuracy ≥ 0.95, scored by the pre-registered
     concept-group scorer at `low` effort. Result 0.967 on the frozen v1 run
-    (`82467bb`). Phase 0 had no extraction measurement, so the v1 run is the
+    (`8ef12af`). Phase 0 had no extraction measurement, so the v1 run is the
     baseline. **The target was locked after the first results were seen**, as the
     Phase 2 pre-registration allows. It is a regression guard, not a pre-registered
     criterion.
@@ -282,7 +283,7 @@ one rule-matching engine → cited, fail-closed output.
 - Deliverable: provision matcher with code verification, plus the score-cutoff
   baseline arm, compared under a pre-registered decision rule (SYSTEM_SPEC.md §18).
   **Pre-registered (2026-10-03), before any determination run:**
-  - 41-case eval set (`9cb9bd2`).
+  - 41-case eval set (`041917e`).
   - Determination code, matcher prompt (SHA-pinned) and τ values (next commit).
   - The rule path reproduces all 123 rule-based labels offline.
   - **First run (2026-10-04): acceptance NOT MET** (SYSTEM_SPEC.md §18). 26 of 123
@@ -294,8 +295,13 @@ one rule-matching engine → cited, fail-closed output.
     an 8-case held-out set was frozen first (never run). Two prompt variants were
     tried. `social-scoring-v1` fixed 5(1)(c) but spilled over (D32, D24).
     `social-scoring-v2`, scoped to the 5(1)(c) candidate, still produced
-    zero-tolerance violations on D32. The user's hard stop ended the intervention.
+    zero-tolerance violations on D32. The author's hard stop ended the intervention.
     The pre-registered prompt stays the default.
+  - **Closed as a documented limitation (author, 2026-10-25).** No further Phase 3
+    attempt in V1. The not-met verdict stands, the phase stays untagged, and the
+    README states the numbers above. The 8-case 5(1)(c) held-out set (H01–H08) stays
+    reserved for the Phase 5 end-to-end evaluation; its use is fixed in the Phase 5
+    pre-registration.
 - Deliverable: `GroundedDetermination` component implemented once, parameterized for
   risk-tier, prohibited-practice, actor-role, and obligation-applicability use.
 - Deliverable: `ApplicabilityRule` matching engine (the evaluation logic; the rule
@@ -365,7 +371,7 @@ one rule-matching engine → cited, fail-closed output.
   - Spend cap: $5 for all Phase 4 API calls, with held-out reserved first.
   - H01–H08 are not used in Phase 4. They are reserved for Phase 5.
 - **Status (2026-10-06): complete, acceptance met, LLM generator adopted. Merged in
-  `678f44c` (PR #3) and tagged `phase-4`.**
+  `5853cff` (PR #3) and tagged `phase-4`.**
   - *Dev.* Two dev prompt iterations. v2 was frozen before the held-out pass.
   - *Held-out pass (once, 39 records).* Raw pass 1.00, fallback 0.00, 0 truncated,
     0 C4/C8, coverage 1.00, status reproduced 15/15, 0 API errors.
@@ -379,12 +385,45 @@ one rule-matching engine → cited, fail-closed output.
 
 **Phase 5 — End-to-end evaluation and polish**
 - Deliverable: end-to-end eval set with full expected outputs.
+  Phase 3 matcher errors flow into it and are reported as such, not corrected.
 - Deliverable: a pre-registered comparison of generation models (`gpt-6.1-sol` vs
   cheaper models). It uses the Phase 4 checks and decision rule, and is not decided
   in Phase 4.
 - Deliverable: README documenting architecture, rejected alternatives, and known
   limitations (including the Digital Omnibus amendment to Article 5 as a live
   versioning example).
+  The limitations section reports the Phase 3 not-met verdict with its numbers.
+- Deliverable (distribution, author decision 2026-10-03): a demo mode that replays
+  recorded results for prepared examples, needing no API key, plus a demo video.
+  Anyone trying their own descriptions clones the repo and uses their own OpenAI key
+  (environment variable); README gives these instructions. No hosted key, no public
+  endpoint.
+  - Demo outputs are real recorded runs, never edited by hand.
+  - Demo examples are new descriptions written for the demo. They are not H01–H08
+    or any other eval record.
+  - The demo and video description point to the known limitations.
+- **Status (2026-11-11): complete, acceptance met. Merged to `master` and tagged
+  `phase-5`.**
+  - *Held-out pass (once, 2026-11-04, 20 cases).* All four pre-registered gates
+    passed: G1 0 violations; G2 20/20; G3a 20/24 (≥ 19); G3b 34/36 (≥ 33); G4 10/10.
+    All 13 missed judgements were cautious (`unresolved` where a definite answer was
+    expected): 6 from the Article 5(1)(c) matcher limitation, 7 from extraction.
+  - *Stability check (reported only).* 19 of 20 determinations stable across three
+    repeats.
+  - *Spend.* About $3.01 of the $8 cap (evaluation $2.57, demo $0.35, `assess`
+    smoke test $0.09).
+  - *Delivered.* `eu-ai-check assess` (bring your own key, capped cost); five
+    recorded demo examples (`docs/demo.md`) and a terminal replay GIF in place of
+    a demo video; README with results and limitations (`docs/evaluation.md`,
+    `docs/limitations.md`); CI running the offline test suite.
+  - *Not delivered.* The generation-model comparison (out of scope, SYSTEM_SPEC.md
+    §18).
+  - *After the held-out pass (not evaluated).* A presentation change: when a
+    prohibited practice applies, the answer says so first and marks the high-risk
+    sections "for reference only" (SYSTEM_SPEC.md §18, 2026-11-11).
+  - *Legal text.* Regulation (EU) 2026/1744 (Digital Omnibus on AI), in force since
+    27 July 2026, is not in the corpus. The project closed on the 2024 text; the
+    README and `assess` say so.
 
 ## 7. Evaluation Plan
 
@@ -397,11 +436,17 @@ deliverable (§10), not an afterthought.
 ## 8. Acceptance Criteria (V1 complete when)
 
 - All five phase-level acceptance criteria above are met.
+  **Deviation (author, 2026-10-25):** Phase 3's criterion is not met and is accepted
+  as a documented limitation (see Phase 3). V1 is declared complete when the other
+  four phases meet theirs; it is never described as meeting all five.
+  **Outcome (2026-11-11):** Phases 0, 1, 2, 4 and 5 met their criteria and are
+  tagged `phase-N`. Phase 3 did not and is untagged. V1 is complete on that basis.
 - The four-way `applicable/not_applicable/unresolved/not_in_force` output is
   demonstrably exercised by real eval cases (all four states, not just the easy ones),
   not just theoretically possible.
 - Numerical targets for every metric category in SYSTEM_SPEC.md §18 have been locked
   (not left as "TBD") against Phase 0 baselines, and the implemented system meets them.
+  The Phase 3 matcher targets are the stated exception (deviation above).
 - At least one eval case explicitly demonstrates correct handling of the Article 25
   role-transfer scenario (deployer becoming subject to provider obligations).
 - At least one eval case explicitly demonstrates simultaneous provider+deployer roles,
@@ -444,7 +489,7 @@ deliverable (§10), not an afterthought.
   phase that ends with a documented not-met verdict is still merged, because its
   code and findings are real and final, but it is not tagged. Its verdict is
   recorded in the relevant SYSTEM_SPEC.md section. Phase 3 is the first example:
-  merged in `d7d45ad`, untagged, with the NOT MET verdict in §18.
+  merged in `83a4bb5`, untagged, with the NOT MET verdict in §18.
 
 ## 10. Data / Evaluation Assets to Create
 
@@ -479,8 +524,9 @@ deliverable (§10), not an afterthought.
 - `obligation_id` entity, if corpus evidence justifies it.
 - Multi-jurisdiction support.
 - `relevant_date` field-splitting (`event_date`/`assessment_date`/`deployment_date`).
-- Incorporating the Digital Omnibus amendment to Article 5 once it has a confirmed
-  effective date.
+- Incorporating Regulation (EU) 2026/1744 (Digital Omnibus on AI, in force since
+  27 July 2026) as a new corpus version. Not done: the project closed in November 2026
+  on the 2024 text.
 
 ## 13. Portfolio / Interview Narrative
 

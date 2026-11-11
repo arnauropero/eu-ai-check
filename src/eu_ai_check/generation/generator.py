@@ -87,7 +87,7 @@ cites an obligation provision of that determination.
 #: line predates these fields).
 PROMPT_VERSION = "v2"
 PROMPT_HISTORY = {
-    "v0": "pre-registered system prompt and schema (33cf62c); smoke test only",
+    "v0": "pre-registered system prompt and schema (364293b); smoke test only",
     "v1": "system prompt and schema unchanged from v0; adapter explanations reworded "
           "without internal ids or None (smoke showed them echoed as 'The code identifies')",
     "v2": "system prompt and input labels describe an analysis of the user's system (no "

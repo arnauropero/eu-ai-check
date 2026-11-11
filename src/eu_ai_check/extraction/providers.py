@@ -1,7 +1,7 @@
 """Extraction provider selection.
 
 **Phase 2 extraction model: OpenAI GPT-6.1 Sol (`gpt-6.1-sol`).** Switched from
-Claude Opus 5.5 on 2026-10-02, after the eval set was pre-registered (`fe0b0f6`)
+Claude Opus 5.5 on 2026-10-02, after the eval set was pre-registered (`832d63c`)
 and before any extraction API call. The switch changes the model under test, not
 the evaluation: eval set, labels, field rules, prompt, leakage check, scoring and
 categories are all unchanged. The Anthropic extractor stays available as an

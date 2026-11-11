@@ -1,0 +1,443 @@
+{
+  "runs": 12,
+  "complete_rounds": 3,
+  "partial_round": null,
+  "determinations_stable": {
+    "k": 19,
+    "n": 20,
+    "rate": 0.95,
+    "wilson95": [
+      0.764,
+      0.991
+    ]
+  },
+  "per_case": {
+    "D32": {
+      "repeats": 3,
+      "statuses": {
+        "risk_tier": [
+          "not_applicable/conditions_not_met",
+          "not_applicable/conditions_not_met",
+          "not_applicable/conditions_not_met"
+        ],
+        "prohibited_practice": [
+          "unresolved",
+          "unresolved",
+          "unresolved"
+        ],
+        "actor_role": [
+          {
+            "actor_roles": [
+              "deployer"
+            ],
+            "unresolved_roles": [
+              "provider"
+            ],
+            "status": "unresolved"
+          },
+          {
+            "actor_roles": [
+              "deployer"
+            ],
+            "unresolved_roles": [
+              "provider"
+            ],
+            "status": "unresolved"
+          },
+          {
+            "actor_roles": [
+              "deployer"
+            ],
+            "unresolved_roles": [
+              "provider"
+            ],
+            "status": "unresolved"
+          }
+        ],
+        "aiact:art_16": [
+          "not_applicable/conditions_not_met",
+          "not_applicable/conditions_not_met",
+          "not_applicable/conditions_not_met"
+        ],
+        "aiact:art_26": [
+          "not_applicable/conditions_not_met",
+          "not_applicable/conditions_not_met",
+          "not_applicable/conditions_not_met"
+        ]
+      },
+      "stable": {
+        "risk_tier": true,
+        "prohibited_practice": true,
+        "actor_role": true,
+        "aiact:art_16": true,
+        "aiact:art_26": true
+      },
+      "correct": {
+        "risk_tier": [
+          false,
+          false,
+          false
+        ],
+        "prohibited_practice": [
+          true,
+          true,
+          true
+        ],
+        "actor_role": [
+          true,
+          true,
+          true
+        ],
+        "aiact:art_16": [
+          false,
+          false,
+          false
+        ],
+        "aiact:art_26": [
+          false,
+          false,
+          false
+        ]
+      },
+      "g1_violations": [
+        {
+          "root": "D32: matcher verdicts (risk_tier)",
+          "item": "risk_tier: unresolved -> not_applicable/conditions_not_met",
+          "stage": "matcher"
+        },
+        {
+          "root": "D32: matcher verdicts (risk_tier)",
+          "item": "aiact:art_16: unresolved -> not_applicable/conditions_not_met",
+          "stage": "matcher"
+        },
+        {
+          "root": "D32: matcher verdicts (risk_tier)",
+          "item": "aiact:art_26: unresolved -> not_applicable/conditions_not_met",
+          "stage": "matcher"
+        },
+        {
+          "root": "D32: matcher verdicts (risk_tier)",
+          "item": "risk_tier: unresolved -> not_applicable/conditions_not_met",
+          "stage": "matcher"
+        },
+        {
+          "root": "D32: matcher verdicts (risk_tier)",
+          "item": "aiact:art_16: unresolved -> not_applicable/conditions_not_met",
+          "stage": "matcher"
+        },
+        {
+          "root": "D32: matcher verdicts (risk_tier)",
+          "item": "aiact:art_26: unresolved -> not_applicable/conditions_not_met",
+          "stage": "matcher"
+        },
+        {
+          "root": "D32: matcher verdicts (risk_tier)",
+          "item": "risk_tier: unresolved -> not_applicable/conditions_not_met",
+          "stage": "matcher"
+        },
+        {
+          "root": "D32: matcher verdicts (risk_tier)",
+          "item": "aiact:art_16: unresolved -> not_applicable/conditions_not_met",
+          "stage": "matcher"
+        },
+        {
+          "root": "D32: matcher verdicts (risk_tier)",
+          "item": "aiact:art_26: unresolved -> not_applicable/conditions_not_met",
+          "stage": "matcher"
+        }
+      ],
+      "g2_failures": []
+    },
+    "D10": {
+      "repeats": 3,
+      "statuses": {
+        "risk_tier": [
+          "unresolved",
+          "unresolved",
+          "unresolved"
+        ],
+        "prohibited_practice": [
+          "not_applicable/conditions_not_met",
+          "not_applicable/conditions_not_met",
+          "not_applicable/conditions_not_met"
+        ],
+        "actor_role": [
+          {
+            "actor_roles": [
+              "provider",
+              "deployer"
+            ],
+            "unresolved_roles": [],
+            "status": "known"
+          },
+          {
+            "actor_roles": [
+              "provider",
+              "deployer"
+            ],
+            "unresolved_roles": [],
+            "status": "known"
+          },
+          {
+            "actor_roles": [
+              "provider",
+              "deployer"
+            ],
+            "unresolved_roles": [],
+            "status": "known"
+          }
+        ],
+        "aiact:art_16": [
+          "unresolved",
+          "unresolved",
+          "unresolved"
+        ],
+        "aiact:art_26": [
+          "unresolved",
+          "unresolved",
+          "unresolved"
+        ]
+      },
+      "stable": {
+        "risk_tier": true,
+        "prohibited_practice": true,
+        "actor_role": true,
+        "aiact:art_16": true,
+        "aiact:art_26": true
+      },
+      "correct": {
+        "risk_tier": [
+          false,
+          false,
+          false
+        ],
+        "prohibited_practice": [
+          true,
+          true,
+          true
+        ],
+        "actor_role": [
+          true,
+          true,
+          true
+        ],
+        "aiact:art_16": [
+          false,
+          false,
+          false
+        ],
+        "aiact:art_26": [
+          false,
+          false,
+          false
+        ]
+      },
+      "g1_violations": [],
+      "g2_failures": []
+    },
+    "D35": {
+      "repeats": 3,
+      "statuses": {
+        "risk_tier": [
+          "applicable",
+          "applicable",
+          "applicable"
+        ],
+        "prohibited_practice": [
+          "unresolved",
+          "unresolved",
+          "unresolved"
+        ],
+        "actor_role": [
+          {
+            "actor_roles": [
+              "provider",
+              "deployer"
+            ],
+            "unresolved_roles": [],
+            "status": "known"
+          },
+          {
+            "actor_roles": [
+              "provider",
+              "deployer"
+            ],
+            "unresolved_roles": [],
+            "status": "known"
+          },
+          {
+            "actor_roles": [
+              "provider",
+              "deployer"
+            ],
+            "unresolved_roles": [],
+            "status": "known"
+          }
+        ],
+        "aiact:art_16": [
+          "applicable",
+          "applicable",
+          "applicable"
+        ],
+        "aiact:art_26": [
+          "applicable",
+          "applicable",
+          "applicable"
+        ]
+      },
+      "stable": {
+        "risk_tier": true,
+        "prohibited_practice": true,
+        "actor_role": true,
+        "aiact:art_16": true,
+        "aiact:art_26": true
+      },
+      "correct": {
+        "risk_tier": [
+          true,
+          true,
+          true
+        ],
+        "prohibited_practice": [
+          false,
+          false,
+          false
+        ],
+        "actor_role": [
+          true,
+          true,
+          true
+        ],
+        "aiact:art_16": [
+          true,
+          true,
+          true
+        ],
+        "aiact:art_26": [
+          true,
+          true,
+          true
+        ]
+      },
+      "g1_violations": [],
+      "g2_failures": []
+    },
+    "D39": {
+      "repeats": 3,
+      "statuses": {
+        "risk_tier": [
+          "not_applicable/not_yet_applicable",
+          "not_applicable/not_yet_applicable",
+          "not_applicable/not_yet_applicable"
+        ],
+        "prohibited_practice": [
+          "unresolved",
+          "not_applicable/conditions_not_met",
+          "unresolved"
+        ],
+        "actor_role": [
+          {
+            "actor_roles": [
+              "deployer"
+            ],
+            "unresolved_roles": [
+              "provider"
+            ],
+            "status": "unresolved"
+          },
+          {
+            "actor_roles": [
+              "deployer"
+            ],
+            "unresolved_roles": [
+              "provider"
+            ],
+            "status": "unresolved"
+          },
+          {
+            "actor_roles": [
+              "deployer"
+            ],
+            "unresolved_roles": [
+              "provider"
+            ],
+            "status": "unresolved"
+          }
+        ],
+        "aiact:art_16": [
+          "unresolved",
+          "unresolved",
+          "unresolved"
+        ],
+        "aiact:art_26": [
+          "not_applicable/not_yet_applicable",
+          "not_applicable/not_yet_applicable",
+          "not_applicable/not_yet_applicable"
+        ]
+      },
+      "stable": {
+        "risk_tier": true,
+        "prohibited_practice": false,
+        "actor_role": true,
+        "aiact:art_16": true,
+        "aiact:art_26": true
+      },
+      "correct": {
+        "risk_tier": [
+          true,
+          true,
+          true
+        ],
+        "prohibited_practice": [
+          false,
+          true,
+          false
+        ],
+        "actor_role": [
+          false,
+          false,
+          false
+        ],
+        "aiact:art_16": [
+          false,
+          false,
+          false
+        ],
+        "aiact:art_26": [
+          true,
+          true,
+          true
+        ]
+      },
+      "g1_violations": [],
+      "g2_failures": []
+    }
+  },
+  "stopped_by_budget": null,
+  "smoke_test_failed": null,
+  "spent_stability_usd": 0.961756,
+  "spent_total_usd": 0.961756,
+  "eval_clock": "2026-10-25",
+  "corpus_snapshot": "2024-08-01",
+  "e2e_cases_sha256": "a50afdabda92f3ee3724047d93dcd9d5e329e3adec517f697660a5d5fff8c0d4",
+  "heldout_5_1_c_sha256": "11e564939375d5482dcd53145a5b245507d1b52542e665c69d9cc693ac1d401c",
+  "extractor": {
+    "model": "gpt-6.1-sol",
+    "effort": "low",
+    "prompt_variant": "baseline",
+    "system_prompt_sha256": "80a13431265124b13da71f77a675788c8cf6a4a4d20934a990c1490582094428"
+  },
+  "matcher": {
+    "model": "gpt-6.1-sol",
+    "effort": "low",
+    "prompt_variant": "baseline",
+    "system_prompt_sha256": "bfa07b53dc211375946962793df92d451a97ae786a77c09b21c609809c5b43af"
+  },
+  "generator": {
+    "model": "gpt-6.1-sol",
+    "effort": "low",
+    "max_output_tokens": 5000,
+    "prompt_version": "v2",
+    "prompt_sha": "a6b4a491da53588b40fd575d34756d0432068fb9f87d7bbc4313cdd68aece0f6"
+  }
+}

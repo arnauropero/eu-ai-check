@@ -108,7 +108,7 @@ translates text" or "it transcribes audio") does not say how its output is used.
 value that only says the role, the decision-maker or human involvement is not \
 described."""
 
-#: Prompt variants. "baseline" is the frozen prompt of the first run (82467bb) and
+#: Prompt variants. "baseline" is the frozen prompt of the first run (8ef12af) and
 #: the default everywhere; other variants exist only for follow-up experiments.
 PROMPT_VARIANTS = {
     "baseline": "",

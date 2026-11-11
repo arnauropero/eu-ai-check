@@ -1,4 +1,4 @@
-"""Phase 4 spend tracker (pre-registration 33cf62c, SYSTEM_SPEC.md §18).
+"""Phase 4 spend tracker (pre-registration 364293b, SYSTEM_SPEC.md §18).
 
 - The cap is the pre-registered $5 for all Phase 4 API calls. The constants below are
   tied to the frozen §18 text by a test.

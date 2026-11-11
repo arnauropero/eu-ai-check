@@ -1,0 +1,781 @@
+{
+  "phase5_acceptance_met": true,
+  "gates": {
+    "G1_zero_tolerance": {
+      "pass": true,
+      "root_causes": 0,
+      "violations": {}
+    },
+    "G2_output_hygiene": {
+      "pass": true,
+      "k": 20,
+      "n": 20,
+      "rate": 1.0,
+      "wilson95": [
+        0.839,
+        1.0
+      ],
+      "failures": {}
+    },
+    "G3a_risk_tier_prohibited": {
+      "pass": true,
+      "threshold": ">= 19/24",
+      "k": 20,
+      "n": 24,
+      "rate": 0.8333,
+      "wilson95": [
+        0.641,
+        0.933
+      ]
+    },
+    "G3b_roles_obligations": {
+      "pass": true,
+      "threshold": ">= 33/36",
+      "k": 34,
+      "n": 36,
+      "rate": 0.9444,
+      "wilson95": [
+        0.819,
+        0.985
+      ]
+    },
+    "G4_citations": {
+      "pass": true,
+      "threshold": "0 mismatches",
+      "k": 10,
+      "n": 10,
+      "rate": 1.0,
+      "wilson95": [
+        0.722,
+        1.0
+      ],
+      "mismatches": []
+    }
+  },
+  "stratum_A": {
+    "cases": 12,
+    "per_state": {
+      "risk_tier": {
+        "applicable": {
+          "k": 7,
+          "n": 7,
+          "rate": 1.0,
+          "wilson95": [
+            0.646,
+            1.0
+          ]
+        },
+        "not_applicable": {
+          "k": 4,
+          "n": 4,
+          "rate": 1.0,
+          "wilson95": [
+            0.51,
+            1.0
+          ]
+        },
+        "not_in_force": {
+          "k": 1,
+          "n": 1,
+          "rate": 1.0,
+          "wilson95": [
+            0.207,
+            1.0
+          ]
+        }
+      },
+      "prohibited_practice": {
+        "not_applicable": {
+          "k": 7,
+          "n": 11,
+          "rate": 0.6364,
+          "wilson95": [
+            0.354,
+            0.848
+          ]
+        },
+        "not_in_force": {
+          "k": 1,
+          "n": 1,
+          "rate": 1.0,
+          "wilson95": [
+            0.207,
+            1.0
+          ]
+        }
+      },
+      "actor_role": {
+        "known": {
+          "k": 9,
+          "n": 10,
+          "rate": 0.9,
+          "wilson95": [
+            0.596,
+            0.982
+          ]
+        },
+        "not_in_force": {
+          "k": 1,
+          "n": 1,
+          "rate": 1.0,
+          "wilson95": [
+            0.207,
+            1.0
+          ]
+        },
+        "unresolved": {
+          "k": 1,
+          "n": 1,
+          "rate": 1.0,
+          "wilson95": [
+            0.207,
+            1.0
+          ]
+        }
+      },
+      "aiact:art_16": {
+        "applicable": {
+          "k": 4,
+          "n": 4,
+          "rate": 1.0,
+          "wilson95": [
+            0.51,
+            1.0
+          ]
+        },
+        "not_applicable": {
+          "k": 6,
+          "n": 6,
+          "rate": 1.0,
+          "wilson95": [
+            0.61,
+            1.0
+          ]
+        },
+        "not_in_force": {
+          "k": 1,
+          "n": 1,
+          "rate": 1.0,
+          "wilson95": [
+            0.207,
+            1.0
+          ]
+        },
+        "unresolved": {
+          "k": 1,
+          "n": 1,
+          "rate": 1.0,
+          "wilson95": [
+            0.207,
+            1.0
+          ]
+        }
+      },
+      "aiact:art_26": {
+        "applicable": {
+          "k": 5,
+          "n": 5,
+          "rate": 1.0,
+          "wilson95": [
+            0.566,
+            1.0
+          ]
+        },
+        "not_applicable": {
+          "k": 5,
+          "n": 6,
+          "rate": 0.8333,
+          "wilson95": [
+            0.436,
+            0.97
+          ]
+        },
+        "not_in_force": {
+          "k": 1,
+          "n": 1,
+          "rate": 1.0,
+          "wilson95": [
+            0.207,
+            1.0
+          ]
+        }
+      }
+    },
+    "extraction_fields": {
+      "intended_purpose": {
+        "k": 12,
+        "n": 12,
+        "rate": 1.0,
+        "wilson95": [
+          0.757,
+          1.0
+        ]
+      },
+      "ai_functionality": {
+        "k": 12,
+        "n": 12,
+        "rate": 1.0,
+        "wilson95": [
+          0.757,
+          1.0
+        ]
+      },
+      "relevant_date": {
+        "k": 12,
+        "n": 12,
+        "rate": 1.0,
+        "wilson95": [
+          0.757,
+          1.0
+        ]
+      },
+      "role_in_decision_making": {
+        "k": 12,
+        "n": 12,
+        "rate": 1.0,
+        "wilson95": [
+          0.757,
+          1.0
+        ]
+      },
+      "develops_system": {
+        "k": 12,
+        "n": 12,
+        "rate": 1.0,
+        "wilson95": [
+          0.757,
+          1.0
+        ]
+      },
+      "uses_system": {
+        "k": 11,
+        "n": 12,
+        "rate": 0.9167,
+        "wilson95": [
+          0.646,
+          0.985
+        ]
+      },
+      "puts_own_name_or_trademark": {
+        "k": 12,
+        "n": 12,
+        "rate": 1.0,
+        "wilson95": [
+          0.757,
+          1.0
+        ]
+      },
+      "modifies_intended_purpose": {
+        "k": 12,
+        "n": 12,
+        "rate": 1.0,
+        "wilson95": [
+          0.757,
+          1.0
+        ]
+      },
+      "modifies_safety_relevant_components": {
+        "k": 12,
+        "n": 12,
+        "rate": 1.0,
+        "wilson95": [
+          0.757,
+          1.0
+        ]
+      },
+      "jurisdiction": {
+        "k": 12,
+        "n": 12,
+        "rate": 1.0,
+        "wilson95": [
+          0.757,
+          1.0
+        ]
+      },
+      "affected_persons": {
+        "k": 10,
+        "n": 12,
+        "rate": 0.8333,
+        "wilson95": [
+          0.552,
+          0.953
+        ]
+      }
+    }
+  },
+  "stratum_B": {
+    "cases": 8,
+    "risk_tier_prohibited": {
+      "k": 14,
+      "n": 16,
+      "rate": 0.875,
+      "wilson95": [
+        0.64,
+        0.965
+      ]
+    },
+    "roles_obligations": {
+      "k": 19,
+      "n": 24,
+      "rate": 0.7917,
+      "wilson95": [
+        0.595,
+        0.908
+      ]
+    },
+    "per_state": {
+      "risk_tier": {
+        "not_applicable": {
+          "k": 4,
+          "n": 4,
+          "rate": 1.0,
+          "wilson95": [
+            0.51,
+            1.0
+          ]
+        },
+        "applicable": {
+          "k": 3,
+          "n": 3,
+          "rate": 1.0,
+          "wilson95": [
+            0.438,
+            1.0
+          ]
+        },
+        "unresolved": {
+          "k": 1,
+          "n": 1,
+          "rate": 1.0,
+          "wilson95": [
+            0.207,
+            1.0
+          ]
+        }
+      },
+      "prohibited_practice": {
+        "not_applicable": {
+          "k": 3,
+          "n": 5,
+          "rate": 0.6,
+          "wilson95": [
+            0.231,
+            0.882
+          ]
+        },
+        "applicable": {
+          "k": 1,
+          "n": 1,
+          "rate": 1.0,
+          "wilson95": [
+            0.207,
+            1.0
+          ]
+        },
+        "unresolved": {
+          "k": 2,
+          "n": 2,
+          "rate": 1.0,
+          "wilson95": [
+            0.342,
+            1.0
+          ]
+        }
+      },
+      "actor_role": {
+        "known": {
+          "k": 5,
+          "n": 8,
+          "rate": 0.625,
+          "wilson95": [
+            0.306,
+            0.863
+          ]
+        }
+      },
+      "aiact:art_16": {
+        "not_applicable": {
+          "k": 4,
+          "n": 6,
+          "rate": 0.6667,
+          "wilson95": [
+            0.3,
+            0.903
+          ]
+        },
+        "applicable": {
+          "k": 1,
+          "n": 1,
+          "rate": 1.0,
+          "wilson95": [
+            0.207,
+            1.0
+          ]
+        },
+        "unresolved": {
+          "k": 1,
+          "n": 1,
+          "rate": 1.0,
+          "wilson95": [
+            0.207,
+            1.0
+          ]
+        }
+      },
+      "aiact:art_26": {
+        "not_applicable": {
+          "k": 4,
+          "n": 4,
+          "rate": 1.0,
+          "wilson95": [
+            0.51,
+            1.0
+          ]
+        },
+        "applicable": {
+          "k": 3,
+          "n": 3,
+          "rate": 1.0,
+          "wilson95": [
+            0.438,
+            1.0
+          ]
+        },
+        "unresolved": {
+          "k": 1,
+          "n": 1,
+          "rate": 1.0,
+          "wilson95": [
+            0.207,
+            1.0
+          ]
+        }
+      }
+    },
+    "extraction_fields": {
+      "intended_purpose": {
+        "k": 8,
+        "n": 8,
+        "rate": 1.0,
+        "wilson95": [
+          0.676,
+          1.0
+        ]
+      },
+      "ai_functionality": {
+        "k": 8,
+        "n": 8,
+        "rate": 1.0,
+        "wilson95": [
+          0.676,
+          1.0
+        ]
+      },
+      "relevant_date": {
+        "k": 8,
+        "n": 8,
+        "rate": 1.0,
+        "wilson95": [
+          0.676,
+          1.0
+        ]
+      },
+      "role_in_decision_making": {
+        "k": 8,
+        "n": 8,
+        "rate": 1.0,
+        "wilson95": [
+          0.676,
+          1.0
+        ]
+      },
+      "develops_system": {
+        "k": 7,
+        "n": 8,
+        "rate": 0.875,
+        "wilson95": [
+          0.529,
+          0.978
+        ]
+      },
+      "uses_system": {
+        "k": 7,
+        "n": 8,
+        "rate": 0.875,
+        "wilson95": [
+          0.529,
+          0.978
+        ]
+      },
+      "puts_own_name_or_trademark": {
+        "k": 7,
+        "n": 8,
+        "rate": 0.875,
+        "wilson95": [
+          0.529,
+          0.978
+        ]
+      },
+      "modifies_intended_purpose": {
+        "k": 0,
+        "n": 8,
+        "rate": 0.0,
+        "wilson95": [
+          0.0,
+          0.324
+        ]
+      },
+      "modifies_safety_relevant_components": {
+        "k": 0,
+        "n": 8,
+        "rate": 0.0,
+        "wilson95": [
+          0.0,
+          0.324
+        ]
+      },
+      "jurisdiction": {
+        "k": 8,
+        "n": 8,
+        "rate": 1.0,
+        "wilson95": [
+          0.676,
+          1.0
+        ]
+      },
+      "affected_persons": {
+        "k": 7,
+        "n": 8,
+        "rate": 0.875,
+        "wilson95": [
+          0.529,
+          0.978
+        ]
+      }
+    }
+  },
+  "misses_by_stage": {
+    "matcher": 6,
+    "extraction": 7
+  },
+  "misses": [
+    {
+      "case": "N01",
+      "stratum": "A",
+      "key": "prohibited_practice",
+      "want": "not_applicable/conditions_not_met",
+      "got": "unresolved",
+      "stage": "matcher"
+    },
+    {
+      "case": "N02",
+      "stratum": "A",
+      "key": "prohibited_practice",
+      "want": "not_applicable/conditions_not_met",
+      "got": "unresolved",
+      "stage": "matcher"
+    },
+    {
+      "case": "N07",
+      "stratum": "A",
+      "key": "actor_role",
+      "want": {
+        "actor_roles": [
+          "provider"
+        ],
+        "unresolved_roles": [],
+        "status": "known"
+      },
+      "got": {
+        "actor_roles": [
+          "provider"
+        ],
+        "unresolved_roles": [
+          "deployer"
+        ],
+        "status": "unresolved"
+      },
+      "stage": "extraction"
+    },
+    {
+      "case": "N07",
+      "stratum": "A",
+      "key": "aiact:art_26",
+      "want": "not_applicable/conditions_not_met",
+      "got": "unresolved",
+      "stage": "extraction"
+    },
+    {
+      "case": "N10",
+      "stratum": "A",
+      "key": "prohibited_practice",
+      "want": "not_applicable/conditions_not_met",
+      "got": "unresolved",
+      "stage": "matcher"
+    },
+    {
+      "case": "N12",
+      "stratum": "A",
+      "key": "prohibited_practice",
+      "want": "not_applicable/conditions_not_met",
+      "got": "unresolved",
+      "stage": "matcher"
+    },
+    {
+      "case": "H02",
+      "stratum": "B",
+      "key": "prohibited_practice",
+      "want": "not_applicable/conditions_not_met",
+      "got": "unresolved",
+      "stage": "matcher"
+    },
+    {
+      "case": "H02",
+      "stratum": "B",
+      "key": "actor_role",
+      "want": {
+        "actor_roles": [
+          "deployer"
+        ],
+        "unresolved_roles": [],
+        "status": "known"
+      },
+      "got": {
+        "actor_roles": [
+          "deployer"
+        ],
+        "unresolved_roles": [
+          "provider"
+        ],
+        "status": "unresolved"
+      },
+      "stage": "extraction"
+    },
+    {
+      "case": "H02",
+      "stratum": "B",
+      "key": "aiact:art_16",
+      "want": "not_applicable/conditions_not_met",
+      "got": "unresolved",
+      "stage": "extraction"
+    },
+    {
+      "case": "H04",
+      "stratum": "B",
+      "key": "prohibited_practice",
+      "want": "not_applicable/conditions_not_met",
+      "got": "unresolved",
+      "stage": "matcher"
+    },
+    {
+      "case": "H06",
+      "stratum": "B",
+      "key": "actor_role",
+      "want": {
+        "actor_roles": [
+          "deployer"
+        ],
+        "unresolved_roles": [],
+        "status": "known"
+      },
+      "got": {
+        "actor_roles": [
+          "deployer"
+        ],
+        "unresolved_roles": [
+          "provider"
+        ],
+        "status": "unresolved"
+      },
+      "stage": "extraction"
+    },
+    {
+      "case": "H06",
+      "stratum": "B",
+      "key": "aiact:art_16",
+      "want": "not_applicable/conditions_not_met",
+      "got": "unresolved",
+      "stage": "extraction"
+    },
+    {
+      "case": "H08",
+      "stratum": "B",
+      "key": "actor_role",
+      "want": {
+        "actor_roles": [
+          "provider",
+          "deployer"
+        ],
+        "unresolved_roles": [],
+        "status": "known"
+      },
+      "got": {
+        "actor_roles": [
+          "provider"
+        ],
+        "unresolved_roles": [
+          "deployer"
+        ],
+        "status": "unresolved"
+      },
+      "stage": "extraction"
+    }
+  ],
+  "system_category": {
+    "k": 11,
+    "n": 11,
+    "rate": 1.0,
+    "wilson95": [
+      0.741,
+      1.0
+    ]
+  },
+  "fallback": {
+    "k": 0,
+    "n": 20,
+    "rate": 0.0,
+    "wilson95": [
+      0.0,
+      0.161
+    ]
+  },
+  "stage_failures": {},
+  "budget_stop": null,
+  "resumed": false,
+  "spent_heldout_usd": 1.607882,
+  "spent_total_usd": 2.569638,
+  "eval_clock": "2026-10-25",
+  "corpus_snapshot": "2024-08-01",
+  "e2e_cases_sha256": "a50afdabda92f3ee3724047d93dcd9d5e329e3adec517f697660a5d5fff8c0d4",
+  "heldout_5_1_c_sha256": "11e564939375d5482dcd53145a5b245507d1b52542e665c69d9cc693ac1d401c",
+  "extractor": {
+    "model": "gpt-6.1-sol",
+    "effort": "low",
+    "prompt_variant": "baseline",
+    "system_prompt_sha256": "80a13431265124b13da71f77a675788c8cf6a4a4d20934a990c1490582094428"
+  },
+  "matcher": {
+    "model": "gpt-6.1-sol",
+    "effort": "low",
+    "prompt_variant": "baseline",
+    "system_prompt_sha256": "bfa07b53dc211375946962793df92d451a97ae786a77c09b21c609809c5b43af"
+  },
+  "generator": {
+    "model": "gpt-6.1-sol",
+    "effort": "low",
+    "max_output_tokens": 5000,
+    "prompt_version": "v2",
+    "prompt_sha": "a6b4a491da53588b40fd575d34756d0432068fb9f87d7bbc4313cdd68aece0f6"
+  },
+  "scored_tree": {
+    "paths": {
+      "src/eu_ai_check": "5fdb053db05250dd459ebae97e51679a67f889c5",
+      "data/corpus": "0da4e76d48c4800c63fc593b445f0623bd64fb82",
+      "data/eval/e2e_cases.json": "1fef5a0725c7c3a654c7cc43ed4a47612bc3ade6",
+      "data/eval/determination_heldout_5_1_c.json": "2bd2ca74a0845c5abd74534b208da0a27f9781e6",
+      "pyproject.toml": "fa88b85a3e525361775678116908dd4466fc84cf",
+      "uv.lock": "4600e28bc7c4377432e9cc3b6da8d94d1d47c587"
+    },
+    "combined_sha256": "9e200aa486dbaf050dff4cc5d2440aa8283fbc059a76eaefa8a5058d3879c67c"
+  }
+}

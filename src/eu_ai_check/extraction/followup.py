@@ -5,7 +5,7 @@ code the metrics and the decision rule the follow-up is judged by, computed from
 `.runs.jsonl` records only (no API calls):
 
   * the frozen baseline: first run, `data/eval/results/extraction_v1_30c.runs.jsonl`
-    (commit 82467bb), never modified;
+    (commit 8ef12af), never modified;
   * the follow-up: four arms, {baseline prompt, role-null-v1} x {low, medium},
     30 cases x 3 repeats each, judge on, written to `extraction_v2_role_null_*`.
     The baseline-prompt re-run measures run-to-run noise only; the frozen run
@@ -230,7 +230,7 @@ def posthoc_affected_persons(frozen_records: Records, labels: dict[str, dict[str
     """POST-HOC, not pre-registered: affected_persons in the frozen run, re-scored
     so a value also counts as correct when the secondary judge accepted it."""
     lines = [
-        "POST-HOC ANALYSIS -- NOT PRE-REGISTERED. Frozen baseline (82467bb), no API calls.",
+        "POST-HOC ANALYSIS -- NOT PRE-REGISTERED. Frozen baseline (8ef12af), no API calls.",
         "affected_persons re-scored: correct = primary concept-group correct OR the",
         "secondary judge (gpt-6-astra, already in the frozen records) said same_fact.",
         "The frozen scoring rules and the frozen results are unchanged; this is analysis only.",
