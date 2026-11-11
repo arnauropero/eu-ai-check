@@ -1,5 +1,7 @@
 # EU AI Check
 
+[![tests](https://github.com/arnauropero/eu-ai-check/actions/workflows/tests.yml/badge.svg)](https://github.com/arnauropero/eu-ai-check/actions/workflows/tests.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) ![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)
+
 **Describe your AI system in plain words. Find out which EU AI Act rules apply to you,
 with every answer tied to the exact article it rests on.**
 

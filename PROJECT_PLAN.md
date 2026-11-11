@@ -210,7 +210,7 @@ one rule-matching engine → cited, fail-closed output.
   optional, non-evaluated provider behind the `anthropic` extra.
 - Status: extractor (originally Claude Opus 5.5, structured outputs, refusal fallbacks), harness
   (`eu-ai-check eval-extraction`), conclusion-leakage check and a 30-case labelled eval
-  set were committed **before the first API run**. The labels were reviewed by the user
+  set were committed **before the first API run**. The labels were reviewed by the author
   first, and one changed in that review (E18, documented as pre-registration, not
   post-hoc). Field rules and labelling decisions L1–L9 are in SYSTEM_SPEC.md §3.4. The
   accuracy target is locked after the first run.
@@ -294,7 +294,7 @@ one rule-matching engine → cited, fail-closed output.
     an 8-case held-out set was frozen first (never run). Two prompt variants were
     tried. `social-scoring-v1` fixed 5(1)(c) but spilled over (D32, D24).
     `social-scoring-v2`, scoped to the 5(1)(c) candidate, still produced
-    zero-tolerance violations on D32. The user's hard stop ended the intervention.
+    zero-tolerance violations on D32. The author's hard stop ended the intervention.
     The pre-registered prompt stays the default.
   - **Closed as a documented limitation (user, 2026-10-25).** No further Phase 3
     attempt in V1. The not-met verdict stands, the phase stays untagged, and the

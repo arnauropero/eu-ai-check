@@ -9,7 +9,7 @@ module, and never printed, logged or returned:
   checks it again, and counts LLM wins (ties go to the template).
 
 Rater (§18 deviation, 2026-10-06): an LLM rater rates all 20 pairs, and results are
-labelled "LLM-rated (Claude)". The user's ratings of a 6-pair validation sample are
+labelled "LLM-rated (Claude)". The author's ratings of a 6-pair validation sample are
 compared with it, reported only.
 
 Blinding is partial: the template has no model sentences, so style can reveal the
@@ -27,7 +27,7 @@ SAMPLE = Path("data/eval/generation_rating_sample.json")
 HELDOUT_RUNS = Path("data/eval/results/generation_heldout.runs.jsonl")
 SHEET = Path("data/eval/results/generation_rating_sheet.md")
 RATINGS = Path("data/eval/results/generation_ratings.json")
-#: Validation sample (6 informative pairs, seed 20261008) rated by the user; the full
+#: Validation sample (6 informative pairs, seed 20261008) rated by the author; the full
 #: 20 are rated by an LLM rater (§18 deviation note, 2026-10-06, before any rating).
 VALIDATION = Path("data/eval/generation_rating_validation.json")
 VALIDATION_RATINGS = Path("data/eval/results/generation_ratings_validation.json")
@@ -106,7 +106,7 @@ def _check_ratings(ratings: dict, ids: list[str], what: str) -> None:
 
 
 def agreement(main: dict, validation: dict, ids: list[str]) -> dict[str, Any]:
-    """Reported only: how often the user's validation ratings equal the LLM rater's
+    """Reported only: how often the author's validation ratings equal the LLM rater's
     on the same pairs. Compares A/B/tie labels, so it needs no key."""
     same = {f: sum(main[s][f] == validation[s][f] for s in ids)
             for f in ("preference", "faithful_A", "faithful_B")}

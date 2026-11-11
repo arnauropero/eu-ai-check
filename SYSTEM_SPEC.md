@@ -11,7 +11,7 @@ matcher (§2, §4.2), the Article 6 route combination and Annex I (§9.1), and f
 corpus defect: trailing paragraph-level text was dropped (§9.1). **Phase 4 design
 (2026-10-06)** records what Phase 3 actually outputs (§16.1), then defines the
 generation input and output (§16.2–16.3) and the generation checks (§18). This document is the
-technical source of truth for implementation in Claude Code. Where a decision rests on
+technical source of truth for implementation. Where a decision rests on
 assumption rather than verified source material, it is marked **[ASSUMPTION]**. Where a
 decision has been checked against the actual EUR-Lex / AI Act Explorer text, it is marked
 **[VERIFIED]**.
@@ -298,7 +298,7 @@ result had been seen. The Claude Opus 5.5 extractor remains available as an opti
 non-evaluated `extract --provider anthropic`, behind the `anthropic` package extra.
 Nothing in the evaluation workflow imports it.
 
-**Review record.** The user reviewed all 30 labels before pre-registration. One
+**Review record.** The author reviewed all 30 labels before pre-registration. One
 label changed during that review, E18 `puts_own_name_or_trademark` false → null
 (L3: the payroll provider's tool is not named). Because the change was made before
 any API run, it is *not* post-hoc. Any change after the first run is.
@@ -1916,7 +1916,7 @@ not retuned.
   decision rule. Clearing 0.85 alone does not adopt it.
 
 **Determination — Phase 3 pre-registration [2026-10-03].** The eval set (labels
-reviewed and approved by the user), arms, scoring and decision rule below are
+reviewed and approved by the author), arms, scoring and decision rule below are
 committed and binding. The τ values, the matcher prompt and the verification code
 were committed afterwards, still before the first determination run (Phase 2
 precedent; see "Pre-registration completed" below).
@@ -2113,7 +2113,7 @@ against this set") in one respect, and is labelled accordingly:
   The rule-based labels were checked offline (24/24). **This set was never run**,
   because the intervention stopped on the dev set. It stays untouched and could
   serve as a confirmation set for a future, separately pre-registered change.
-- *Hard stop, set by the user before v2 ran:* v2 is the last dev iteration. A
+- *Hard stop, set by the author before v2 ran:* v2 is the last dev iteration. A
   zero-tolerance violation or a clear regression on the dev set ends the
   intervention as NOT ADOPTED, with no v3.
 
@@ -2283,7 +2283,7 @@ It is binding. As with Phase 3, a miss is reported as a miss and is not retuned.
   - If the hygiene criterion fails, that is recorded and the template ships as the
     Phase 4 generator. There is no retry.
   - API failures during the held-out pass count as failures. They are not re-run,
-    unless the user decides otherwise before the results are looked at, as in
+    unless the author decides otherwise before the results are looked at, as in
     Phase 3.
 - **Model:** `gpt-6.1-sol` at effort `low`, configurable. The comparison with cheaper
   models is deferred to Phase 5 as a pre-registered comparison.
@@ -2392,8 +2392,8 @@ It is binding. As with Phase 3, a miss is reported as a miss and is not retuned.
   held-out pass is $1.0114.
 
 - **[Note, 2026-10-06, before any held-out call and before any held-out result
-  exists] API-failure policy for the held-out pass.** The user decided this before
-  looking at any held-out result, as the hard rule above allows ("unless the user
+  exists] API-failure policy for the held-out pass.** The author decided this before
+  looking at any held-out result, as the hard rule above allows ("unless the author
   decides otherwise before the results are looked at"). The pre-registration is not
   edited.
   - *Transient errors* (connection failures, timeouts, HTTP 5xx) are retried
@@ -2411,22 +2411,22 @@ It is binding. As with Phase 3, a miss is reported as a miss and is not retuned.
   - The summaries report `retries` and `retry_cost_usd`.
 
 - **[Deviation, 2026-10-06, after the held-out pass, before any rating exists] The
-  pairwise rating is done by an LLM rater.** This is the user's decision. The
+  pairwise rating is done by an LLM rater.** This is the author's decision. The
   pre-registration is not edited.
-  - *Rater.* The pre-registered human rater (the user) will not rate all 20 pairs.
+  - *Rater.* The pre-registered human rater (the author) will not rate all 20 pairs.
     An independent LLM rater, Claude in the claude.ai chat (not the session that built
     and ran Phase 4), rates all 20 blinded pairs from the committed sheet. The result
     is labelled **"LLM-rated (Claude)"** everywhere, and never "human-rated".
   - *Rule unchanged.* Blind pairwise preference ≥ 15/20, ties to the template.
     Scoring still reports both 15/20 and x/18 (the 2 not_in_force pairs are
     identical by construction).
-  - *Human validation, reported only.* The user rates 6 of the 18 informative pairs:
+  - *Human validation, reported only.* The author rates 6 of the 18 informative pairs:
     R04, R05, R06, R07, R12, R17, drawn with seed 20261008. The R01/R02 pairs are
     excluded. Their agreement with the LLM rater is reported (preference x/6,
     faithfulness x/6) and never changes the adoption decision. With 6 pairs the
     agreement estimate is coarse, and 4 of the 6 are unresolved-class pairs.
   - *Files.* `data/eval/generation_rating_validation.json` (the frozen ids and seed)
-    and `data/eval/results/generation_ratings_validation.json` (the user's ratings).
+    and `data/eval/results/generation_ratings_validation.json` (the author's ratings).
     The A/B key is opened only by the scorer, after both rating files are complete.
 
 - **[Note, 2026-10-06, after rating] Rating outcome and adoption decision.** The
@@ -2487,7 +2487,7 @@ determination and generation, not retrieval. The README states this.
 
 **End-to-end — Phase 5 pre-registration (APPROVED 2026-11-04).** Design:
 `docs/phase5_design.md` (Q1–Q4 decided 2026-10-25). Everything below was approved by
-the user and committed **before any Phase 5 API call**: no smoke test, no stability
+the author and committed **before any Phase 5 API call**: no smoke test, no stability
 run, no held-out call. It is binding. A miss is reported as a miss and nothing is
 retuned. The runner is `src/eu_ai_check/e2e/` (`eu-ai-check eval-e2e`).
 
@@ -2649,7 +2649,7 @@ retuned. The runner is `src/eu_ai_check/e2e/` (`eu-ai-check eval-e2e`).
     or scoring logic. Each such fix must:
     - be verified by tests;
     - be recorded as a dated deviation note in this section;
-    - be shown to the user before the held-out pass.
+    - be shown to the author before the held-out pass.
 
     Anything else falls under the no-tuning rule above.
   - **Resume rule for the held-out pass.**

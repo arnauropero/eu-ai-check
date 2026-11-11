@@ -1,6 +1,6 @@
 # Phase 5 — End-to-end evaluation and polish: design note
 
-Status: **FROZEN** (2026-11-04, branch `phase-5/end-to-end`). The user approved the
+Status: **FROZEN** (2026-11-04, branch `phase-5/end-to-end`). The author approved the
 §8 labels and the thresholds on 2026-11-04. The binding text is the Phase 5
 pre-registration in SYSTEM_SPEC §18, which wins over this note wherever the two
 differ. The case SHAs are pinned in `tests/test_e2e_cases.py`, and the runner is
@@ -154,7 +154,7 @@ toward G3/G4.
 
 ### 3.1 The Q1 pre-check: would the D32 failure class trip G1? **Yes.**
 
-The user's condition was to check on dev data, before freezing, whether the known
+The author's condition was to check on dev data, before freezing, whether the known
 failure class would trip G1. If it would, the work stops so that the treatment can be
 decided in advance.
 
@@ -200,7 +200,7 @@ pre-registration will state it:
   Phase 5.**
 - The held-out pass runs once and **cannot be rerun**, so such an event would stand.
 
-The options as presented to the user:
+The options as presented to the author:
 
 - **(a) Strict, as drafted.** Any G1 violation in either stratum fails Phase 5. A
   D32-type flip on H07 or H08 would fail the phase.
@@ -359,7 +359,7 @@ Measured per-call cost at $2 / $10 per M tokens, from the frozen ledgers:
   - *wiring-fix carve-out:* after stability output is seen, the only fixes allowed are
     those that change no stage configuration, prompt, label, check, threshold or
     scoring logic. Each one is tested, recorded as a dated §18 deviation note and shown
-    to the user before the held-out pass;
+    to the author before the held-out pass;
   - *resume rule:* a crashed held-out pass may continue only with the cases that have
     no recorded result, and only if the scored-path git tree hash equals the one in the
     marker.
@@ -421,7 +421,7 @@ a test checks them against the rule dates):
 - Article 16 applies through its Annex III rule. Its Article 6(1) rule would apply
   only from 2027-08-02.
 
-**Decidability check (the user's Q4 rule).** Every expected output must be decidable
+**Decidability check (the author's Q4 rule).** Every expected output must be decidable
 from the frozen corpus and the description alone.
 - Each case's grounds are in the corpus: Annex III, Annex I, Articles 5, 6, 16, 25 and
   26, Article 3(3), (4) and (23), and the applicability rules.
@@ -480,6 +480,6 @@ Changes in round 2:
   - Time stability: a pinned clock, and explicit dates in N04, N07 and N08.
   - N08's expected output is given per route.
 
-**Frozen 2026-11-04.** The user approved the labels and thresholds. The
-pre-registration is in SYSTEM_SPEC §18. Next, each step only with the user's
-go-ahead: the stability check, then the held-out pass (`docs/phase5_status.md`).
+**Frozen 2026-11-04.** The author approved the labels and thresholds. The
+pre-registration is in SYSTEM_SPEC §18. Next, each step only with the author's
+go-ahead: the stability check, then the held-out pass.

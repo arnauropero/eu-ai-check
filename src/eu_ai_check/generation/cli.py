@@ -98,7 +98,7 @@ def register(sub) -> None:
     p.add_argument("--refs", default=None, help="dev records only, e.g. D01#0,D10#0")
     p.add_argument("--validation-ratings",
                    default="data/eval/results/generation_ratings_validation.json",
-                   help="score-ratings: the user's ratings of the validation pairs "
+                   help="score-ratings: the author's ratings of the validation pairs "
                         "(agreement with the LLM rater, reported only)")
     p.add_argument("--confirm-heldout", action="store_true",
                    help="required for the single held-out pass")
