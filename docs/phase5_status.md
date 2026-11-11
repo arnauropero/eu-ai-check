@@ -9,7 +9,7 @@ pre-registration are **frozen**.
 - **Pre-registration:** SYSTEM_SPEC §18, "End-to-end — Phase 5 pre-registration".
   It is binding and wins over `docs/phase5_design.md` wherever they differ.
 - **Eval set:** N01–N12 (`data/eval/e2e_cases.json`) and H01–H08
-  (`data/eval/determination_heldout_5_1_c.json`, unchanged since `6b98c76`). The
+  (`data/eval/determination_heldout_5_1_c.json`, unchanged since `53eeeec`). The
   SHAs of both are pinned in `tests/test_e2e_cases.py`.
 - **Gates:**
   - G1: strict, counted by root cause, both strata;
@@ -67,7 +67,7 @@ pre-registration are **frozen**.
 **Status (2026-11-04, end of day).**
 - Done: the stability check (v2), the held-out pass (acceptance MET, G1–G4 pass),
   the demo recording, `eu-ai-check assess` and the README.
-- The README commit `3dd99f5` is local only. The branch on origin is at `2acb180`.
+- The README commit `3b484e2` is local only. The branch on origin is at `ed6b89c`.
 - No PR, merge or tag yet.
 
 Remaining work:

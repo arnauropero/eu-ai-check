@@ -269,7 +269,7 @@ Responses API (`src/eu_ai_check/extraction/openai_extractor.py`; the default in
   model from the extractor, so no output is graded by the model that produced it.
   `low` effort matches the effort the pre-registered judge used.
 - **Method unchanged.** The judge's system prompt and verdict schema are identical
-  to the pre-registration (`fe0b0f6`); tests pin their SHA-256. Only the provider and
+  to the pre-registration (`832d63c`); tests pin their SHA-256. Only the provider and
   model changed.
 - **It never defines or changes the ground truth.** The judge sees the label's
   reference sentence and the extracted value, read-only, and only for text fields
@@ -285,9 +285,9 @@ Responses API (`src/eu_ai_check/extraction/openai_extractor.py`; the default in
 ### 3.5.3 Provenance
 
 Both changes were made on 2026-10-02: *after* the eval set was pre-registered
-(`fe0b0f6`) and *before* any API call.
+(`832d63c`) and *before* any API call.
 
-1. **Extractor:** Claude Opus 5.5 → GPT-6.1 Sol (commit `7434d4d`).
+1. **Extractor:** Claude Opus 5.5 → GPT-6.1 Sol (commit `b6d3739`).
 2. **Judge:** Claude Opus 5.5 → GPT-6 Astra, making the stack OpenAI-only.
 
 Unchanged by either: eval set, labels, labelling rules, null discipline, leakage
@@ -1851,7 +1851,7 @@ fixed, pass `--out` an undotted name.
   path.
 - *Baseline.* Phase 0 contained **no extraction accuracy measurement**; it deferred
   the number to Phase 2 (`src/eu_ai_check/corpus/baseline.py`). The "Phase 0
-  baseline" in the acceptance criterion is therefore the frozen v1 run (`82467bb`),
+  baseline" in the acceptance criterion is therefore the frozen v1 run (`8ef12af`),
   the committed Phase 2 baseline used for this target check.
 - *Locked target.* Overall field-level accuracy **≥ 0.95**, measured with the
   pre-registered primary concept-group scorer on the frozen 30-case v1 eval set, in
@@ -1864,7 +1864,7 @@ fixed, pass `--out` an undotted name.
 
 | criterion | committed result | outcome |
 |---|---|---|
-| overall field accuracy ≥ 0.95 (`low`, v1 `82467bb`) | 0.967 | met |
+| overall field accuracy ≥ 0.95 (`low`, v1 `8ef12af`) | 0.967 | met |
 | zero leaks | 0 in v1 (180 runs); also 0 in all 360 v2 runs | met |
 
 The post-hoc `affected_persons` re-score is **not** used for acceptance. The official
@@ -2101,7 +2101,7 @@ against this set") in one respect, and is labelled accordingly:
 - *Scope:* the 5(1)(c) over-caution pattern only. The risk-tier misses above (D10,
   D26, D28) and the D32#2 variance have different causes and are outside this
   intervention.
-- *Held-out set, frozen before any matcher change (`6b98c76`).*
+- *Held-out set, frozen before any matcher change (`53eeeec`).*
   `data/eval/determination_heldout_5_1_c.json` has 8 cases, from angles not in the
   failing dev cases:
   - H01 payment fraud, H02 workplace productivity, H03 churn, H04 motor telematics
@@ -2117,7 +2117,7 @@ against this set") in one respect, and is labelled accordingly:
   zero-tolerance violation or a clear regression on the dev set ends the
   intervention as NOT ADOPTED, with no v3.
 
-**Variant `social-scoring-v1` (`5b5d186`).** One rule was appended to the
+**Variant `social-scoring-v1` (`4d1c1e8`).** One rule was appended to the
 pre-registered system prompt. It said that an evaluation of people used for its
 own stated purpose, in the same context as its data, is lawful purpose-specific
 evaluation, not social scoring, so the answer is `does_not_match`. It added that
@@ -2126,7 +2126,7 @@ the description need not rule out every element of the provision, and that
 treatment is left open. No domain examples were given. The variant text is
 SHA-pinned in `tests/test_determination.py`.
 
-**Variant `social-scoring-v2` (`897c22e`).** v1's rule sat in the system prompt
+**Variant `social-scoring-v2` (`2587e00`).** v1's rule sat in the system prompt
 and spilled over to other provisions. For v2, the restriction was made structural:
 the system prompt is byte-identical to the pre-registered one, and the guidance is
 printed only as a `note:` line inside the Article 5(1)(c) candidate's block of the
@@ -2431,7 +2431,7 @@ It is binding. As with Phase 3, a miss is reported as a miss and is not retuned.
 
 - **[Note, 2026-10-06, after rating] Rating outcome and adoption decision.** The
   pre-registration is not edited. The scorer opened the A/B key only after both
-  rating files were committed (9d88c9f). The key matched its committed SHA-256
+  rating files were committed (7af45d4). The key matched its committed SHA-256
   (`41231e32…01222`).
   - *Pairwise, LLM-rated (Claude).* The model arm was preferred in **17/20** pairs
     (17/18 informative pairs). The template arm was preferred in 0, and 3 were ties:
@@ -2525,7 +2525,7 @@ retuned. The runner is `src/eu_ai_check/e2e/` (`eu-ai-check eval-e2e`).
   - **Stratum A, N01–N12:** `data/eval/e2e_cases.json`, cases-content SHA-256
     `a50afdabda92f3ee3724047d93dcd9d5e329e3adec517f697660a5d5fff8c0d4`.
   - **Stratum B, H01–H08:** `data/eval/determination_heldout_5_1_c.json`, frozen in
-    `6b98c76` and unchanged since. Cases-content SHA-256
+    `53eeeec` and unchanged since. Cases-content SHA-256
     `11e564939375d5482dcd53145a5b245507d1b52542e665c69d9cc693ac1d401c`.
   - Both SHAs are pinned in `tests/test_e2e_cases.py`.
   - N08's expected risk tier is given per route:
@@ -2684,7 +2684,7 @@ retuned. The runner is `src/eu_ai_check/e2e/` (`eu-ai-check eval-e2e`).
   - Its purpose is the limitation reported by the Phase 4 raters and seen in H06 and
     demo X04: the high-risk obligations read as a route to compliance for a
     prohibited practice.
-  - The held-out results above were produced by the earlier renderer at `405cd0c`
+  - The held-out results above were produced by the earlier renderer at `3a3aad8`
     and are not re-scored. Of the five demo answers, only X04 differs when rebuilt
     at $0 from its recorded facts, verdicts and model text; the rebuilt answer
     passes every check. `docs/demo.md` shows it, marked as re-rendered;

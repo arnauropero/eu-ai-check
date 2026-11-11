@@ -1,6 +1,6 @@
 """Phase 4 eval harness: smoke test, dev iteration, and the single held-out pass.
 
-Pre-registration 33cf62c (SYSTEM_SPEC.md §18) governs everything here:
+Pre-registration 364293b (SYSTEM_SPEC.md §18) governs everything here:
 - the held-out pass runs exactly once. A marker is written before its first call,
   so even a crashed pass cannot be re-run;
 - API-failure policy (§18 note, 2026-10-06, before any held-out call): transient

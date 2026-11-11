@@ -61,12 +61,12 @@ resumed. Results are in `data/eval/results/e2e_heldout.json` and the per-case re
 are in `e2e_heldout.runs.jsonl`.
 
 **Reproducing the run.**
-- The pass ran at commit `405cd0c`. Its scored-path tree hash, recorded in
+- The pass ran at commit `3a3aad8`. Its scored-path tree hash, recorded in
   `data/eval/results/e2e_heldout.started` before the first call, is
   `9e200aa486dbaf050dff4cc5d2440aa8283fbc059a76eaefa8a5058d3879c67c`.
 - The scored paths are `src/eu_ai_check`, `data/corpus`, the two case files,
   `pyproject.toml` and `uv.lock` (SYSTEM_SPEC.md §18).
-- To check it: `git checkout 405cd0c`, then `eu_ai_check.e2e.runner.scored_tree()`
+- To check it: `git checkout 3a3aad8`, then `eu_ai_check.e2e.runner.scored_tree()`
   returns the same hash.
 
 **All four acceptance gates passed:**

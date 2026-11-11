@@ -11,7 +11,7 @@ $1.10 to $1.50 (§5). The earlier [PROPOSAL] items (§4 attribution, §6 reserve
 approved as written.
 
 Grounded in:
-- PROJECT_PLAN Phase 5 and §8 (including the Phase 3 deviation, `ce8e60d`);
+- PROJECT_PLAN Phase 5 and §8 (including the Phase 3 deviation, `2a8f647`);
 - SYSTEM_SPEC §18, "End-to-end" (obligation, citation and evidence correctness, with
   per-stage attribution), and the Phase 2–4 pre-registrations;
 - the as-built code: `extraction/openai_extractor.py`, `determination/pipeline.py`,
@@ -70,7 +70,7 @@ and by `eu-ai-check search`. This is recorded as a dated note in SYSTEM_SPEC §1
 - after approval the file is SHA-pinned.
 
 **Stratum B: H01–H08** (`data/eval/determination_heldout_5_1_c.json`, frozen in
-`6b98c76`, never run):
+`53eeeec`, never run):
 - the Article 5(1)(c) stratum;
 - it runs exactly once, nothing is tuned against it afterwards, and its results are
   reported as they come;

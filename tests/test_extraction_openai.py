@@ -246,7 +246,7 @@ def test_judge_is_gpt_6_astra_and_not_the_extractor() -> None:
     assert JUDGE_MODEL != OPENAI_MODEL  # no output is graded by the model that produced it
 
 
-#: SHA-256 of the judge prompt and verdict schema as pre-registered (fe0b0f6).
+#: SHA-256 of the judge prompt and verdict schema as pre-registered (832d63c).
 #: Migrating the judge changed the provider and model, not the method.
 PRE_REGISTERED_JUDGE_PROMPT = "1c5db014d50a24ba3bedc7a16c32392fc3a5b3a7a960b68b9ec759d42135cc7b"
 PRE_REGISTERED_JUDGE_SCHEMA = "08467002c705533788a410f456983bedefed286589ee519f8290ed84c83e0518"
@@ -373,7 +373,7 @@ def test_eval_workflow_runs_on_openai_alone(monkeypatch, tmp_path, no_judge) -> 
 # --------------------------------------------------------------------------
 
 #: Canonical SHA-256 of each part of data/eval/extraction_cases.json as committed
-#: in the pre-registration, fe0b0f6 (2026-10-02). Hashing parsed JSON, not bytes,
+#: in the pre-registration, 832d63c (2026-10-02). Hashing parsed JSON, not bytes,
 #: keeps the check independent of line endings on checkout.
 PRE_REGISTERED = {
     "cases": "b05e12f8d9088793bc12642aca739387c864e99015d8e82785bd7b86c3029fe9",
@@ -390,7 +390,7 @@ def test_pre_registered_eval_content_is_unchanged(part: str) -> None:
         json.dumps(data[part], sort_keys=True, ensure_ascii=False).encode()
     ).hexdigest()
     assert digest == PRE_REGISTERED[part], (
-        f"{part} differs from the pre-registration (fe0b0f6). A change after "
+        f"{part} differs from the pre-registration (832d63c). A change after "
         "pre-registration must be flagged post_hoc, not silently absorbed."
     )
 

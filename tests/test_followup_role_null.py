@@ -1,7 +1,7 @@
 """Phase 2 follow-up `role-null-v1` -- offline tests (SYSTEM_SPEC.md §18).
 
 These pin, before any follow-up API call: that the baseline prompt is still the
-frozen one of the first run (82467bb); the exact text of the approved
+frozen one of the first run (8ef12af); the exact text of the approved
 intervention and where it goes; that the frozen v1 results are untouched; and
 that the pre-registered metrics and decision rule reproduce the baseline numbers
 the follow-up was designed against. No test here makes a network call.
@@ -35,7 +35,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CASES = ROOT / "data/eval/extraction_cases.json"
 FROZEN = ROOT / "data/eval/results/extraction_v1_30c.runs.jsonl"
 
-#: SHA-256 of system_prompt() as sent in the first run (82467bb).
+#: SHA-256 of system_prompt() as sent in the first run (8ef12af).
 FROZEN_SYSTEM_PROMPT = "80a13431265124b13da71f77a675788c8cf6a4a4d20934a990c1490582094428"
 
 #: The intervention exactly as approved on 2026-10-02.

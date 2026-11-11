@@ -237,7 +237,7 @@ one rule-matching engine → cited, fail-closed output.
   output.
 - Deliverable: extraction eval set (hand-labeled free-text → expected fields).
   **Delivered:** `data/eval/extraction_cases.json`, 30 cases, user-reviewed and
-  committed before any API call (`fe0b0f6`); its content is SHA-pinned in tests.
+  committed before any API call (`832d63c`); its content is SHA-pinned in tests.
 - Acceptance: field-level accuracy meets the target locked during this phase against
   the Phase 0 baseline (SYSTEM_SPEC.md §18); extraction **never** outputs a value for
   an excluded (conclusion-level) field — this is a zero-tolerance check, not a
@@ -245,7 +245,7 @@ one rule-matching engine → cited, fail-closed output.
   **Met.**
   - *Accuracy:* target overall field accuracy ≥ 0.95, scored by the pre-registered
     concept-group scorer at `low` effort. Result 0.967 on the frozen v1 run
-    (`82467bb`). Phase 0 had no extraction measurement, so the v1 run is the
+    (`8ef12af`). Phase 0 had no extraction measurement, so the v1 run is the
     baseline. **The target was locked after the first results were seen**, as the
     Phase 2 pre-registration allows. It is a regression guard, not a pre-registered
     criterion.
@@ -282,7 +282,7 @@ one rule-matching engine → cited, fail-closed output.
 - Deliverable: provision matcher with code verification, plus the score-cutoff
   baseline arm, compared under a pre-registered decision rule (SYSTEM_SPEC.md §18).
   **Pre-registered (2026-10-03), before any determination run:**
-  - 41-case eval set (`9cb9bd2`).
+  - 41-case eval set (`041917e`).
   - Determination code, matcher prompt (SHA-pinned) and τ values (next commit).
   - The rule path reproduces all 123 rule-based labels offline.
   - **First run (2026-10-04): acceptance NOT MET** (SYSTEM_SPEC.md §18). 26 of 123
@@ -370,7 +370,7 @@ one rule-matching engine → cited, fail-closed output.
   - Spend cap: $5 for all Phase 4 API calls, with held-out reserved first.
   - H01–H08 are not used in Phase 4. They are reserved for Phase 5.
 - **Status (2026-10-06): complete, acceptance met, LLM generator adopted. Merged in
-  `678f44c` (PR #3) and tagged `phase-4`.**
+  `5853cff` (PR #3) and tagged `phase-4`.**
   - *Dev.* Two dev prompt iterations. v2 was frozen before the held-out pass.
   - *Held-out pass (once, 39 records).* Raw pass 1.00, fallback 0.00, 0 truncated,
     0 C4/C8, coverage 1.00, status reproduced 15/15, 0 API errors.
@@ -464,7 +464,7 @@ deliverable (§10), not an afterthought.
   phase that ends with a documented not-met verdict is still merged, because its
   code and findings are real and final, but it is not tagged. Its verdict is
   recorded in the relevant SYSTEM_SPEC.md section. Phase 3 is the first example:
-  merged in `d7d45ad`, untagged, with the NOT MET verdict in §18.
+  merged in `83a4bb5`, untagged, with the NOT MET verdict in §18.
 
 ## 10. Data / Evaluation Assets to Create
 

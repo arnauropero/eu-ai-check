@@ -479,7 +479,7 @@ matcher):
 
 ## 7. Edits to SYSTEM_SPEC and PROJECT_PLAN
 
-- `34acd2a`:
+- `6c425c9`:
   - SYSTEM_SPEC §16 as-built note and §16.1 (what Phase 3 really produces);
   - §16.2 (adapter input, per-article obligations);
   - §16.3 (claims-first output, template renderer);

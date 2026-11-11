@@ -49,7 +49,7 @@ from .schema import BOOL_FIELDS, DATE_FIELDS, SHORT_TEXT_FIELDS, TEXT_FIELDS
 CONCEPT_FIELDS = (*TEXT_FIELDS, *SHORT_TEXT_FIELDS)
 ALL_SCORED = (*CONCEPT_FIELDS, *BOOL_FIELDS, *DATE_FIELDS)
 
-#: Secondary judge. Migrated from Claude Opus 5.5 (pre-registration fe0b0f6) to
+#: Secondary judge. Migrated from Claude Opus 5.5 (pre-registration 832d63c) to
 #: OpenAI on 2026-10-02, before any API call. Same role, same prompt, same verdict
 #: schema, same effort level (`low`); a different model from the extractor.
 JUDGE_MODEL = "gpt-6-astra"

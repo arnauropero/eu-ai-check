@@ -1,4 +1,4 @@
-POST-HOC ANALYSIS -- NOT PRE-REGISTERED. Frozen baseline (82467bb), no API calls.
+POST-HOC ANALYSIS -- NOT PRE-REGISTERED. Frozen baseline (8ef12af), no API calls.
 affected_persons re-scored: correct = primary concept-group correct OR the
 secondary judge (gpt-6-astra, already in the frozen records) said same_fact.
 The frozen scoring rules and the frozen results are unchanged; this is analysis only.
