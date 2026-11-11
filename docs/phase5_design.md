@@ -50,7 +50,9 @@ snapshot, `data/corpus/provisions.json`. Its 110 provisions are the Act's text a
 force from 2024-08-01, with no amendments; every provision has
 `text_valid_from = 2024-08-01`. A later amendment, such as the pending Digital Omnibus
 change to Article 5, would need a new corpus version. It would not silently change
-these labels.
+these labels. *(Note added 2026-11-11: the Digital Omnibus was already law when this
+was written — Regulation (EU) 2026/1744, in force since 27 July 2026. It is not in
+the corpus; see the README and docs/limitations.md.)*
 
 **Retrieval is not on this path [DECIDED: recorded].** The matcher sees the closed,
 exhaustive candidate set of every scope (`determination/scopes.py`), never a retrieval

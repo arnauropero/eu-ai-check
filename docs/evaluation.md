@@ -14,8 +14,9 @@ The full record behind the summary in the [README](../README.md). Limitations ar
   - Stratum B is H01–H08, an earlier held-out set on Article 5(1)(c), checked only
     for safety and output hygiene (G1 and G2).
 - **Phases:** the stages the project was built in, from Phase 0 (the legal text) to
-  Phase 5 (the end-to-end evaluation). Each had acceptance criteria fixed before its
-  run.
+  Phase 5 (the end-to-end evaluation). Each had acceptance criteria. Phases 3 to 5
+  fixed theirs before the first run; in Phases 1 and 2 part of the target was set
+  after the first run (PROJECT_PLAN.md).
 - **Wilson interval:** the range of true rates that are plausible, with 95%
   confidence, given the result on a small number of cases. The fewer the cases, the
   wider the range.

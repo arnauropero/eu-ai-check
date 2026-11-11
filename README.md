@@ -125,14 +125,16 @@ No key? Read the [recorded demo](docs/demo.md).
 
 ## How it was built
 
-The project ran in six phases. Each phase fixed its acceptance criteria before its
-run, and is tagged `phase-N` only if it met them.
+The project ran in six phases, each with acceptance criteria, and a phase is tagged
+`phase-N` only if it met them. Phases 3 to 5 fixed their criteria before their first
+run. In Phases 1 and 2 part of the target was set after the first run had been seen,
+and PROJECT_PLAN.md says so.
 
 | Phase | What | Outcome |
 |---|---|---|
 | 0 | Legal text: parse the Act into citable provisions | met |
-| 1 | Hybrid retrieval over the provisions | met |
-| 2 | Fact extraction from free text | met |
+| 1 | Hybrid retrieval over the provisions | met (thresholds set after the first run) |
+| 2 | Fact extraction from free text | met (accuracy target set after the first run) |
 | 3 | Grounded determination (rules plus provision matcher) | **not met** (Article 5(1)(c)) |
 | 4 | Answer generation with checked citations | met |
 | 5 | End-to-end evaluation, demo and `assess` | met |
