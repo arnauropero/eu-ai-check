@@ -1,9 +1,11 @@
 """Render docs/assets/demo.gif: a terminal-style replay of recorded demo examples.
 
-No API call. Text comes from data/demo/recording.json, unedited but trimmed: each
-"## " determination line is shown with its cited provisions (ids dropped), the
-explanations and verbatim obligation lists are left out, and the GIF says so on
-screen. The command shown is the `assess` call that runs the same frozen pipeline.
+No API call. Each answer is rebuilt at $0 from data/demo/recording.json exactly as
+docs/demo.md does (scripts/make_demo_docs.py), so the model's wording is unedited.
+It is trimmed: each "## " determination line is shown with its cited provisions
+(ids dropped), explanations and verbatim obligation lists are left out, and the GIF
+says so on screen. The command shown is the `assess` call that runs the same frozen
+pipeline, and the footer is the one `assess` prints for that date.
 
     uv run --with pillow python scripts/make_demo_gif.py [--font PATH --bold-font PATH]
 
@@ -18,17 +20,26 @@ import re
 import textwrap
 from pathlib import Path
 
+import sys
+
 from PIL import Image, ImageDraw, ImageFont
+
+from eu_ai_check.e2e.assess import AMENDMENT_IN_FORCE, AMENDMENT_NOTE
+from eu_ai_check.generation.render import REFERENCE_ONLY
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from make_demo_docs import rebuild  # noqa: E402
 
 RECORDING = Path("data/demo/recording.json")
 OUT = Path("docs/assets/demo.gif")
-SCENES = ["X01", "X02"]
+SCENES = ["X04", "X02"]
 
-COLS, ROWS = 96, 30
+COLS, ROWS = 96, 33
 FONT_SIZE, LINE_H, PAD, BAR_H = 15, 20, 18, 30
 BG, BAR = (24, 26, 33), (38, 41, 51)
 FG, DIM, WHITE = (205, 210, 220), (120, 127, 142), (240, 242, 246)
 GREEN, AMBER, BLUE, PROMPT = (126, 201, 140), (236, 178, 92), (120, 170, 240), (150, 200, 255)
+RED = (240, 113, 113)
 
 TYPE_MS, LINE_MS, CHARS_PER_FRAME = 35, 110, 5
 
@@ -37,6 +48,8 @@ def verdict_colour(verdict: str) -> tuple[int, int, int]:
     v = verdict.lower()
     if "could not be determined" in v:
         return BLUE
+    if "prohibition" in v and not v.startswith("no "):
+        return RED
     if v.startswith(("no ", "not ", "does not", "you are not")):
         return GREEN
     return AMBER
@@ -51,10 +64,10 @@ def fit(text: str, width: int = COLS) -> str:
     return text if len(text) <= width else text[: width - 1] + "…"
 
 
-def scene_lines(ex: dict) -> list[list[tuple[str, tuple]]]:
+def scene_lines(ex: dict, answer: str) -> list[list[tuple[str, tuple]]]:
     """Output lines of one scene; each line is a list of (text, colour) runs."""
     out: list[list[tuple[str, tuple]]] = []
-    lines = ex["shipped_answer"].splitlines()
+    lines = answer.splitlines()
     i = 0
     while i < len(lines):
         line = lines[i]
@@ -67,7 +80,11 @@ def scene_lines(ex: dict) -> list[list[tuple[str, tuple]]]:
             if len(items) > 3:
                 out.append([(f"   … {len(items) - 3} more questions", DIM)])
             break
-        if line.startswith("## "):
+        if line.startswith("Important:"):
+            out += [[(w, RED)] for w in textwrap.wrap(line, COLS)]
+        elif line == REFERENCE_ONLY:
+            out.append([(fit(line), DIM)])
+        elif line.startswith("## "):
             head, _, verdict = line[3:].partition(": ")
             out.append([("## " + head + ": ", WHITE), (fit(verdict, COLS - len(head) - 5),
                                                         verdict_colour(verdict))])
@@ -80,6 +97,8 @@ def scene_lines(ex: dict) -> list[list[tuple[str, tuple]]]:
     out.append([("---", DIM)])
     out.append([(f"Assessed for {ex['relevant_date']} with the frozen pipeline. Cost of this "
                  f"run: ${ex['spend_usd']:.4f} ({len(ex['calls'])} API calls).", FG)])
+    if ex["relevant_date"] and ex["relevant_date"] >= AMENDMENT_IN_FORCE.isoformat():
+        out += [[(w, DIM)] for w in textwrap.wrap(AMENDMENT_NOTE, COLS)]
     return out
 
 
@@ -138,16 +157,17 @@ def main() -> None:
     args = ap.parse_args()
     rec = json.loads(RECORDING.read_text(encoding="utf-8"))
     by_id = {e["id"]: e for e in rec["examples"]}
+    answers = rebuild(rec["examples"])
     sc = Screen(ImageFont.truetype(args.font, FONT_SIZE),
                 ImageFont.truetype(args.bold_font, FONT_SIZE))
     for n, ex_id in enumerate(SCENES):
         ex = by_id[ex_id]
         sc.buf = [[(f"# Recorded demo example {ex_id} (2026-11-04), replayed. "
-                    "Output trimmed, wording unedited.", DIM)], [("", FG)]]
+                    "Model wording unedited, output trimmed.", DIM)], [("", FG)]]
         sc.snap(500, cursor=False)
         sc.type_command(f'eu-ai-check assess "{ex["input"]}"')
         sc.buf.append([("", FG)])
-        sc.print_lines(scene_lines(ex))
+        sc.print_lines(scene_lines(ex, answers[ex_id]))
         sc.durations[-1] = 6500 if n == len(SCENES) - 1 else 5000
     OUT.parent.mkdir(parents=True, exist_ok=True)
     sc.frames[0].save(OUT, save_all=True, append_images=sc.frames[1:], duration=sc.durations,

@@ -19,6 +19,8 @@ Total demo spend: $0.3540. The same output in raw form is in [`data/demo/recordi
 
 Cost: $0.0877 (3 API calls). Template fallback: no.
 
+**Note:** this answer follows the 2024 text the tool uses. Regulation (EU) 2026/1744, in force since 27 July 2026, moved the high-risk rules for Annex III systems, including Articles 16 and 26, to 2 December 2027, so under the amended Act they do not apply yet on 1 November 2026.
+
 <details>
 <summary>Full answer, unedited</summary>
 
@@ -211,7 +213,7 @@ Cost: $0.0874 (3 API calls). Template fallback: no.
 
 **Re-rendered on 2026-11-11** with the current renderer, at $0 and with no API call, from this example's recorded facts, matcher verdicts and model text. The model's words are unchanged. Only code-written lines differ from the recording: the prohibited-practice notice at the top and the "for reference only" marks, added after the evaluation so that the high-risk sections no longer read as a way to comply. The answer as originally recorded is in [`data/demo/recording.md`](../data/demo/recording.md#x04-a-prohibited-practice).
 
-**Note:** the prohibition (Article 5(1)(g), biometric categorisation inferring political opinions) is the finding that matters. The high-risk classification and Articles 16 and 26 are still determined and shown, marked as for reference only. Some quoted Article 26 paragraphs do not fit this case, such as 26(10) on criminal investigations (see [limitations.md](limitations.md)).
+**Note:** the prohibition (Article 5(1)(g), biometric categorisation inferring political opinions) is the finding that matters. The high-risk classification and Articles 16 and 26 are still determined and shown, marked as for reference only. Some quoted Article 26 paragraphs do not fit this case, such as 26(10) on criminal investigations (see [limitations.md](limitations.md)). The prohibition is not affected by the 2026 amendment (Regulation (EU) 2026/1744).
 
 <details>
 <summary>Full answer (model text unedited)</summary>

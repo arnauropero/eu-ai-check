@@ -174,3 +174,13 @@ def test_without_a_key_assess_explains_what_to_do_and_makes_no_call(monkeypatch,
     assert args.func(args) == 2
     err = capsys.readouterr().err
     assert "OPENAI_API_KEY is not set" in err and "docs/demo.md" in err
+
+
+def test_answers_dated_after_the_2026_amendment_say_the_corpus_predates_it() -> None:
+    base = {"answer": "## x", "fallback": False, "calls": [], "cost_usd": 0.0,
+            "worst_case_usd": 0.6, "max_cost_usd": 0.75}
+    after = A.render(base | {"relevant_date": "2026-11-01"})
+    before = A.render(base | {"relevant_date": "2026-07-26"})
+    assert A.AMENDMENT_NOTE in after and after.endswith(A.LIMITATIONS_POINTER)
+    assert A.AMENDMENT_NOTE not in before
+    assert A.AMENDMENT_NOTE not in A.render(base | {"relevant_date": None})

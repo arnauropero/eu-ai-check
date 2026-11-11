@@ -33,6 +33,13 @@ GENERATION_INPUT_CHARS_BOUND = 60_000
 #: date the extraction might return.
 _LATEST = date(2100, 1, 1)
 
+#: Regulation (EU) 2026/1744 (Digital Omnibus on AI) entered into force on this date.
+#: The corpus does not include it, so answers for later dates say so in one line.
+AMENDMENT_IN_FORCE = date(2026, 7, 27)
+AMENDMENT_NOTE = ("Based on the AI Act as published in 2024. Later amendments are not "
+                  "included, such as Regulation (EU) 2026/1744 (in force since 27 July "
+                  "2026), which moves the high-risk rules for Annex III systems to "
+                  "2 December 2027.")
 LIMITATIONS_POINTER = ("Not legal advice. Read the limitations before relying on this "
                        "answer: docs/limitations.md.")
 
@@ -132,6 +139,9 @@ def render(result: dict[str, Any]) -> str:
               f"({runner.MODEL}).",
               f"Cost of this run: ${result['cost_usd']:.4f} ({len(calls)} API call"
               f"{'s' if len(calls) != 1 else ''}; worst case checked before the run "
-              f"${result['worst_case_usd']:.2f}, cap --max-cost ${result['max_cost_usd']:.2f}).",
-              LIMITATIONS_POINTER]
+              f"${result['worst_case_usd']:.2f}, cap --max-cost ${result['max_cost_usd']:.2f})."]
+    on = result["relevant_date"]
+    if on and date.fromisoformat(on) >= AMENDMENT_IN_FORCE:
+        lines.append(AMENDMENT_NOTE)
+    lines.append(LIMITATIONS_POINTER)
     return "\n".join(lines)

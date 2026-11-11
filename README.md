@@ -28,7 +28,10 @@ the answer is **"could not be determined"**, with a list of what it would need t
 know. It does not guess.
 
 It is a portfolio project, not legal advice. It covers only the provisions above and
-reads the Act as published on 2024-08-01, with no later amendments.
+uses the AI Act as published in 2024. Later amendments are not included, such as
+Regulation (EU) 2026/1744 (the "Digital Omnibus on AI", in force since 27 July 2026),
+which among other changes moves the high-risk rules for Annex III systems to
+2 December 2027.
 
 ## How it works
 

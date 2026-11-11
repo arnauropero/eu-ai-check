@@ -2851,6 +2851,7 @@ retuned. The runner is `src/eu_ai_check/e2e/` (`eu-ai-check eval-e2e`).
 - Splitting `relevant_date` into `event_date` / `assessment_date` / `deployment_date`.
 - Multi-jurisdiction support (using the already-captured but currently unused
   `jurisdiction` field).
-- Incorporating the pending Digital Omnibus amendment to Article 5 once it has a
-  confirmed effective date — a live, real-world exercise of the text-versioning model
-  rather than a synthetic one.
+- Incorporating Regulation (EU) 2026/1744 (Digital Omnibus on AI, in force since
+  27 July 2026) as a new corpus version — a live, real-world exercise of the
+  text-versioning model rather than a synthetic one. Not done: the project closed in
+  November 2026 on the 2024 text.

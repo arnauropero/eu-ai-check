@@ -36,11 +36,16 @@ TITLES = {  # short reader-facing titles; the recording's `covers` stays the sou
 }
 
 NOTES = {  # our annotations; replace the recording's note where given
+    "X01": "**Note:** this answer follows the 2024 text the tool uses. Regulation (EU) "
+           "2026/1744, in force since 27 July 2026, moved the high-risk rules for Annex III "
+           "systems, including Articles 16 and 26, to 2 December 2027, so under the "
+           "amended Act they do not apply yet on 1 November 2026.",
     "X04": "**Note:** the prohibition (Article 5(1)(g), biometric categorisation inferring "
            "political opinions) is the finding that matters. The high-risk classification "
            "and Articles 16 and 26 are still determined and shown, marked as for reference "
            "only. Some quoted Article 26 paragraphs do not fit this case, such as 26(10) on "
-           "criminal investigations (see [limitations.md](limitations.md)).",
+           "criminal investigations (see [limitations.md](limitations.md)). The prohibition "
+           "is not affected by the 2026 amendment (Regulation (EU) 2026/1744).",
     "X05": "**Shown because it goes wrong.** The answer is \"not high-risk\" through the "
            "Article 6(3) derogation. That is debatable: returning incomplete applications "
            "before any recruiter reads them is close to \"filtering applications\", which "

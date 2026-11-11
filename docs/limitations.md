@@ -105,6 +105,12 @@ The full list. The [README](../README.md) shows the four that matter most. Resul
 - **Retrieval is not on the product path.** See "Pipeline as built" in [evaluation.md](evaluation.md).
 - **The legal text is frozen.** The corpus is the 2024-08-01 text, with no
   amendments (see "Legal text version" in [evaluation.md](evaluation.md)).
+  Regulation (EU) 2026/1744 (Digital Omnibus on AI), in force since 27 July 2026,
+  is not included. Among other changes, it moves the high-risk rules for Annex III
+  systems, including Articles 16 and 26, to 2 December 2027 (Annex I systems:
+  2 August 2028) and adds two prohibitions from 2 December 2026. For dates after
+  27 July 2026, answers about when high-risk obligations apply follow the 2024 text,
+  and `assess` adds a one-line note saying so.
 - **Phase 3 acceptance was NOT MET.** The Article 5(1)(c) shortfall was accepted as
   a documented limitation. V1 will never claim that every phase met its
   acceptance criteria.

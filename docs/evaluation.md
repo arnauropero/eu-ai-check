@@ -24,9 +24,11 @@ The full record behind the summary in the [README](../README.md). Limitations ar
 
 All results, and all expected outputs in the evaluation sets, are relative to one
 frozen corpus snapshot: the Act as in force from 2024-08-01, with no amendments
-(`data/corpus/provisions.json`, 110 provisions). An amendment, such as the pending
-Digital Omnibus change to Article 5, would need a new corpus version. The answers do
-not track legislative changes automatically. Evaluation dates are fixed in the eval
+(`data/corpus/provisions.json`, 110 provisions). Regulation (EU) 2026/1744 (Digital
+Omnibus on AI), in force since 27 July 2026, has since amended the Act. It is not in
+the corpus; including it would need a new corpus version. The results here are
+unaffected: they measure the system against the 2024 text, on which every expected
+output is based. The answers do not track legislative changes automatically. Evaluation dates are fixed in the eval
 files, so no expected output changes as calendar time passes.
 
 ## Pipeline as built
