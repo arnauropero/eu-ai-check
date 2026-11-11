@@ -158,3 +158,19 @@ def test_cli_parses_assess_with_a_date_and_cap() -> None:
     default = parser.parse_args(["assess", DESC])
     assert default.max_cost == A.DEFAULT_MAX_COST_USD
     assert isinstance(default.date, date)
+
+
+def test_without_a_key_assess_explains_what_to_do_and_makes_no_call(monkeypatch, capsys) -> None:
+    import argparse
+
+    from eu_ai_check.e2e import cli
+
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.setattr(runner, "default_client",
+                        lambda: pytest.fail("no client may be built without a key"))
+    parser = argparse.ArgumentParser()
+    cli.register(parser.add_subparsers(dest="cmd"))
+    args = parser.parse_args(["assess", DESC])
+    assert args.func(args) == 2
+    err = capsys.readouterr().err
+    assert "OPENAI_API_KEY is not set" in err and "docs/demo.md" in err

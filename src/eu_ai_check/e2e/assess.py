@@ -34,7 +34,7 @@ GENERATION_INPUT_CHARS_BOUND = 60_000
 _LATEST = date(2100, 1, 1)
 
 LIMITATIONS_POINTER = ("Not legal advice. Read the limitations before relying on this "
-                       "answer: README.md, section \"Limitations\".")
+                       "answer: docs/limitations.md.")
 
 
 class CostCapExceeded(RuntimeError):

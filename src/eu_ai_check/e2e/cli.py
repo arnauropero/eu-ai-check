@@ -20,6 +20,16 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+
+NO_KEY_MESSAGE = (
+    "OPENAI_API_KEY is not set.\n"
+    "`assess` calls the OpenAI API with your own key (about $0.08 per run); the project "
+    "ships no key.\n"
+    "  bash:       export OPENAI_API_KEY=sk-...\n"
+    "  PowerShell: $env:OPENAI_API_KEY=\"sk-...\"\n"
+    "No key? Five recorded answers are in docs/demo.md, and `eu-ai-check show ID` "
+    "prints any provision of the Act at no cost.")
 
 
 def cmd_eval_e2e(args: argparse.Namespace) -> int:
@@ -68,6 +78,9 @@ def cmd_assess(args: argparse.Namespace) -> int:
     from . import runner
     from .assess import CostCapExceeded, assess, render
 
+    if not os.environ.get("OPENAI_API_KEY"):
+        print(NO_KEY_MESSAGE, file=sys.stderr)
+        return 2
     stages = runner.Stages.frozen(runner.default_client())
     try:
         result = assess(args.text, args.date, stages, max_cost=args.max_cost)
