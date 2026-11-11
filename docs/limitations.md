@@ -93,8 +93,8 @@ The full list. The [README](../README.md) shows the four that matter most. Resul
   well as on answer quality. The errors may be specific to the machine and network
   used for the run.
 - **The new cases are not independent of the system's builder.** N01–N12 were
-  written by the project author and Claude Code, and a second Claude session reviewed
-  their labels. A misreading of the Act shared by the builders and the labels would
+  written by the project author, with AI assistance, and no independent annotator
+  reviewed their labels. A misreading of the Act shared by the builders and the labels would
   not show up as a miss.
 - **The G3 thresholds come from a different setting.** They are development
   performance minus 0.05, measured with gold facts in Phase 3. The end-to-end run

@@ -367,8 +367,8 @@ Measured per-call cost at $2 / $10 per M tokens, from the frozen ledgers:
 ### 7.1 Limitations of this evaluation (stated before any run)
 
 - **The new cases are not independent of the system's builder.** N01–N12 were written
-  by the project author and Claude Code, and their labels were reviewed by a second
-  Claude session. They test the system against its builders' reading of the Act, not
+  by the project author, with AI assistance, and no independent annotator reviewed
+  their labels. They test the system against its builders' reading of the Act, not
   against an independent annotator's. Systematic misreadings shared by the builders
   and the labels would not show up as misses.
 - **The G3 thresholds come from a different setting.** They derive from dev

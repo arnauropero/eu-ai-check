@@ -94,8 +94,9 @@ The four that matter most:
   post-evaluation fix, the answer opens by saying the practice is prohibited and
   marks those sections "for reference only" (demo example X04), but the statuses
   themselves are unchanged.
-- **Small, self-written test set.** The 12 scored cases were written by the author
-  with Claude Code. The intervals are wide, and a misreading of the Act shared by the builders and the
+- **Small, self-written test set.** The 12 scored cases were written by the author,
+  with AI assistance, and no independent annotator reviewed the labels. The
+  intervals are wide, and a misreading of the Act shared by the builders and the
   labels would not show up.
 
 All of them: [docs/limitations.md](docs/limitations.md).
