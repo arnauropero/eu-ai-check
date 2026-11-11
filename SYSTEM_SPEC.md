@@ -2034,7 +2034,7 @@ scoring rule or case changed.
   D30#1–2, D31, D32, D34#0–1, D35#2, D36, D37, D39, D40 and D41, all repeats unless
   marked. They fall in the last stretch of the run, which points to a network
   outage. The harness scored each one as wrong. B had no errors.
-- *Retry of the API-failed calls only (user decision, 2026-10-04).* The
+- *Retry of the API-failed calls only (author decision, 2026-10-04).* The
   pre-registration did not say how to handle transport failures. Only the 26 failed
   (case, repeat) pairs were re-called, once each, with the same model, effort,
   prompt and labels. The 97 successful M-low runs were not re-called: they were

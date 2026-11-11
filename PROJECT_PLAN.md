@@ -1,7 +1,8 @@
 # PROJECT_PLAN.md — EU AI Act Compliance Determination System
 
-Status: V1 scope locked. Companion document to SYSTEM_SPEC.md (technical source of
-truth). This document governs scope, milestones, and portfolio narrative.
+Status: **project complete (November 2026), not maintained.** V1 is complete with one
+documented exception (Phase 3 acceptance not met; see §8). Companion document to
+SYSTEM_SPEC.md (technical source of truth). This document governs scope, milestones, and portfolio narrative.
 
 ---
 
@@ -296,7 +297,7 @@ one rule-matching engine → cited, fail-closed output.
     `social-scoring-v2`, scoped to the 5(1)(c) candidate, still produced
     zero-tolerance violations on D32. The author's hard stop ended the intervention.
     The pre-registered prompt stays the default.
-  - **Closed as a documented limitation (user, 2026-10-25).** No further Phase 3
+  - **Closed as a documented limitation (author, 2026-10-25).** No further Phase 3
     attempt in V1. The not-met verdict stands, the phase stays untagged, and the
     README states the numbers above. The 8-case 5(1)(c) held-out set (H01–H08) stays
     reserved for the Phase 5 end-to-end evaluation; its use is fixed in the Phase 5
@@ -392,7 +393,7 @@ one rule-matching engine → cited, fail-closed output.
   limitations (including the Digital Omnibus amendment to Article 5 as a live
   versioning example).
   The limitations section reports the Phase 3 not-met verdict with its numbers.
-- Deliverable (distribution, user decision 2026-10-03): a demo mode that replays
+- Deliverable (distribution, author decision 2026-10-03): a demo mode that replays
   recorded results for prepared examples, needing no API key, plus a demo video.
   Anyone trying their own descriptions clones the repo and uses their own OpenAI key
   (environment variable); README gives these instructions. No hosted key, no public
@@ -401,6 +402,28 @@ one rule-matching engine → cited, fail-closed output.
   - Demo examples are new descriptions written for the demo. They are not H01–H08
     or any other eval record.
   - The demo and video description point to the known limitations.
+- **Status (2026-11-11): complete, acceptance met. Merged to `master` and tagged
+  `phase-5`.**
+  - *Held-out pass (once, 2026-11-04, 20 cases).* All four pre-registered gates
+    passed: G1 0 violations; G2 20/20; G3a 20/24 (≥ 19); G3b 34/36 (≥ 33); G4 10/10.
+    All 13 missed judgements were cautious (`unresolved` where a definite answer was
+    expected): 6 from the Article 5(1)(c) matcher limitation, 7 from extraction.
+  - *Stability check (reported only).* 19 of 20 determinations stable across three
+    repeats.
+  - *Spend.* About $3.01 of the $8 cap (evaluation $2.57, demo $0.35, `assess`
+    smoke test $0.09).
+  - *Delivered.* `eu-ai-check assess` (bring your own key, capped cost); five
+    recorded demo examples (`docs/demo.md`) and a terminal replay GIF in place of
+    a demo video; README with results and limitations (`docs/evaluation.md`,
+    `docs/limitations.md`); CI running the offline test suite.
+  - *Not delivered.* The generation-model comparison (out of scope, SYSTEM_SPEC.md
+    §18).
+  - *After the held-out pass (not evaluated).* A presentation change: when a
+    prohibited practice applies, the answer says so first and marks the high-risk
+    sections "for reference only" (SYSTEM_SPEC.md §18, 2026-11-11).
+  - *Legal text.* Regulation (EU) 2026/1744 (Digital Omnibus on AI), in force since
+    27 July 2026, is not in the corpus. The project closed on the 2024 text; the
+    README and `assess` say so.
 
 ## 7. Evaluation Plan
 
@@ -413,9 +436,11 @@ deliverable (§10), not an afterthought.
 ## 8. Acceptance Criteria (V1 complete when)
 
 - All five phase-level acceptance criteria above are met.
-  **Deviation (user, 2026-10-25):** Phase 3's criterion is not met and is accepted
+  **Deviation (author, 2026-10-25):** Phase 3's criterion is not met and is accepted
   as a documented limitation (see Phase 3). V1 is declared complete when the other
   four phases meet theirs; it is never described as meeting all five.
+  **Outcome (2026-11-11):** Phases 0, 1, 2, 4 and 5 met their criteria and are
+  tagged `phase-N`. Phase 3 did not and is untagged. V1 is complete on that basis.
 - The four-way `applicable/not_applicable/unresolved/not_in_force` output is
   demonstrably exercised by real eval cases (all four states, not just the easy ones),
   not just theoretically possible.
@@ -499,8 +524,9 @@ deliverable (§10), not an afterthought.
 - `obligation_id` entity, if corpus evidence justifies it.
 - Multi-jurisdiction support.
 - `relevant_date` field-splitting (`event_date`/`assessment_date`/`deployment_date`).
-- Incorporating the Digital Omnibus amendment to Article 5 once it has a confirmed
-  effective date.
+- Incorporating Regulation (EU) 2026/1744 (Digital Omnibus on AI, in force since
+  27 July 2026) as a new corpus version. Not done: the project closed in November 2026
+  on the 2024 text.
 
 ## 13. Portfolio / Interview Narrative
 
